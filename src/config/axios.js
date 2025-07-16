@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://fms-backend-jbws.onrender.com/api', // Your Render backend URL
 });
 
 // Add a request interceptor to include the token if available
