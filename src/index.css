@@ -2,6 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-.gradient {
-  background: linear-gradient(to bottom, hsla(48, 100%, 56%, 1) 0%, hsla(0, 0%, 100%, 1) 100%);
-}
