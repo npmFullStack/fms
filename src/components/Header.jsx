@@ -30,8 +30,8 @@ const Header = () => {
                         to={"/login"}
                         className={({ isActive }) =>
                             isActive
-                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-xl text-xs font-bold text-white"
-                                : "bg-blue-800 px-4 py-2 rounded-xl text-xs font-bold text-white hover:bg-blue-700"
+                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-lg text-xs font-bold text-white"
+                                : "bg-blue-800 px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-blue-700"
                         }
                     >
                         Login
@@ -40,8 +40,8 @@ const Header = () => {
                         to={"/track-order"}
                         className={({ isActive }) =>
                             isActive
-                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-xl text-xs font-bold text-white"
-                                : "bg-blue-800 px-4 py-2 rounded-xl text-xs font-bold text-white hover:bg-blue-800"
+                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-lg text-xs font-bold text-white"
+                                : "bg-blue-800 px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-blue-800"
                         }
                     >
                         Track Order
@@ -76,8 +76,8 @@ const Header = () => {
                             to={"/login"}
                             className={({ isActive }) =>
                                 isActive
-                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-xl text-center"
-                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-xl text-center hover:bg-blue-800"
+                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-lg text-center"
+                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-800"
                             }
                         >
                             Login
@@ -86,8 +86,8 @@ const Header = () => {
                             to={"/track-order"}
                             className={({ isActive }) =>
                                 isActive
-                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-xl text-center"
-                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-xl text-center hover:bg-blue-800"
+                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-lg text-center"
+                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-800"
                             }
                         >
                             Track Order

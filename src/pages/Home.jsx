@@ -20,7 +20,7 @@ const Home = () => {
                     <p className="text-lg md:text-2xl text-white mb-8">
                         Reliable and Efficient Freight Services
                     </p>
-                    <button className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl">
+                    <button className="bg-red-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
                         Get Started
                     </button>
                 </div>
