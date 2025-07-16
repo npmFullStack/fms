@@ -9,27 +9,37 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    navigate("/login");
-                    return;
-                }
-
-                const response = await axios.get("/auth/me"); // You'll need to create this endpoint
-                setUserData(response.data.user);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-                localStorage.removeItem("token");
-                navigate("/login");
-            } finally {
-                setLoading(false);
+    const fetchUserData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const storedUser = localStorage.getItem("user");
+            
+            // Immediately use stored user data if available
+            if (storedUser) {
+                setUserData(JSON.parse(storedUser));
             }
-        };
 
-        fetchUserData();
-    }, [navigate]);
+            // Still verify with backend
+            if (token) {
+                const response = await axios.get("/auth/me");
+                setUserData(response.data.user);
+                // Update localStorage with fresh data
+                localStorage.setItem("user", JSON.stringify(response.data.user));
+            } else {
+                navigate("/login");
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            navigate("/login");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchUserData();
+}, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem("token");

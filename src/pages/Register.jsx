@@ -16,16 +16,30 @@ const Register = () => {
     };
 
     const handleSubmit = async e => {
-        e.preventDefault();
-        try {
-            const res = await axios.post("/auth/register", formData);
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("user", JSON.stringify(res.data.user)); // Store user data
-            navigate("/dashboard");
-        } catch (err) {
-            setError(err.response?.data?.error || "Registration failed");
+    e.preventDefault();
+    try {
+        const res = await axios.post("/auth/register", formData);
+        
+        // Debugging logs
+        console.log("Registration response:", res.data);
+        
+        if (!res.data?.token) {
+            throw new Error("No token received from server");
         }
-    };
+
+        // Store token and user data
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        
+        // Verify navigation is working
+        console.log("Navigating to dashboard...");
+        navigate("/dashboard", { replace: true }); // Add replace to prevent back navigation
+        
+    } catch (err) {
+        console.error("Registration error:", err);
+        setError(err.response?.data?.error || err.message || "Registration failed");
+    }
+};
 
     return (
         <div className="max-w-md mx-auto mt-10">
