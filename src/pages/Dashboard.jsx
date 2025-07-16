@@ -9,37 +9,40 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-    const fetchUserData = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const storedUser = localStorage.getItem("user");
-            
-            // Immediately use stored user data if available
-            if (storedUser) {
-                setUserData(JSON.parse(storedUser));
-            }
+        const fetchUserData = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const storedUser = localStorage.getItem("user");
 
-            // Still verify with backend
-            if (token) {
-                const response = await axios.get("/auth/me");
-                setUserData(response.data.user);
-                // Update localStorage with fresh data
-                localStorage.setItem("user", JSON.stringify(response.data.user));
-            } else {
+                // Immediately use stored user data if available
+                if (storedUser) {
+                    setUserData(JSON.parse(storedUser));
+                }
+
+                // Still verify with backend
+                if (token) {
+                    const response = await axios.get("/auth/me");
+                    setUserData(response.data.user);
+                    // Update localStorage with fresh data
+                    localStorage.setItem(
+                        "user",
+                        JSON.stringify(response.data.user)
+                    );
+                } else {
+                    navigate("/login");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
                 navigate("/login");
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            navigate("/login");
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    fetchUserData();
-}, [navigate]);
+        fetchUserData();
+    }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -62,8 +65,7 @@ const Dashboard = () => {
                     <p className="mb-2 text-green-600 font-semibold">
                         GWAPO SI NORWAY
                     </p>
-                    <div className="mb-4 p-4 rounded">
-                        <p className="font-medium">User Information:</p>
+                    <div className="mb-4 p-4 bg-white rounded">
                         <p>
                             Username:{" "}
                             <span className="font-semibold">
