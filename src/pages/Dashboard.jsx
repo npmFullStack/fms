@@ -62,7 +62,7 @@ const Dashboard = () => {
                     <p className="mb-2 text-green-600 font-semibold">
                         GWAPO SI NORWAY
                     </p>
-                    <div className="mb-4 p-4 bg-gray-100 rounded">
+                    <div className="mb-4 p-4 rounded">
                         <p className="font-medium">User Information:</p>
                         <p>
                             Username:{" "}
