@@ -1,44 +1,32 @@
 import React from "react";
-import heroImage from "../assets/images/hero.png";
+import { NavLink } from "react-router-dom";
 
 const Home = () => {
     return (
-        <div className="w-full h-auto flex flex-col">
-            <section
-                id="hero"
-                className="bg-cover bg-top w-full h-screen flex items-center justify-center"
-                style={{
-                    backgroundImage: `url(${heroImage})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                }}
-            >
-                <div className="container mx-auto px-8 text-center">
-                    <h1 className="text-4xl md:text-6xl text-white font-bold mb-4">
-                        XTRA-MILE FREIGHT FORWARDING-INC
-                    </h1>
-                    <p className="text-lg md:text-2xl text-white mb-8">
-                        Reliable and Efficient Freight Services
-                    </p>
-                    <button className="bg-red-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+        <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">
+            {/* ✅ Fixed Background Grid */}
+            <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
+
+            {/* ✅ Content */}
+            <div className="container mx-auto px-4 text-center">
+                <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+                    <span className="gradient">Freight Monitoring System</span>
+                </h1>
+                <p className="mt-4 text-gray-600 text-xl md:text-base">
+                    Get real-time updates on shipment status, automate tasks,
+                    and make data-driven decisions to optimize your logistics
+                    operations.
+                </p>
+
+                <div className="mt-6">
+                    <NavLink
+                        to="/login"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+                    >
                         Get Started
-                    </button>
+                    </NavLink>
                 </div>
-            </section>
-            <section id="cta" className="bg-red-800 text-white py-12">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                        Ready to Get Started?
-                    </h2>
-                    <p className="text-lg md:text-xl mb-8">
-                        Contact us today to learn more about our freight
-                        services
-                    </p>
-                    <button className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl">
-                        Contact Us
-                    </button>
-                </div>
-            </section>
+            </div>
         </div>
     );
 };

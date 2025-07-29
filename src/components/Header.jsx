@@ -5,92 +5,67 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 const Header = () => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <header className="w-full bg-red-800 shadow-lg">
-            <div className="container mx-auto px-2 py-2 flex justify-between items-center">
-                <div className="flex flex-col space-x-0 items-start">
-                    <p className="font-bold text-yellow-300">
+        <header className="w-full bg-transparent font-[Poppins]">
+            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                {/* Logo */}
+                <div className="flex flex-col text-left md:text-left">
+                    <p className="gradient font-bold text-sm md:text-xl">
                         XTRA-MILE FREIGHT FORWARDING-INC
                     </p>
-                    <p className="font-bold text-white">
+                    <p className="text-gray-800 font-bold text-sm md:text-xl">
                         FREIGHT MONITORING SYSTEM
                     </p>
                 </div>
-                <nav className="hidden md:flex items-center space-x-2">
+
+                {/* Desktop Nav */}
+                <nav className="hidden md:flex items-center space-x-5">
                     <NavLink
-                        to={"/"}
+                        to="/"
                         className={({ isActive }) =>
                             isActive
-                                ? "text-xs font-bold text-white underline underline-offset-2 decoration-white"
-                                : "text-xs text-white font-bold hover:underline-offset-2"
+                                ? "text-sm font-bold text-blue-600 underline underline-offset-2"
+                                : "text-sm text-blue-600 font-semibold hover:underline underline-offset-2"
                         }
                     >
                         Home
                     </NavLink>
                     <NavLink
-                        to={"/login"}
+                        to="/login"
                         className={({ isActive }) =>
                             isActive
-                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-lg text-xs font-bold text-white"
-                                : "bg-blue-800 px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-blue-700"
+                                ? "border-2 border-blue-600 bg-white px-4 py-2 rounded-lg text-sm font-bold text-blue-600"
+                                : "bg-blue-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:bg-blue-700"
                         }
                     >
                         Login
                     </NavLink>
-                    <NavLink
-                        to={"/track-order"}
-                        className={({ isActive }) =>
-                            isActive
-                                ? "border-2 border-white bg-blue-900 px-4 py-2 rounded-lg text-xs font-bold text-white"
-                                : "bg-blue-800 px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-blue-800"
-                        }
-                    >
-                        Track Order
-                    </NavLink>
                 </nav>
 
+                {/* Mobile Menu Button */}
                 <button
                     className="md:hidden p-2"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? (
-                        <XMarkIcon className="h-8 w-8 text-white" />
+                        <XMarkIcon className="h-8 w-8 text-black" />
                     ) : (
-                        <Bars3Icon className="h-8 w-8 text-white" />
+                        <Bars3Icon className="h-8 w-8 text-black" />
                     )}
                 </button>
             </div>
+
+            {/* Mobile Nav */}
             {isOpen && (
-                <div className="md:hidden bg-white px-8 py-2 shadow-lg">
-                    <div className="flex flex-col items-center justify-between gap-1.5">
-                        <NavLink
-                            to={"/"}
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "font-bold text-blue-900"
-                                    : "font-bold text-black"
-                            }
-                        >
+                <div className="md:hidden bg-transparent px-6 py-3 shadow-md">
+                    <div className="flex flex-col items-center gap-3">
+                        <NavLink to="/" className="text-blue-600 font-semibold">
                             Home
                         </NavLink>
                         <NavLink
-                            to={"/login"}
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-lg text-center"
-                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-800"
-                            }
+                            to="/login"
+                            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-700"
                         >
                             Login
-                        </NavLink>
-                        <NavLink
-                            to={"/track-order"}
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "w-full bg-blue-900 text-white font-bold py-2 px-4 rounded-lg text-center"
-                                    : "w-full bg-blue-800 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-800"
-                            }
-                        >
-                            Track Order
                         </NavLink>
                     </div>
                 </div>

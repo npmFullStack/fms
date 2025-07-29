@@ -1,23 +1,30 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
+import PublicLayout from "./components/PublicLayout";
+import ProtectedLayout from "./components/ProtectedLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import TrackOrder from "./pages/TrackOrder";
 import Dashboard from "./pages/Dashboard";
+import Booking from "./pages/Booking";
+import ShippingLine from "./pages/ShippingLine";
 
 function App() {
     return (
         <Router>
-            <Layout>
-                <Routes>
-                    <Route path={"/"} element={<Home />} />
-                    <Route path={"/login"} element={<Login />} />
-                    <Route path={"/register"} element={<Register />} />
-                    <Route path={"/track-order"} element={<TrackOrder />} />
-                    <Route path={"/dashboard"} element={<Dashboard />} />
-                </Routes>
-            </Layout>
+            <Routes>
+                {/* Public layout pages */}
+                <Route element={<PublicLayout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                </Route>
+                {/* Protected layout pages */}
+                <Route element={<ProtectedLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/booking" element={<Booking />} />
+                    <Route path="/shipping" element={<ShippingLine />} />
+                </Route>
+            </Routes>
         </Router>
     );
 }

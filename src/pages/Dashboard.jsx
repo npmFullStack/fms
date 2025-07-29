@@ -1,92 +1,35 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "../config/axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../config/axios";
+import Loading from "../components/Loading";
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const [userData, setUserData] = useState(null);
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const storedUser = localStorage.getItem("user");
-
-                // Immediately use stored user data if available
-                if (storedUser) {
-                    setUserData(JSON.parse(storedUser));
-                }
-
-                // Still verify with backend
-                if (token) {
-                    const response = await axios.get("/auth/me");
-                    setUserData(response.data.user);
-                    // Update localStorage with fresh data
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify(response.data.user)
-                    );
-                } else {
-                    navigate("/login");
-                }
+                const res = await api.get("/auth/profile");
+                setUser(res.data.user);
             } catch (error) {
-                console.error("Error fetching user data:", error);
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
+                console.log("Not authorized", error.response?.data?.message);
                 navigate("/login");
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchUserData();
+        fetchProfile();
     }, [navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
-    };
-
-    if (loading) {
-        return (
-            <div className="max-w-md mx-auto mt-10">
-                <p>Loading...</p>
-            </div>
-        );
-    }
+    if (loading) return <Loading />;
 
     return (
-        <div className="max-w-md mx-auto mt-10">
-            <h2 className="text-2xl font-bold mb-5">Dashboard</h2>
-            {userData && (
-                <>
-                    <p className="mb-2 text-green-600 font-semibold">
-                        GWAPO SI NORWAY
-                    </p>
-                    <div className="mb-4 p-4 bg-white rounded">
-                        <p>
-                            Username:{" "}
-                            <span className="font-semibold">
-                                {userData.username}
-                            </span>
-                        </p>
-                        <p>
-                            Email:{" "}
-                            <span className="font-semibold">
-                                {userData.email}
-                            </span>
-                        </p>
-                    </div>
-                </>
-            )}
-            <button
-                onClick={handleLogout}
-                className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
-            >
-                Logout
-            </button>
+        <div>
+<h1 className="text-2xl font-bold mb-4">Welcome, {user?.username}!</h1>
+
+            <p className="text-gray-700">GWAPO SI NORWAY!!!</p>
         </div>
     );
 };

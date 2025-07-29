@@ -1,100 +1,170 @@
-import React, { useState } from "react";
-import axios from "../config/axios";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import api from "../config/axios";
 import { useNavigate, Link } from "react-router-dom";
+import { registerSchema } from "../schemas/authSchema";
+import registerImage from "../assets/images/register.png";
 
 const Register = () => {
-    const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        password: ""
-    });
-    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
-    const handleChange = e => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm({
+        resolver: zodResolver(registerSchema)
+    });
+
+    const onSubmit = async data => {
+        try {
+            const response = await api.post("/auth/register", data);
+            setMessage("Registration successful!");
+            navigate("/login");
+        } catch (error) {
+            setMessage("Registration failed. Please try again.");
+        }
     };
 
-    const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-        const res = await axios.post("/auth/register", formData);
-        
-        // Debugging logs
-        console.log("Registration response:", res.data);
-        
-        if (!res.data?.token) {
-            throw new Error("No token received from server");
-        }
-
-        // Store token and user data
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        
-        // Verify navigation is working
-        console.log("Navigating to dashboard...");
-        navigate("/dashboard", { replace: true }); // Add replace to prevent back navigation
-        
-    } catch (err) {
-        console.error("Registration error:", err);
-        setError(err.response?.data?.error || err.message || "Registration failed");
-    }
-};
-
     return (
-        <div className="max-w-md mx-auto mt-10">
-            <h2 className="text-2xl font-bold mb-5">Register</h2>
-            {error && <div className="text-red-500 mb-4">{error}</div>}
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block mb-2">Username</label>
-                    <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
+        <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">
+            {/* ✅ Fixed Background Grid */}
+            <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
+
+            {/* Main Container */}
+            <div className="max-w-4xl w-full flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
+                {/* Image Section */}
+                <div className="hidden md:block md:w-1/2">
+                    <img
+                        src={registerImage}
+                        alt="Register"
+                        className="w-full h-full object-contain"
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block mb-2">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block mb-2">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                        minLength="6"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    className="w-full bg-green-500 text-white p-2 rounded mb-4"
-                >
-                    Register
-                </button>
-                <div className="text-center">
-                    <p>
+
+                {/* Form Section */}
+                <div className="w-full md:w-1/2 p-8">
+                    <div className="mb-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                            Create an account
+                        </h1>
+                        <p className="text-gray-600">
+                            Join us today — it's free!
+                        </p>
+                    </div>
+
+                    {/* Global Error Message */}
+                    {errors.root && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {errors.root.message}
+                        </div>
+                    )}
+
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="space-y-6"
+                    >
+                        {/* Username Field */}
+                        <div>
+                            <label
+                                htmlFor="username"
+                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Username
+                            </label>
+                            <input
+                                id="username"
+                                type="text"
+                                {...register("username")}
+                                placeholder="Enter your username"
+                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                    errors.username
+                                        ? "border-red-500"
+                                        : "border-gray-300"
+                                }`}
+                            />
+                            {errors.username && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.username.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Email Field */}
+                        <div>
+                            <label
+                                htmlFor="email"
+                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Email Address
+                            </label>
+                            <input
+                                id="email"
+                                type="email"
+                                {...register("email")}
+                                placeholder="Enter your email"
+                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                    errors.email
+                                        ? "border-red-500"
+                                        : "border-gray-300"
+                                }`}
+                            />
+                            {errors.email && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Password Field */}
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                type="password"
+                                {...register("password")}
+                                placeholder="Create a password"
+                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                    errors.password
+                                        ? "border-red-500"
+                                        : "border-gray-300"
+                                }`}
+                            />
+                            {errors.password && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.password.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                        >
+                            Sign up
+                        </button>
+                    </form>
+
+                    {/* Sign In Link */}
+                    <div className="mt-6 text-center text-sm text-gray-600">
                         Already have an account?{" "}
-                        <Link to="/login" className="text-blue-500">
-                            Login
+                        <Link
+                            to="/login"
+                            className="text-blue-600 hover:text-blue-500 font-medium"
+                        >
+                            Sign in
                         </Link>
-                    </p>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };
