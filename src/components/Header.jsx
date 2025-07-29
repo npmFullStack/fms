@@ -23,7 +23,7 @@ const Header = () => {
                         to="/"
                         className={({ isActive }) =>
                             isActive
-                                ? "text-sm font-bold text-blue-600 underline underline-offset-2"
+                                ? "text-sm font-bold text-blue-600 underline underline-offset-2 transition-colors duration-200"
                                 : "text-sm text-blue-600 font-semibold hover:underline underline-offset-2"
                         }
                     >
@@ -33,7 +33,7 @@ const Header = () => {
                         to="/login"
                         className={({ isActive }) =>
                             isActive
-                                ? "border-2 border-blue-600 bg-white px-4 py-2 rounded-lg text-sm font-bold text-blue-600"
+                                ? "border-2 border-blue-600 bg-white px-4 py-2 rounded-lg text-sm font-bold text-blue-600 transition-colors duration-200"
                                 : "bg-blue-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:bg-blue-700"
                         }
                     >
@@ -63,7 +63,7 @@ const Header = () => {
                         </NavLink>
                         <NavLink
                             to="/login"
-                            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-700"
+                            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200"
                         >
                             Login
                         </NavLink>
