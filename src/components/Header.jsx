@@ -4,68 +4,121 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
     const [isOpen, setIsOpen] = useState(false);
+    
     return (
-        <header className="w-full bg-transparent font-[Poppins]">
-            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <header className="w-full bg-white/90 backdrop-blur-sm border-b border-gray-200 font-[Poppins] sticky top-0 z-50">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 {/* Logo */}
-                <div className="flex flex-col text-left md:text-left">
-                    <p className="gradient font-bold text-sm md:text-xl">
+                <div className="flex flex-col text-left">
+                    <p className="gradient font-bold text-sm md:text-lg">
                         XTRA-MILE FREIGHT FORWARDING-INC
                     </p>
-                    <p className="text-gray-800 font-bold text-sm md:text-xl">
+                    <p className="text-gray-800 font-semibold text-xs md:text-sm">
                         FREIGHT MONITORING SYSTEM
                     </p>
                 </div>
 
-                {/* Desktop Nav */}
-                <nav className="hidden md:flex items-center space-x-5">
+                {/* Desktop Navigation */}
+                <nav className="hidden md:flex items-center space-x-8">
                     <NavLink
                         to="/"
                         className={({ isActive }) =>
                             isActive
-                                ? "text-sm font-bold text-blue-600 underline underline-offset-2 transition-colors duration-200"
-                                : "text-sm text-blue-600 font-semibold hover:underline underline-offset-2"
+                                ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1 transition-all duration-200"
+                                : "text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
                         }
                     >
                         Home
                     </NavLink>
+                    
+                    <a 
+                        href="#services" 
+                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                    >
+                        Partner Network
+                    </a>
+                    
+                    <a 
+                        href="#how-to-use" 
+                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                    >
+                        How We Work
+                    </a>
+                    
+                    <a 
+                        href="#contact" 
+                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                    >
+                        Contact
+                    </a>
+                    
                     <NavLink
                         to="/login"
-                        className={({ isActive }) =>
-                            isActive
-                                ? "border-2 border-blue-600 bg-white px-4 py-2 rounded-lg text-sm font-bold text-blue-600 transition-colors duration-200"
-                                : "bg-blue-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:bg-blue-700"
-                        }
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-md"
                     >
-                        Login
+                        Get Quote
                     </NavLink>
                 </nav>
 
                 {/* Mobile Menu Button */}
                 <button
-                    className="md:hidden p-2"
+                    className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                     onClick={() => setIsOpen(!isOpen)}
+                    aria-label="Toggle menu"
                 >
                     {isOpen ? (
-                        <XMarkIcon className="h-8 w-8 text-black" />
+                        <XMarkIcon className="h-6 w-6 text-gray-700" />
                     ) : (
-                        <Bars3Icon className="h-8 w-8 text-black" />
+                        <Bars3Icon className="h-6 w-6 text-gray-700" />
                     )}
                 </button>
             </div>
 
-            {/* Mobile Nav */}
+            {/* Mobile Navigation Menu */}
             {isOpen && (
-                <div className="md:hidden bg-transparent px-6 py-3 shadow-md">
-                    <div className="flex flex-col items-center gap-3">
-                        <NavLink to="/" className="text-blue-600 font-semibold">
+                <div className="md:hidden bg-white border-t border-gray-200 px-4 py-6 shadow-lg">
+                    <div className="flex flex-col space-y-4">
+                        <NavLink 
+                            to="/" 
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-blue-600 font-semibold py-2 px-4 rounded-lg bg-blue-50"
+                                    : "text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            }
+                            onClick={() => setIsOpen(false)}
+                        >
                             Home
                         </NavLink>
+                        
+                        <a 
+                            href="#services" 
+                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            Partner Network
+                        </a>
+                        
+                        <a 
+                            href="#how-to-use" 
+                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            How We Work
+                        </a>
+                        
+                        <a 
+                            href="#contact" 
+                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                        >
+                            Contact
+                        </a>
+                        
                         <NavLink
                             to="/login"
-                            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200"
+                            className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200 shadow-md"
+                            onClick={() => setIsOpen(false)}
                         >
-                            Login
+                            Get Quote
                         </NavLink>
                     </div>
                 </div>
