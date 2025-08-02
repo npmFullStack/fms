@@ -40,10 +40,7 @@ const Home = () => {
                             Create an account to experience our reliable and
                             efficient logistics services.
                         </p>
-                        <Link
-                            to="/register"
-                            className="btn-primary gradient-bg"
-                        >
+                        <Link to="/register" className="btn-primary font-bold">
                             Get Started{" "}
                             <ArrowRightIcon className="h-6 w-6 text-white" />
                         </Link>
@@ -238,136 +235,34 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* Testimonials Section */}
-                <section
-                    id="testimonials"
-                    className="min-h-screen w-screen flex flex-col items-center justify-center gradient-bg px-12 py-20"
-                >
-                    <div className="container text-white mx-auto px-8 md:px-8">
-                        <div className="text-center mb-16">
-                            <h1 className="heading text-white mb-6">
-                                What Our Clients Say
-                            </h1>
-                            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-                                Don't just take our word for it. Here's what our
-                                satisfied customers have to say about our
-                                freight forwarding services.
+
+
+                {/* Footer */}
+                <footer className="bg-gray-800 text-white py-6">
+                    <div className="container mx-auto px-4 text-center">
+                        {/* Company Info */}
+                        <p className="gradient font-medium">
+                            XTRA-MILE FREIGHT FORWARDING INC
+                        </p>
+                        <p className="text-gray-300 text-sm mt-1">
+                            FREIGHT MONITORING SYSTEM
+                        </p>
+
+                        {/* Contact */}
+                        <div className="mt-4 text-sm text-gray-300">
+                            <p>+63 123 456 7890</p>
+                            <p>info@xtramilefreight.com</p>
+                        </div>
+
+                        {/* Copyright */}
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                            <p className="text-xs text-gray-400">
+                                © 2025 Xtra-Mile Freight Forwarding Inc. All
+                                rights reserved.
                             </p>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            <div className="bg-white p-8 rounded-xl shadow-xl">
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <StarIcon
-                                            key={i}
-                                            className="h-5 w-5 text-yellow-400 fill-current"
-                                        />
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 mb-6 italic">
-                                    "Xtra-Mile has transformed our supply chain
-                                    operations. Their tracking system is
-                                    incredibly detailed and their customer
-                                    service is outstanding."
-                                </p>
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                                        JD
-                                    </div>
-                                    <div className="ml-4">
-                                        <p className="font-bold text-gray-800">
-                                            John Davidson
-                                        </p>
-                                        <p className="text-gray-500 text-sm">
-                                            Supply Chain Manager, TechCorp
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-xl shadow-xl">
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <StarIcon
-                                            key={i}
-                                            className="h-5 w-5 text-yellow-400 fill-current"
-                                        />
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 mb-6 italic">
-                                    "Fast, reliable, and cost-effective. They've
-                                    handled our international shipments
-                                    flawlessly for over two years now."
-                                </p>
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
-                                        MR
-                                    </div>
-                                    <div className="ml-4">
-                                        <p className="font-bold text-gray-800">
-                                            Maria Rodriguez
-                                        </p>
-                                        <p className="text-gray-500 text-sm">
-                                            Operations Director, Global Imports
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-xl shadow-xl">
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <StarIcon
-                                            key={i}
-                                            className="h-5 w-5 text-yellow-400 fill-current"
-                                        />
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 mb-6 italic">
-                                    "The best freight forwarder we've worked
-                                    with. Professional, transparent, and always
-                                    goes the extra mile for their clients."
-                                </p>
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                                        DL
-                                    </div>
-                                    <div className="ml-4">
-                                        <p className="font-bold text-gray-800">
-                                            David Lee
-                                        </p>
-                                        <p className="text-gray-500 text-sm">
-                                            CEO, Pacific Trading Co.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </section>
-
-{/* Footer */}  
-<footer className="bg-gray-800 text-white py-6">  
-    <div className="container mx-auto px-4 text-center">  
-        {/* Company Info */}  
-        <p className="font-medium">XTRA-MILE FREIGHT FORWARDING INC</p>  
-        <p className="text-gray-300 text-sm mt-1">FREIGHT MONITORING SYSTEM</p>  
-
-        {/* Contact */}  
-        <div className="mt-4 text-sm text-gray-300">  
-            <p>+63 123 456 7890</p>  
-            <p>info@xtramilefreight.com</p>  
-        </div>  
-
-        {/* Copyright */}  
-        <div className="mt-4 pt-4 border-t border-gray-700">  
-            <p className="text-xs text-gray-400">  
-                © 2025 Xtra-Mile Freight. All rights reserved.  
-            </p>  
-        </div>  
-    </div>  
-</footer>  
+                </footer>
             </div>
         </div>
     );

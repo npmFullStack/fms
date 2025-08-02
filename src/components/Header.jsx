@@ -69,23 +69,34 @@ const Header = () => {
                         Why Choose Us
                     </button>
 
-                    <button
-                        onClick={() => handleClick("testimonials")}
-                        className={`pb-1 ${
-                            activeSection === "testimonials"
-                                ? "text-blue-600 font-semibold border-b-2 border-blue-600"
-                                : "text-gray-700 hover:text-blue-600"
-                        }`}
-                    >
-                        Testimonials
-                    </button>
 
-                    <NavLink
-                        to="/login"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                        Get Quote
-                    </NavLink>
+
+                    <div className="flex gap-4">
+                        <NavLink
+                            to="/login"
+                            className={({ isActive }) => 
+                                `px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                    isActive 
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-blue-600 text-white hover:bg-blue-700"
+                                }`
+                            }
+                        >
+                            Sign In
+                        </NavLink>
+                        <NavLink
+                            to="/register"
+                            className={({ isActive }) => 
+                                `px-4 py-2 rounded-lg font-semibold transition-colors border ${
+                                    isActive 
+                                        ? "bg-white text-blue-600 border-blue-600"
+                                        : "bg-white text-blue-600 border-blue-600 hover:bg-blue-50"
+                                }`
+                            }
+                        >
+                            Create Account
+                        </NavLink>
+                    </div>
                 </nav>
 
                 {/* Mobile menu button - shown on small screens */}
@@ -105,10 +116,10 @@ const Header = () => {
             {/* Mobile menu - shown when isMenuOpen is true */}
             {isMenuOpen && (
                 <div className="md:hidden bg-white border-t border-gray-200 px-4 py-6 shadow-lg">
-                    <div className="flex flex-col space-y-4">
+                    <div className="flex flex-col space-y-4 items-center">
                         <button
                             onClick={() => handleClick("home")}
-                            className={`text-left p-2 ${
+                            className={`w-full text-center p-2 ${
                                 activeSection === "home"
                                     ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
                                     : "text-gray-700"
@@ -119,7 +130,7 @@ const Header = () => {
 
                         <button
                             onClick={() => handleClick("how-it-works")}
-                            className={`text-left p-2 ${
+                            className={`w-full text-center p-2 ${
                                 activeSection === "how-it-works"
                                     ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
                                     : "text-gray-700"
@@ -130,7 +141,7 @@ const Header = () => {
 
                         <button
                             onClick={() => handleClick("why-choose-us")}
-                            className={`text-left p-2 ${
+                            className={`w-full text-center p-2 ${
                                 activeSection === "why-choose-us"
                                     ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
                                     : "text-gray-700"
@@ -139,24 +150,36 @@ const Header = () => {
                             Why Choose Us
                         </button>
 
-                        <button
-                            onClick={() => handleClick("testimonials")}
-                            className={`text-left p-2 ${
-                                activeSection === "testimonials"
-                                    ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
-                                    : "text-gray-700"
-                            }`}
-                        >
-                            Testimonials
-                        </button>
 
-                        <NavLink
-                            to="/login"
-                            className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center hover:bg-blue-700 transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Get Quote
-                        </NavLink>
+
+                        <div className="flex flex-col gap-3 mt-4 w-full max-w-xs">
+                            <NavLink
+                                to="/login"
+                                className={({ isActive }) => 
+                                    `py-3 px-6 rounded-lg text-center font-semibold transition-colors ${
+                                        isActive 
+                                            ? "bg-blue-600 text-white"
+                                            : "bg-blue-600 text-white hover:bg-blue-700"
+                                    }`
+                                }
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Sign In
+                            </NavLink>
+                            <NavLink
+                                to="/register"
+                                className={({ isActive }) => 
+                                    `py-3 px-6 rounded-lg text-center font-semibold transition-colors border ${
+                                        isActive 
+                                            ? "bg-white text-blue-600 border-blue-600"
+                                            : "bg-white text-blue-600 border-blue-600 hover:bg-blue-50"
+                                    }`
+                                }
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Create Account
+                            </NavLink>
+                        </div>
                     </div>
                 </div>
             )}
