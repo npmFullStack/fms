@@ -1,23 +1,35 @@
-/* ✅ 1. Import Poppins first */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ✅ 2. Apply globally to body */
-body {
-    font-family: "Poppins", sans-serif;
-}
-
-/* ✅ 3. Tailwind directives after */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ✅ 4. Your custom utility classes */
+@layer base {
+    body {
+        font-family: "Poppins", sans-serif;
+    }
+}
+
+@layer components {
+    .heading {
+        @apply text-4xl lg:text-5xl font-bold mb-6;
+    }
+
+    .subheading {
+        @apply text-xl lg:text-2xl text-gray-600 mb-8;
+    }
+
+    .btn-primary {
+        @apply flex w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition;
+    }
+}
+
 @layer utilities {
     .gradient {
-        background: linear-gradient(90deg, #178fff, #006dd2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        color: transparent;
+        @apply bg-gradient-to-r from-[#178fff] to-[#006dd2] bg-clip-text text-transparent;
+    }
+
+    .gradient-bg {
+        @apply bg-gradient-to-r from-[#178fff] to-[#006dd2];
     }
 }

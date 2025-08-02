@@ -3,10 +3,26 @@ import { NavLink } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    
+    // ETO YUNG BURGER ICON
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // PANG TRACK SA ANONG SECTION ANG ACTIVE
+    const [activeSection, setActiveSection] = useState("home");
+
+    // FUNCTION SA CLICKING ACTIVE MENU
+    const handleClick = sectionId => {
+        setActiveSection(sectionId); // UPDATE ACTIVE SECTION
+        setIsMenuOpen(false);
+
+        // Scroll to the section smoothly
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
     return (
-        <header className="w-full bg-white/90 backdrop-blur-sm border-b border-gray-200 font-[Poppins] sticky top-0 z-50">
+        <header className="w-full bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 {/* Logo */}
                 <div className="flex flex-col text-left">
@@ -18,55 +34,67 @@ const Header = () => {
                     </p>
                 </div>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center space-x-8">
-                    <NavLink
-                        to="/"
-                        className={({ isActive }) =>
-                            isActive
-                                ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1 transition-all duration-200"
-                                : "text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
-                        }
+                {/* Desktop Navigation - shown on larger screens */}
+                <nav className="hidden md:flex items-center gap-8">
+                    <button
+                        onClick={() => handleClick("home")}
+                        className={`pb-1 ${
+                            activeSection === "home"
+                                ? "text-blue-600 font-semibold border-b-2 border-blue-600"
+                                : "text-gray-700 hover:text-blue-600"
+                        }`}
                     >
                         Home
-                    </NavLink>
-                    
-                    <a 
-                        href="#services" 
-                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                    </button>
+
+                    <button
+                        onClick={() => handleClick("how-it-works")}
+                        className={`pb-1 ${
+                            activeSection === "how-it-works"
+                                ? "text-blue-600 font-semibold border-b-2 border-blue-600"
+                                : "text-gray-700 hover:text-blue-600"
+                        }`}
                     >
-                        Partner Network
-                    </a>
-                    
-                    <a 
-                        href="#how-to-use" 
-                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                        How It Works
+                    </button>
+
+                    <button
+                        onClick={() => handleClick("why-choose-us")}
+                        className={`pb-1 ${
+                            activeSection === "why-choose-us"
+                                ? "text-blue-600 font-semibold border-b-2 border-blue-600"
+                                : "text-gray-700 hover:text-blue-600"
+                        }`}
                     >
-                        How We Work
-                    </a>
-                    
-                    <a 
-                        href="#contact" 
-                        className="text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200"
+                        Why Choose Us
+                    </button>
+
+                    <button
+                        onClick={() => handleClick("testimonials")}
+                        className={`pb-1 ${
+                            activeSection === "testimonials"
+                                ? "text-blue-600 font-semibold border-b-2 border-blue-600"
+                                : "text-gray-700 hover:text-blue-600"
+                        }`}
                     >
-                        Contact
-                    </a>
-                    
+                        Testimonials
+                    </button>
+
                     <NavLink
                         to="/login"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-md"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                     >
                         Get Quote
                     </NavLink>
                 </nav>
 
-                {/* Mobile Menu Button */}
+                {/* Mobile menu button - shown on small screens */}
                 <button
-                    className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsOpen(!isOpen)}
+                    className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
                     aria-label="Toggle menu"
                 >
-                    {isOpen ? (
+                    {isMenuOpen ? (
                         <XMarkIcon className="h-6 w-6 text-gray-700" />
                     ) : (
                         <Bars3Icon className="h-6 w-6 text-gray-700" />
@@ -74,49 +102,58 @@ const Header = () => {
                 </button>
             </div>
 
-            {/* Mobile Navigation Menu */}
-            {isOpen && (
+            {/* Mobile menu - shown when isMenuOpen is true */}
+            {isMenuOpen && (
                 <div className="md:hidden bg-white border-t border-gray-200 px-4 py-6 shadow-lg">
                     <div className="flex flex-col space-y-4">
-                        <NavLink 
-                            to="/" 
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "text-blue-600 font-semibold py-2 px-4 rounded-lg bg-blue-50"
-                                    : "text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                            }
-                            onClick={() => setIsOpen(false)}
+                        <button
+                            onClick={() => handleClick("home")}
+                            className={`text-left p-2 ${
+                                activeSection === "home"
+                                    ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
+                                    : "text-gray-700"
+                            }`}
                         >
                             Home
-                        </NavLink>
-                        
-                        <a 
-                            href="#services" 
-                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
+                        </button>
+
+                        <button
+                            onClick={() => handleClick("how-it-works")}
+                            className={`text-left p-2 ${
+                                activeSection === "how-it-works"
+                                    ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
+                                    : "text-gray-700"
+                            }`}
                         >
-                            Partner Network
-                        </a>
-                        
-                        <a 
-                            href="#how-to-use" 
-                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
+                            How It Works
+                        </button>
+
+                        <button
+                            onClick={() => handleClick("why-choose-us")}
+                            className={`text-left p-2 ${
+                                activeSection === "why-choose-us"
+                                    ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
+                                    : "text-gray-700"
+                            }`}
                         >
-                            How We Work
-                        </a>
-                        
-                        <a 
-                            href="#contact" 
-                            className="text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            Why Choose Us
+                        </button>
+
+                        <button
+                            onClick={() => handleClick("testimonials")}
+                            className={`text-left p-2 ${
+                                activeSection === "testimonials"
+                                    ? "text-blue-600 font-semibold bg-blue-50 rounded-lg"
+                                    : "text-gray-700"
+                            }`}
                         >
-                            Contact
-                        </a>
-                        
+                            Testimonials
+                        </button>
+
                         <NavLink
                             to="/login"
-                            className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200 shadow-md"
-                            onClick={() => setIsOpen(false)}
+                            className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center hover:bg-blue-700 transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
                         >
                             Get Quote
                         </NavLink>

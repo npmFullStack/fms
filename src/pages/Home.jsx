@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     TruckIcon,
     UserPlusIcon,
@@ -8,262 +8,479 @@ import {
     PhoneIcon,
     EnvelopeIcon,
     MapPinIcon,
-    CubeIcon
+    ArrowRightIcon,
+    ShieldCheckIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    ChatBubbleLeftRightIcon,
+    StarIcon,
+    CheckCircleIcon
 } from "@heroicons/react/24/outline";
 
 const Home = () => {
     return (
-        <div className="font-[Poppins]">
-            {/* Background Grid */}
-            <div className="fixed inset-0 -z-10 bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
+        <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">
+            {/* ✅ Fixed Background Grid */}
+            <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"></div>
 
-            {/* HERO SECTION */}
-            <section className="min-h-screen flex items-center justify-center px-4 py-16">
-                <div className="container mx-auto text-center max-w-4xl">
-                    <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-                        Specialized in <span className="gradient">LCL</span> and{" "}
-                        <span className="gradient">Multi-Container</span>{" "}
-                        Shipments
-                    </h1>
-                    <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                        We consolidate Less-than-Container Loads (LCL) and
-                        manage multi-container shipments (2x20, 4x20) with
-                        trusted shipping lines and trucking partners across the
-                        Philippines.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <NavLink
-                            to="/login"
-                            className="bg-blue-600 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 font-semibold text-lg"
-                        >
-                            Request LCL Quote
-                        </NavLink>
-                        <button className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition duration-300 font-semibold text-lg">
-                            How Consolidation Works
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* HOW TO USE SECTION */}
-            <section className="py-16 bg-gray-50">
-                <div className="container mx-auto px-4 max-w-6xl">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Our LCL Process
-                        </h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Efficient consolidation for cost-effective shipping
+            <div className="flex flex-col h-auto">
+                {/* Hero Section */}
+                <section
+                    id="home"
+                    className="min-h-screen flex flex-col justify-center items-center py-12 md:py-24"
+                >
+                    <div className="container mx-auto px-8 md:px-8">
+                        <h1 className="heading">
+                            Need Help with Your{" "}
+                            <span className="gradient">Freight Forwarding</span>{" "}
+                            Needs?
+                        </h1>
+                        <p className="subheading">
+                            We've got your freight forwarding needs covered.
+                            Create an account to experience our reliable and
+                            efficient logistics services.
                         </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Step 1 */}
-                        <div className="text-center">
-                            <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <UserPlusIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">
-                                Submit Your Cargo
-                            </h3>
-                            <p className="text-gray-600">
-                                Provide details of your shipment volume and
-                                destination.
-                            </p>
-                        </div>
-
-                        {/* Step 2 */}
-                        <div className="text-center">
-                            <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <ClipboardDocumentListIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">
-                                We Consolidate
-                            </h3>
-                            <p className="text-gray-600">
-                                We combine your cargo with others to optimize
-                                container space.
-                            </p>
-                        </div>
-
-                        {/* Step 3 */}
-                        <div className="text-center">
-                            <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <EyeIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">
-                                Track & Deliver
-                            </h3>
-                            <p className="text-gray-600">
-                                Monitor your consolidated shipment until final
-                                delivery.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* SERVICES SECTION */}
-            <section className="py-16">
-                <div className="container mx-auto px-4 max-w-6xl">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Our Specialized Services
-                        </h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Tailored solutions for LCL and multi-container needs
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* LCL Service */}
-                        <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-                                <CubeIcon className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-4">
-                                LCL Consolidation
-                            </h3>
-                            <p className="text-gray-600 mb-4">
-                                Cost-effective solutions for smaller shipments
-                                that don't require a full container.
-                            </p>
-                            <ul className="text-sm text-gray-600 space-y-2">
-                                <li>• Weekly consolidations to major ports</li>
-                                <li>• Shared container space = lower costs</li>
-                                <li>• Professional cargo handling</li>
-                                <li>• Documentation management</li>
-                            </ul>
-                        </div>
-
-                        {/* Multi-Container Service */}
-                        <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                                <CubeIcon className="w-8 h-8 text-green-600" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-4">
-                                Multi-Container Solutions
-                            </h3>
-                            <p className="text-gray-600 mb-4">
-                                Efficient management of multiple container
-                                shipments (2x20, 4x20 configurations).
-                            </p>
-                            <ul className="text-sm text-gray-600 space-y-2">
-                                <li>• Coordinated loading/unloading</li>
-                                <li>• Synchronized documentation</li>
-                                <li>• Volume discount advantages</li>
-                                <li>• Single-point management</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA SECTION */}
-            <section className="py-16 bg-blue-600">
-                <div className="container mx-auto px-4 text-center max-w-4xl">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                        Need LCL or Multi-Container Solutions?
-                    </h2>
-                    <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-                        Get competitive rates for consolidated shipments and
-                        multi-container arrangements.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <NavLink
-                            to="/login"
-                            className="bg-white text-blue-600 px-8 py-4 rounded-lg shadow-lg hover:bg-gray-100 transition duration-300 font-semibold text-lg"
+                        <Link
+                            to="/register"
+                            className="btn-primary gradient-bg"
                         >
-                            Get LCL Quote
-                        </NavLink>
-                        <button className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition duration-300 font-semibold text-lg">
-                            Multi-Container Inquiry
-                        </button>
+                            Get Started{" "}
+                            <ArrowRightIcon className="h-6 w-6 text-white" />
+                        </Link>
                     </div>
+                </section>
 
-                    <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        <div>
-                            <div className="text-3xl font-bold text-white">
-                                200+
-                            </div>
-                            <div className="text-blue-200">
-                                Weekly LCL Consolidations
-                            </div>
+                {/* How It Works Section */}
+                <section
+                    id="how-it-works"
+                    className="min-h-screen w-screen flex flex-col items-center justify-center gradient-bg px-12 py-20"
+                >
+                    <div className="container text-white mx-auto px-8 md:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="heading text-white mb-6">
+                                How It Works
+                            </h1>
+                            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+                                Our streamlined process makes freight forwarding
+                                simple and efficient. Follow these easy steps to
+                                get your cargo moving worldwide.
+                            </p>
                         </div>
-                        <div>
-                            <div className="text-3xl font-bold text-white">
-                                98%
-                            </div>
-                            <div className="text-blue-200">
-                                On-Time Delivery
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-white">
-                                15+
-                            </div>
-                            <div className="text-blue-200">
-                                Shipping Line Partners
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-white">
-                                50+
-                            </div>
-                            <div className="text-blue-200">
-                                Trucking Partners
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            {/* FOOTER */}
-            <footer className="bg-gray-900 text-white py-12">
-                <div className="container mx-auto px-4 max-w-6xl">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Company Info */}
-                        <div className="md:col-span-2">
-                            <div className="mb-4">
-                                <p className="font-bold text-lg">
-                                    XTRA-MILE FREIGHT FORWARDING-INC
-                                </p>
-                                <p className="text-gray-300">
-                                    SPECIALIZED LCL & MULTI-CONTAINER SERVICES
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
+                                <div className="flex justify-center mb-6">
+                                    <div className="bg-blue-100 p-4 rounded-full">
+                                        <UserPlusIcon className="h-12 w-12 text-blue-600" />
+                                    </div>
+                                </div>
+                                <div className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
+                                    STEP 1
+                                </div>
+                                <h3 className="text-black text-xl font-bold mb-4">
+                                    Create Your Account
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    Sign up for free and gain access to our
+                                    comprehensive freight forwarding platform.
+                                    Complete your profile and verify your
+                                    business details to get started.
                                 </p>
                             </div>
-                            <p className="text-gray-400 mb-4">
-                                Your trusted partner for consolidated shipments
-                                and multi-container logistics in the
-                                Philippines.
+
+                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
+                                <div className="flex justify-center mb-6">
+                                    <div className="bg-green-100 p-4 rounded-full">
+                                        <ClipboardDocumentListIcon className="h-12 w-12 text-green-600" />
+                                    </div>
+                                </div>
+                                <div className="bg-green-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
+                                    STEP 2
+                                </div>
+                                <h3 className="text-black text-xl font-bold mb-4">
+                                    Book Your Shipment
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    Enter your shipment details, select
+                                    services, and get instant quotes. Upload
+                                    documents, choose pickup dates, and confirm
+                                    your booking with just a few clicks.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
+                                <div className="flex justify-center mb-6">
+                                    <div className="bg-purple-100 p-4 rounded-full">
+                                        <EyeIcon className="h-12 w-12 text-purple-600" />
+                                    </div>
+                                </div>
+                                <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
+                                    STEP 3
+                                </div>
+                                <h3 className="text-black text-xl font-bold mb-4">
+                                    Track & Monitor
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    Monitor your shipment in real-time with our
+                                    advanced tracking system. Receive updates,
+                                    manage documentation, and stay informed
+                                    throughout the journey.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Choose Us Section */}
+                <section
+                    id="why-choose-us"
+                    className="min-h-screen w-screen flex flex-col items-center justify-center bg-white px-12 py-20"
+                >
+                    <div className="container mx-auto px-8 md:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="heading mb-6">Why Choose Us?</h1>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                We deliver excellence in freight forwarding with
+                                unmatched reliability, competitive rates, and
+                                world-class customer service.
                             </p>
                         </div>
 
-                        {/* Contact */}
-                        <div>
-                            <h3 className="font-semibold text-lg mb-4">
-                                Contact
-                            </h3>
-                            <ul className="space-y-2 text-gray-400">
-                                <li className="flex items-center">
-                                    <PhoneIcon className="w-5 h-5 mr-2" />
-                                    +63 (XXX) XXX-XXXX
-                                </li>
-                                <li className="flex items-center">
-                                    <EnvelopeIcon className="w-5 h-5 mr-2" />
-                                    lcl@xtramilefreight.com
-                                </li>
-                                <li className="flex items-center">
-                                    <MapPinIcon className="w-5 h-5 mr-2" />
-                                    Manila & Cagayan de Oro Offices
-                                </li>
-                            </ul>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <ShieldCheckIcon className="h-12 w-12 text-blue-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    Reliable & Secure
+                                </h3>
+                                <p className="text-gray-600">
+                                    Our logistics services are designed to be
+                                    reliable and secure, ensuring that your
+                                    shipments arrive safely and on time, every
+                                    time.
+                                </p>
+                            </div>
+
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <CurrencyDollarIcon className="h-12 w-12 text-green-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    Competitive Pricing
+                                </h3>
+                                <p className="text-gray-600">
+                                    We offer transparent, competitive pricing
+                                    for our logistics services, ensuring you get
+                                    the best value without hidden fees or
+                                    surprises.
+                                </p>
+                            </div>
+
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <ChatBubbleLeftRightIcon className="h-12 w-12 text-purple-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    24/7 Customer Support
+                                </h3>
+                                <p className="text-gray-600">
+                                    Our dedicated customer support team is
+                                    available around the clock to assist you
+                                    with any questions, concerns, or urgent
+                                    requests.
+                                </p>
+                            </div>
+
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <ClockIcon className="h-12 w-12 text-orange-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    Fast Processing
+                                </h3>
+                                <p className="text-gray-600">
+                                    Quick turnaround times for quotes, bookings,
+                                    and documentation. We prioritize efficiency
+                                    to keep your supply chain moving smoothly.
+                                </p>
+                            </div>
+
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <TruckIcon className="h-12 w-12 text-red-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    Global Network
+                                </h3>
+                                <p className="text-gray-600">
+                                    Extensive worldwide network of trusted
+                                    partners and agents providing comprehensive
+                                    coverage for all your international shipping
+                                    needs.
+                                </p>
+                            </div>
+
+                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                                <div className="flex justify-center mb-4">
+                                    <CheckCircleIcon className="h-12 w-12 text-teal-600" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">
+                                    Proven Track Record
+                                </h3>
+                                <p className="text-gray-600">
+                                    Years of experience handling diverse cargo
+                                    types with a 99.5% on-time delivery rate and
+                                    thousands of satisfied customers worldwide.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </footer>
+                </section>
+
+                {/* Testimonials Section */}
+                <section
+                    id="testimonials"
+                    className="min-h-screen w-screen flex flex-col items-center justify-center gradient-bg px-12 py-20"
+                >
+                    <div className="container text-white mx-auto px-8 md:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="heading text-white mb-6">
+                                What Our Clients Say
+                            </h1>
+                            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+                                Don't just take our word for it. Here's what our
+                                satisfied customers have to say about our
+                                freight forwarding services.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                            <div className="bg-white p-8 rounded-xl shadow-xl">
+                                <div className="flex mb-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <StarIcon
+                                            key={i}
+                                            className="h-5 w-5 text-yellow-400 fill-current"
+                                        />
+                                    ))}
+                                </div>
+                                <p className="text-gray-600 mb-6 italic">
+                                    "Xtra-Mile has transformed our supply chain
+                                    operations. Their tracking system is
+                                    incredibly detailed and their customer
+                                    service is outstanding."
+                                </p>
+                                <div className="flex items-center">
+                                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                        JD
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="font-bold text-gray-800">
+                                            John Davidson
+                                        </p>
+                                        <p className="text-gray-500 text-sm">
+                                            Supply Chain Manager, TechCorp
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-xl">
+                                <div className="flex mb-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <StarIcon
+                                            key={i}
+                                            className="h-5 w-5 text-yellow-400 fill-current"
+                                        />
+                                    ))}
+                                </div>
+                                <p className="text-gray-600 mb-6 italic">
+                                    "Fast, reliable, and cost-effective. They've
+                                    handled our international shipments
+                                    flawlessly for over two years now."
+                                </p>
+                                <div className="flex items-center">
+                                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+                                        MR
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="font-bold text-gray-800">
+                                            Maria Rodriguez
+                                        </p>
+                                        <p className="text-gray-500 text-sm">
+                                            Operations Director, Global Imports
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-xl">
+                                <div className="flex mb-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <StarIcon
+                                            key={i}
+                                            className="h-5 w-5 text-yellow-400 fill-current"
+                                        />
+                                    ))}
+                                </div>
+                                <p className="text-gray-600 mb-6 italic">
+                                    "The best freight forwarder we've worked
+                                    with. Professional, transparent, and always
+                                    goes the extra mile for their clients."
+                                </p>
+                                <div className="flex items-center">
+                                    <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                        DL
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="font-bold text-gray-800">
+                                            David Lee
+                                        </p>
+                                        <p className="text-gray-500 text-sm">
+                                            CEO, Pacific Trading Co.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer */}
+                <footer className="bg-gray-900 text-white py-16">
+                    <div className="container mx-auto px-8">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                            {/* Company Info */}
+                            <div className="col-span-1 md:col-span-2">
+                                <div className="mb-6">
+                                    <p className="gradient font-bold text-lg mb-2">
+                                        XTRA-MILE FREIGHT FORWARDING-INC
+                                    </p>
+                                    <p className="text-gray-300 text-sm mb-4">
+                                        FREIGHT MONITORING SYSTEM
+                                    </p>
+                                </div>
+                                <p className="text-gray-300 mb-6 leading-relaxed">
+                                    Your trusted partner in global freight
+                                    forwarding and logistics solutions. We
+                                    deliver excellence with every shipment,
+                                    ensuring your cargo reaches its destination
+                                    safely and on time.
+                                </p>
+                                <div className="flex space-x-4">
+                                    <div className="flex items-center text-gray-300">
+                                        <PhoneIcon className="h-5 w-5 mr-2" />
+                                        <span>+63 123 456 7890</span>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-4 mt-2">
+                                    <div className="flex items-center text-gray-300">
+                                        <EnvelopeIcon className="h-5 w-5 mr-2" />
+                                        <span>info@xtramilefreight.com</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Links */}
+                            <div>
+                                <h3 className="text-lg font-bold mb-4">
+                                    Quick Links
+                                </h3>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <a
+                                            href="#home"
+                                            className="text-gray-300 hover:text-white transition-colors duration-200"
+                                        >
+                                            Home
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="#how-it-works"
+                                            className="text-gray-300 hover:text-white transition-colors duration-200"
+                                        >
+                                            How It Works
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="#why-choose-us"
+                                            className="text-gray-300 hover:text-white transition-colors duration-200"
+                                        >
+                                            Why Choose Us
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="#testimonials"
+                                            className="text-gray-300 hover:text-white transition-colors duration-200"
+                                        >
+                                            Testimonials
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Services */}
+                            <div>
+                                <h3 className="text-lg font-bold mb-4">
+                                    Services
+                                </h3>
+                                <ul className="space-y-2">
+                                    <li className="text-gray-300">
+                                        Ocean Freight
+                                    </li>
+                                    <li className="text-gray-300">
+                                        Air Freight
+                                    </li>
+                                    <li className="text-gray-300">
+                                        Land Transport
+                                    </li>
+                                    <li className="text-gray-300">
+                                        Customs Clearance
+                                    </li>
+                                    <li className="text-gray-300">
+                                        Cargo Insurance
+                                    </li>
+                                    <li className="text-gray-300">
+                                        Warehousing
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Bottom Footer */}
+                        <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
+                            <p className="text-gray-400 text-sm mb-4 md:mb-0">
+                                © 2025 Xtra-Mile Freight Forwarding Inc. All
+                                rights reserved.
+                            </p>
+                            <div className="flex space-x-6 text-sm">
+                                <a
+                                    href="#"
+                                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                                >
+                                    Privacy Policy
+                                </a>
+                                <a
+                                    href="#"
+                                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                                >
+                                    Terms of Service
+                                </a>
+                                <a
+                                    href="#"
+                                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                                >
+                                    Contact Us
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 };
