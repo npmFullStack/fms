@@ -347,139 +347,27 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* Footer */}
-                <footer className="bg-gray-900 text-white py-16">
-                    <div className="container mx-auto px-8">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-                            {/* Company Info */}
-                            <div className="col-span-1 md:col-span-2">
-                                <div className="mb-6">
-                                    <p className="gradient font-bold text-lg mb-2">
-                                        XTRA-MILE FREIGHT FORWARDING-INC
-                                    </p>
-                                    <p className="text-gray-300 text-sm mb-4">
-                                        FREIGHT MONITORING SYSTEM
-                                    </p>
-                                </div>
-                                <p className="text-gray-300 mb-6 leading-relaxed">
-                                    Your trusted partner in global freight
-                                    forwarding and logistics solutions. We
-                                    deliver excellence with every shipment,
-                                    ensuring your cargo reaches its destination
-                                    safely and on time.
-                                </p>
-                                <div className="flex space-x-4">
-                                    <div className="flex items-center text-gray-300">
-                                        <PhoneIcon className="h-5 w-5 mr-2" />
-                                        <span>+63 123 456 7890</span>
-                                    </div>
-                                </div>
-                                <div className="flex space-x-4 mt-2">
-                                    <div className="flex items-center text-gray-300">
-                                        <EnvelopeIcon className="h-5 w-5 mr-2" />
-                                        <span>info@xtramilefreight.com</span>
-                                    </div>
-                                </div>
-                            </div>
+{/* Footer */}  
+<footer className="bg-gray-800 text-white py-6">  
+    <div className="container mx-auto px-4 text-center">  
+        {/* Company Info */}  
+        <p className="font-medium">XTRA-MILE FREIGHT FORWARDING INC</p>  
+        <p className="text-gray-300 text-sm mt-1">FREIGHT MONITORING SYSTEM</p>  
 
-                            {/* Quick Links */}
-                            <div>
-                                <h3 className="text-lg font-bold mb-4">
-                                    Quick Links
-                                </h3>
-                                <ul className="space-y-2">
-                                    <li>
-                                        <a
-                                            href="#home"
-                                            className="text-gray-300 hover:text-white transition-colors duration-200"
-                                        >
-                                            Home
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="#how-it-works"
-                                            className="text-gray-300 hover:text-white transition-colors duration-200"
-                                        >
-                                            How It Works
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="#why-choose-us"
-                                            className="text-gray-300 hover:text-white transition-colors duration-200"
-                                        >
-                                            Why Choose Us
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="#testimonials"
-                                            className="text-gray-300 hover:text-white transition-colors duration-200"
-                                        >
-                                            Testimonials
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+        {/* Contact */}  
+        <div className="mt-4 text-sm text-gray-300">  
+            <p>+63 123 456 7890</p>  
+            <p>info@xtramilefreight.com</p>  
+        </div>  
 
-                            {/* Services */}
-                            <div>
-                                <h3 className="text-lg font-bold mb-4">
-                                    Services
-                                </h3>
-                                <ul className="space-y-2">
-                                    <li className="text-gray-300">
-                                        Ocean Freight
-                                    </li>
-                                    <li className="text-gray-300">
-                                        Air Freight
-                                    </li>
-                                    <li className="text-gray-300">
-                                        Land Transport
-                                    </li>
-                                    <li className="text-gray-300">
-                                        Customs Clearance
-                                    </li>
-                                    <li className="text-gray-300">
-                                        Cargo Insurance
-                                    </li>
-                                    <li className="text-gray-300">
-                                        Warehousing
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Bottom Footer */}
-                        <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-                            <p className="text-gray-400 text-sm mb-4 md:mb-0">
-                                © 2025 Xtra-Mile Freight Forwarding Inc. All
-                                rights reserved.
-                            </p>
-                            <div className="flex space-x-6 text-sm">
-                                <a
-                                    href="#"
-                                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                                >
-                                    Privacy Policy
-                                </a>
-                                <a
-                                    href="#"
-                                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                                >
-                                    Terms of Service
-                                </a>
-                                <a
-                                    href="#"
-                                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                                >
-                                    Contact Us
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+        {/* Copyright */}  
+        <div className="mt-4 pt-4 border-t border-gray-700">  
+            <p className="text-xs text-gray-400">  
+                © 2025 Xtra-Mile Freight. All rights reserved.  
+            </p>  
+        </div>  
+    </div>  
+</footer>  
             </div>
         </div>
     );
