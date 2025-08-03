@@ -10,6 +10,8 @@ const Register = lazy(() => import("./pages/Register"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Booking = lazy(() => import("./pages/Booking"));
 const ShippingLine = lazy(() => import("./pages/ShippingLine"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+
 
 function App() {
     return (
@@ -27,6 +29,7 @@ function App() {
                     <Route element={<ProtectedLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/booking" element={<Booking />} />
+                        <Route path="/track-order" element={<TrackOrder />} />
                         <Route path="/shipping" element={<ShippingLine />} />
                     </Route>
                 </Routes>

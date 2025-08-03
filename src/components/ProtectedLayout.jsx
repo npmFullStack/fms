@@ -14,6 +14,10 @@ const ProtectedLayout = () => {
         fetchUser(navigate);
     }, [fetchUser, navigate]);
 
+    const handleCloseSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
     if (loading) return <Loading />;
 
     return (
@@ -30,6 +34,7 @@ const ProtectedLayout = () => {
                     <SideBar
                         isOpen={isSidebarOpen}
                         user={user}
+                        onClose={handleCloseSidebar}
                         className={`${
                             isSidebarOpen ? "w-64" : "w-20"
                         } transition-all duration-300 ease-in-out h-full`}
