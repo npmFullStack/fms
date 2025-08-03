@@ -1,61 +1,157 @@
 import { NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../config/axios";
-import Loading from "../components/Loading";
+import {
+    HomeIcon,
+    TruckIcon,
+    ClipboardDocumentListIcon,
+    CurrencyDollarIcon,
+    ChartBarIcon,
+    Cog6ToothIcon,
+    ChevronDownIcon,
+    ChevronUpIcon
+} from "@heroicons/react/24/outline";
+import useAuthStore from "../utils/store/useAuthStore";
 
-const navLinks = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Booking", path: "/booking" },
-    { name: "Shipping Line", path: "/shipping" }
-];
+const menuByRole = {
+    customer: [
+        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        {
+            name: "My Bookings",
+            isDropdown: true,
+            icon: ClipboardDocumentListIcon,
+            subLinks: [
+                { name: "Create Booking", path: "/booking/create" },
+                { name: "Booking Logs", path: "/booking/logs" }
+            ]
+        },
+        { name: "Track Orders", path: "/track", icon: TruckIcon }
+    ],
+    marketing: [
+        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Bookings", path: "/booking", icon: TruckIcon },
+        {
+            name: "Shipping Line",
+            path: "/shipping",
+            icon: ClipboardDocumentListIcon
+        }
+    ],
+    finance: [
+        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Accounts Receivable", path: "/ar", icon: CurrencyDollarIcon },
+        { name: "Accounts Payable", path: "/ap", icon: CurrencyDollarIcon }
+    ],
+    gm: [
+        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Reports", path: "/reports", icon: ChartBarIcon }
+    ]
+};
 
-const SideBar = () => {
+const SideBar = ({ isOpen = true, user, className }) => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { logout } = useAuthStore();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showBookingSubmenu, setShowBookingSubmenu] = useState(false);
+    const profileRef = useRef();
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await api.get("/auth/profile");
-                setUser(res.data.user);
-            } catch (error) {
-                console.log("Not authorized", error.response?.data?.message);
-                navigate("/login");
-            } finally {
-                setLoading(false);
+        const handleClickOutside = e => {
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setShowProfileMenu(false);
             }
         };
-        fetchProfile();
-    }, [navigate]);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
-    if (loading) return <Loading />;
+    const role = user?.role || "customer";
+    const navLinks = menuByRole[role] || [];
 
     return (
-        <div className="w-64 bg-white border-r min-h-screen p-4 shadow-sm flex flex-col">
-            <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
+        <div className={`bg-gray-900 text-white h-full p-4 flex flex-col ${className}`}>
+            {/* Navigation */}
+            <nav className="flex flex-col gap-1 flex-grow">
+                {navLinks.map(({ name, path, icon: Icon, isDropdown, subLinks }) =>
+                    isDropdown ? (
+                        <div key={name}>
+                            <button
+                                onClick={() => setShowBookingSubmenu(!showBookingSubmenu)}
+                                className="flex items-center justify-between w-full px-4 py-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Icon className="w-5 h-5" />
+                                    {isOpen && <span>{name}</span>}
+                                </div>
+                                {isOpen && (
+                                    showBookingSubmenu ? (
+                                        <ChevronUpIcon className="w-4 h-4" />
+                                    ) : (
+                                        <ChevronDownIcon className="w-4 h-4" />
+                                    )
+                                )}
+                            </button>
 
-            <nav className="flex flex-col gap-2 flex-grow">
-                {navLinks.map(link => (
-                    <NavLink
-                        key={link.path}
-                        to={link.path}
-                        className={({ isActive }) =>
-                            `px-4 py-2 rounded font-medium transition-colors duration-200 ${
-                                isActive
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-800 hover:bg-blue-100"
-                            }`
-                        }
-                    >
-                        {link.name}
-                    </NavLink>
-                ))}
+                            {showBookingSubmenu && isOpen && (
+                                <div className="ml-8 mt-1 flex flex-col gap-3 transition-all duration-200">
+                                    {subLinks.map(sub => (
+                                        <NavLink
+                                            key={sub.path}
+                                            to={sub.path}
+                                            className={({ isActive }) => 
+                                                `text-sm hover:text-blue-400 transition-colors ${
+                                                    isActive ? "text-blue-400 font-medium" : ""
+                                                }`
+                                            }
+                                        >
+                                            {sub.name}
+                                        </NavLink>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <NavLink
+                            key={path}
+                            to={path}
+                            className={({ isActive }) =>
+                                `flex items-center gap-3 px-4 py-2 rounded-md font-medium transition-colors ${
+                                    isActive
+                                        ? "bg-blue-600 text-white"
+                                        : "hover:bg-gray-700"
+                                }`
+                            }
+                        >
+                            <Icon className="w-5 h-5" />
+                            {isOpen && <span>{name}</span>}
+                        </NavLink>
+                    )
+                )}
             </nav>
 
-            <div className="mt-auto px-3 py-2 text-center bg-gray-700 text-white rounded">
-                {user?.email}
+            {/* Profile Menu */}
+            <div
+                ref={profileRef}
+                className="mt-auto relative text-sm text-white rounded px-3 py-2 hover:bg-gray-700 cursor-pointer transition-colors"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+            >
+                <div className="flex items-center gap-2">
+                    <Cog6ToothIcon className="w-6 h-6" />
+                    {isOpen && <span className="truncate">{user?.email}</span>}
+                </div>
+
+                {showProfileMenu && (
+                    <div className="absolute bottom-full mb-2 left-0 w-40 bg-white text-gray-800 rounded shadow-md z-50 transition-all duration-200">
+                        <button className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors">
+                            Settings
+                        </button>
+                        <button
+                            onClick={() => logout(navigate)}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

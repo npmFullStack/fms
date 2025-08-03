@@ -5,9 +5,11 @@ import api from "../config/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { loginSchema } from "../schemas/authSchema";
 import loginImage from "../assets/images/login.png";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login = () => {
     const [message, setMessage] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const {
@@ -15,25 +17,25 @@ const Login = () => {
         handleSubmit,
         formState: { errors }
     } = useForm({
-        resolver: zodResolver(loginSchema)
+        resolver: zodResolver(loginSchema),
+        mode: "onChange"
     });
 
     const onSubmit = async data => {
-    try {
-        const response = await api.post("/auth/login", data);
-        
-        // Save token to localStorage
-        const token = response.data.token;
-        localStorage.setItem("token", token);
+        try {
+            const response = await api.post("/auth/login", data);
 
-        setMessage("Login successful!");
-        navigate("/dashboard");
-    } catch (error) {
-        console.error(error.response?.data || error.message);
-        setMessage(error.response?.data?.message || "Login failed.");
-    }
-};
+            // Save token to localStorage
+            const token = response.data.token;
+            localStorage.setItem("token", token);
 
+            setMessage("Login successful!");
+            navigate("/dashboard");
+        } catch (error) {
+            console.error(error.response?.data || error.message);
+            setMessage(error.response?.data?.message || "Login failed.");
+        }
+    };
 
     return (
         <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">
@@ -60,13 +62,6 @@ const Login = () => {
                         <p className="text-gray-600">Sign in to your account</p>
                     </div>
 
-                    {/* Global Error Message */}
-                    {errors.root && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            {errors.root.message}
-                        </div>
-                    )}
-
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="space-y-6"
@@ -86,7 +81,7 @@ const Login = () => {
                                 placeholder="Enter your email"
                                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
                                     errors.email
-                                        ? "border-red-500"
+                                        ? "focus:ring-0 border-red-500"
                                         : "border-gray-300"
                                 }`}
                             />
@@ -105,17 +100,33 @@ const Login = () => {
                             >
                                 Password
                             </label>
+                                                        <div className="relative">
                             <input
                                 id="password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 {...register("password")}
                                 placeholder="Enter your password"
                                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
                                     errors.password
-                                        ? "border-red-500"
+                                        ? "focus:ring-0 border-red-500"
                                         : "border-gray-300"
                                 }`}
                             />
+                            
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                >
+                                    {showPassword ? (
+                                        <EyeSlashIcon className="h-5 w-5" />
+                                    ) : (
+                                        <EyeIcon className="h-5 w-5" />
+                                    )}
+                                </button>
+                            </div>
                             {errors.password && (
                                 <p className="text-sm text-red-600 mt-1">
                                     {errors.password.message}
@@ -154,7 +165,7 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
     );
 };
 
