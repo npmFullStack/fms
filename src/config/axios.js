@@ -1,11 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://fms-backend-i1jm.onrender.com" || "http://localhost:5000", // Fallback for local dev
-    timeout: 10000, // 10 second timeout
-    headers: {
-        "Content-Type": "application/json"
-    }
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json"
+  }
 });
 
 // Request interceptor
