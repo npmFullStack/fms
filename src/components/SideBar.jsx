@@ -103,22 +103,18 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 {/* Main dropdown button */}
                                 <button
                                     onClick={() => setShowBooking(!showBooking)}
-                                    className={`flex items-center w-full px-4 py-3 bg-white text-gray-800 rounded-lg hover:bg-blue-50 transition-all duration-200 group border border-blue-200 shadow-sm ${
-                                        !isOpen
-                                            ? "justify-center"
-                                            : "justify-between"
-                                    } ${
+                                    className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
                                         showBooking
-                                            ? "bg-blue-50 text-blue-700"
-                                            : ""
+                                            ? "bg-blue-600 text-white border-blue-500"
+                                            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
                                     }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <Icon
-                                            className={`w-5 h-5 transition-colors flex-shrink-0 ${
+                                            className={`w-5 h-5 flex-shrink-0 ${
                                                 showBooking
-                                                    ? "text-blue-700"
-                                                    : "text-blue-600 group-hover:text-blue-700"
+                                                    ? "text-white"
+                                                    : "text-blue-600"
                                             }`}
                                         />
                                         {isOpen && (
@@ -129,7 +125,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                     </div>
                                     {isOpen &&
                                         (showBooking ? (
-                                            <ChevronUpIcon className="w-4 h-4 text-blue-700 transition-transform duration-200" />
+                                            <ChevronUpIcon className="w-4 h-4 text-white-700 transition-transform duration-200" />
                                         ) : (
                                             <ChevronDownIcon className="w-4 h-4 text-gray-500 transition-transform duration-200" />
                                         ))}
