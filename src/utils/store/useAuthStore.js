@@ -3,59 +3,55 @@ import api from "../../config/axios";
 
 const useAuthStore = create((set) => ({
   user: null,
+  users: [],
   loading: true,
 
-  // Fetch user profile
   fetchUser: async (navigate) => {
-  console.log("[AuthStore] fetchUser called");
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      
+      if (!token) {
+        set({ loading: false });
+        navigate("/login");
+        return;
+      }
 
-  if (typeof window === "undefined" || !window.localStorage) {
-    console.warn("[AuthStore] Browser environment not ready");
-    set({ loading: false });
-    return;
-  }
-
-  const token = window.localStorage.getItem("token");
-  console.log("[AuthStore] Token:", token);
-
-  if (!token) {
-    console.warn("[AuthStore] No token found, redirecting to login");
-    set({ loading: false });
-    navigate("/login");
-    return;
-  }
-
-  try {
-    console.log("[AuthStore] Requesting /auth/profile...");
-    const response = await api.get("/auth/profile", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    console.log("[AuthStore] User fetched:", response.data.user);
-    set({ user: response.data.user, loading: false });
-  } catch (error) {
-    console.error("[AuthStore] Error fetching profile:", error);
-    window.localStorage.removeItem("token");
-    set({ user: null, loading: false });
-    navigate("/login");
-  }
-},
-
-
-  // Set user directly after login
-  setUser: (userData) => {
-    console.log("[AuthStore] Setting user after login:", userData);
-    set({ user: userData, loading: false });
+      const response = await api.get("/auth/profile");
+      set({ user: response.data.user, loading: false });
+    } catch (error) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
+      set({ user: null, loading: false });
+      navigate("/login");
+    }
   },
 
+  updateProfilePicture: async (imageUrl) => {
+    try {
+      const response = await api.post("/auth/profile-picture", { imageUrl });
+      set({ user: response.data.user });
+      return true;
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      return false;
+    }
+  },
+
+  setUser: (userData) => set({ user: userData, loading: false }),
+
   logout: (navigate) => {
-    console.log("[AuthStore] Logging out");
-    if (typeof window !== "undefined" && window.localStorage) {
-      window.localStorage.removeItem("token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
     }
     set({ user: null });
     navigate("/login");
+  },
+
+  fetchUsers: async () => {
+    const res = await api.get("/auth/users");
+    set({ users: res.data.rows || [] });
   }
 }));
 
 export default useAuthStore;
-

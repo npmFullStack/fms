@@ -14,34 +14,20 @@ const ProtectedLayout = () => {
         fetchUser(navigate);
     }, [fetchUser, navigate]);
 
-    const handleCloseSidebar = () => {
-        setIsSidebarOpen(false);
-    };
-
     if (loading) return <Loading />;
 
     return (
         <div className="flex flex-col h-screen text-gray-800">
-            {/* Top Navbar */}
-            <div className="flex-shrink-0">
-                <NavBar onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
-            </div>
-
-            {/* Main Body */}
+            <NavBar onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
             <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar */}
-                <div className="h-full">
-                    <SideBar
-                        isOpen={isSidebarOpen}
-                        user={user}
-                        onClose={handleCloseSidebar}
-                        className={`${
-                            isSidebarOpen ? "w-64" : "w-20"
-                        } transition-all duration-300 ease-in-out h-full`}
-                    />
-                </div>
-
-                {/* Page Content */}
+                <SideBar
+                    isOpen={isSidebarOpen}
+                    user={user}
+                    onClose={() => setIsSidebarOpen(false)}
+                    className={`${
+                        isSidebarOpen ? "w-64" : "w-20"
+                    } transition-all duration-300 ease-in-out h-full`}
+                />
                 <main className="flex-1 overflow-auto p-4 bg-gray-100">
                     <Outlet />
                 </main>

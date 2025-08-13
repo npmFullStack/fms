@@ -112,9 +112,6 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
     const [isMobile, setIsMobile] = useState(false);
     const navigate = useNavigate();
 
-    const role = user?.role || "customer";
-    const navLinks = menuByRole[role] || [];
-
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -123,6 +120,11 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
+    
+    if (!user) return null;
+
+    const role = user?.role || "customer";
+    const navLinks = menuByRole[role] || [];
 
     if (isMobile) {
         return (
@@ -131,12 +133,16 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                 onClose={onClose}
                 user={user}
                 navLinks={navLinks}
-                navigate={navigate}
             />
         );
     }
 
-    // Desktop sidebar
+    const handleDropdownClick = (path) => {
+        setShowBooking(!showBooking);
+        // Navigate to the main path when clicking the dropdown
+        navigate(path);
+    };
+
     return (
         <div
             className={`bg-gray-50 border-r border-gray-200 text-gray-800 p-4 flex flex-col transition-all duration-300 hidden md:flex ${className}`}
@@ -150,34 +156,34 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                     ({ name, path, icon: Icon, isDropdown, subLinks }) =>
                         isDropdown ? (
                             <div key={name} className="w-full">
-                                {/* Main dropdown button */}
+                                {/* Main dropdown button - now navigates to main path */}
                                 <button
-                                    onClick={() => setShowBooking(!showBooking)}
+                                    onClick={() => handleDropdownClick(path)}
                                     className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
-                                        showBooking
+                                        window.location.pathname === path || window.location.pathname.startsWith(path)
                                             ? "bg-blue-600 text-white border-blue-500"
                                             : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
                                     }`}
                                 >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <Icon
                                             className={`w-5 h-5 flex-shrink-0 ${
-                                                showBooking
+                                                window.location.pathname === path || window.location.pathname.startsWith(path)
                                                     ? "text-white"
                                                     : "text-blue-600"
                                             }`}
                                         />
                                         {isOpen && (
-                                            <span className="font-medium">
+                                            <span className="font-medium truncate text-sm">
                                                 {name}
                                             </span>
                                         )}
                                     </div>
                                     {isOpen &&
                                         (showBooking ? (
-                                            <ChevronUpIcon className="w-4 h-4 text-white-700 transition-transform duration-200" />
+                                            <ChevronUpIcon className="w-4 h-4 text-current transition-transform duration-200 flex-shrink-0" />
                                         ) : (
-                                            <ChevronDownIcon className="w-4 h-4 text-gray-500 transition-transform duration-200" />
+                                            <ChevronDownIcon className="w-4 h-4 text-current transition-transform duration-200 flex-shrink-0" />
                                         ))}
                                 </button>
 
@@ -189,7 +195,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                                 key={sub.path}
                                                 to={sub.path}
                                                 className={({ isActive }) =>
-                                                    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border ${
+                                                    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border min-w-0 ${
                                                         isActive
                                                             ? "bg-blue-600 text-white shadow-md border-blue-500"
                                                             : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200 shadow-sm"
@@ -205,7 +211,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                                             : "text-blue-600 group-hover:text-blue-700"
                                                     }`}
                                                 />
-                                                <span className="font-medium">
+                                                <span className="font-medium truncate text-sm">
                                                     {sub.name}
                                                 </span>
                                             </NavLink>
@@ -218,7 +224,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 key={path}
                                 to={path}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
+                                    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm min-w-0 ${
                                         isActive
                                             ? "bg-blue-600 text-white border-blue-500"
                                             : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
@@ -233,7 +239,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                     }`}
                                 />
                                 {isOpen && (
-                                    <span className="font-medium">{name}</span>
+                                    <span className="font-medium truncate text-sm">{name}</span>
                                 )}
                             </NavLink>
                         )

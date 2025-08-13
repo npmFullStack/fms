@@ -24,30 +24,19 @@ const Login = () => {
     const { setUser } = useAuthStore();
 
     const onSubmit = async data => {
-        try {
-            const loginRes = await api.post("/auth/login", data);
+  try {
+    const loginRes = await api.post("/auth/login", data);
+    const token = loginRes.data?.token;
+    if (!token) throw new Error("No token received");
 
-            const token = loginRes.data?.token;
-            if (!token) throw new Error("No token received");
-
-            // Save token right away
-            if (typeof window !== "undefined" && window.localStorage) {
-                window.localStorage.setItem("token", token);
-            }
-
-            // Fetch profile using token directly
-            const profileRes = await api.get("/auth/profile", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            setUser(profileRes.data.user);
-            setMessage("Login successful!");
-            navigate("/dashboard");
-        } catch (errorMsg) {
-            console.error("Login Error:", errorMsg);
-            setMessage(errorMsg);
-        }
-    };
+    localStorage.setItem("token", token);
+    const profileRes = await api.get("/auth/profile");
+    setUser(profileRes.data.user);
+    navigate("/dashboard");
+  } catch (error) {
+    setMessage(error.message);
+  }
+};
 
     return (
         <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">

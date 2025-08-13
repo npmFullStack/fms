@@ -1,20 +1,12 @@
-import useAuthStore from "../utils/store/useAuthStore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    BellIcon,
-    Bars3Icon,
-    UserCircleIcon
-} from "@heroicons/react/24/outline";
+import { BellIcon, Bars3Icon, UserCircleIcon } from "@heroicons/react/24/outline";
+import useAuthStore from "../utils/store/useAuthStore";
 
 const NavBar = ({ onToggleSidebar }) => {
-    const { user, fetchUser, logout } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        fetchUser(navigate); // load user info on mount
-    }, [fetchUser, navigate]);
 
     return (
         <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow-md">
@@ -35,23 +27,37 @@ const NavBar = ({ onToggleSidebar }) => {
                     onClick={() => setMenuOpen(!menuOpen)}
                     className="flex items-center gap-1"
                 >
-                    <UserCircleIcon className="w-7 h-7" />
-                    <span className="hidden sm:block">{user?.first_name}</span>
+                    {user?.profile_picture ? (
+                        <img 
+                            src={user.profile_picture} 
+                            alt="Profile"
+                            className="w-7 h-7 rounded-full object-cover"
+                        />
+                    ) : (
+                        <UserCircleIcon className="w-7 h-7" />
+                    )}
+                    <span className="hidden sm:block">{user?.first_name || "User"}</span>
                 </button>
 
-{menuOpen && (
-    <div className="absolute right-0 top-full bg-white text-gray-800 rounded shadow-md w-40 z-10">
-        <button className="block w-full px-4 py-2 text-left hover:bg-gray-100">
-            Settings
-        </button>
-        <button
-            onClick={() => logout(navigate)}
-            className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-        >
-            Logout
-        </button>
-    </div>
-)}
+                {menuOpen && (
+                    <div className="absolute right-0 top-full bg-white text-gray-800 rounded shadow-md w-40 z-10">
+                        <button 
+                            onClick={() => {
+                                setMenuOpen(false);
+                                navigate("/profile");
+                            }}
+                            className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                        >
+                            Profile
+                        </button>
+                        <button
+                            onClick={() => logout(navigate)}
+                            className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                )}
             </div>
         </nav>
     );
