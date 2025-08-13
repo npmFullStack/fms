@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "../config/axios";
+import api from "../../config/axios";
 import { useNavigate, Link } from "react-router-dom";
-import { loginSchema } from "../schemas/authSchema";
-import loginImage from "../assets/images/login.png";
+import { loginSchema } from "../../schemas/authSchema";
+import loginImage from "../../assets/images/login.png";
+import useAuthStore from "../../utils/store/useAuthStore";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login = () => {
@@ -20,20 +21,31 @@ const Login = () => {
         resolver: zodResolver(loginSchema),
         mode: "onChange"
     });
+    const { setUser } = useAuthStore();
 
     const onSubmit = async data => {
         try {
-            const response = await api.post("/auth/login", data);
+            const loginRes = await api.post("/auth/login", data);
 
-            // Save token to localStorage
-            const token = response.data.token;
-            localStorage.setItem("token", token);
+            const token = loginRes.data?.token;
+            if (!token) throw new Error("No token received");
 
+            // Save token right away
+            if (typeof window !== "undefined" && window.localStorage) {
+                window.localStorage.setItem("token", token);
+            }
+
+            // Fetch profile using token directly
+            const profileRes = await api.get("/auth/profile", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setUser(profileRes.data.user);
             setMessage("Login successful!");
             navigate("/dashboard");
-        } catch (error) {
-            console.error(error.response?.data || error.message);
-            setMessage(error.response?.data?.message || "Login failed.");
+        } catch (errorMsg) {
+            console.error("Login Error:", errorMsg);
+            setMessage(errorMsg);
         }
     };
 
@@ -100,19 +112,19 @@ const Login = () => {
                             >
                                 Password
                             </label>
-                                                        <div className="relative">
-                            <input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                {...register("password")}
-                                placeholder="Enter your password"
-                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                    errors.password
-                                        ? "focus:ring-0 border-red-500"
-                                        : "border-gray-300"
-                                }`}
-                            />
-                            
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    {...register("password")}
+                                    placeholder="Enter your password"
+                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                        errors.password
+                                            ? "focus:ring-0 border-red-500"
+                                            : "border-gray-300"
+                                    }`}
+                                />
+
                                 <button
                                     type="button"
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
@@ -165,7 +177,7 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-            </div>
+        </div>
     );
 };
 

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "../config/axios";
+import api from "../../config/axios";
 import { useNavigate, Link } from "react-router-dom";
-import { registerSchema } from "../schemas/authSchema";
-import registerImage from "../assets/images/register.png";
+import { registerSchema } from "../../schemas/authSchema";
+import registerImage from "../../assets/images/register.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Register = () => {

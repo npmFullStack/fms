@@ -8,7 +8,10 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
     PlusCircleIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    UserGroupIcon,
+    BuildingLibraryIcon,
+    BuildingStorefrontIcon
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import ProfileMenu from "./ProfileMenu";
@@ -21,6 +24,7 @@ const menuByRole = {
         {
             name: "My Bookings",
             isDropdown: true,
+            path: "/booking",
             icon: ClipboardDocumentListIcon,
             subLinks: [
                 {
@@ -37,23 +41,69 @@ const menuByRole = {
         },
         { name: "Track Orders", path: "/track-order", icon: TruckIcon }
     ],
-    marketing: [
+    marketing_coordinator: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-        { name: "Bookings", path: "/booking", icon: TruckIcon },
         {
-            name: "Shipping Line",
-            path: "/shipping",
+            name: "Bookings",
+            path: "/bookings",
             icon: ClipboardDocumentListIcon
+        },
+        {
+            name: "Cargo Monitoring",
+            path: "/cargo-monitoring",
+            icon: TruckIcon
+        },
+        {
+            name: "Shipping Lines",
+            path: "/shipping-lines",
+            icon: BuildingLibraryIcon
+        },
+        {
+            name: "Trucking Companies",
+            path: "/trucking-companies",
+            icon: BuildingStorefrontIcon
         }
     ],
-    finance: [
+    admin_finance: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-        { name: "Accounts Receivable", path: "/ar", icon: CurrencyDollarIcon },
-        { name: "Accounts Payable", path: "/ap", icon: CurrencyDollarIcon }
+        {
+            name: "Accounts Receivable",
+            path: "/accounts-receivable",
+            icon: CurrencyDollarIcon
+        },
+        {
+            name: "Accounts Payable",
+            path: "/accounts-payable",
+            icon: CurrencyDollarIcon
+        },
+        {
+            name: "Billing & Invoices",
+            path: "/billing",
+            icon: DocumentTextIcon
+        }
     ],
-    gm: [
+    general_manager: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-        { name: "Reports", path: "/reports", icon: ChartBarIcon }
+        {
+            name: "Reports",
+            path: "/reports",
+            icon: ChartBarIcon
+        },
+        {
+            name: "Account Management",
+            path: "/account-management",
+            icon: UserGroupIcon
+        },
+        {
+            name: "Cargo Monitoring",
+            path: "/cargo-monitoring",
+            icon: TruckIcon
+        },
+        {
+            name: "Financial Overview",
+            path: "/financial-overview",
+            icon: CurrencyDollarIcon
+        }
     ]
 };
 
