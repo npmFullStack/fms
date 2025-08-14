@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import useAuthStore from "../../utils/store/useAuthStore";
+import useUserStore from "../../utils/store/useUserStore"; // Changed from useAuthStore
 import { 
   EyeIcon,
   PencilSquareIcon,
@@ -11,14 +11,28 @@ import {
 import Loading from "../../components/Loading";
 import SearchBar from "../../components/SearchBar";
 import AddUser from "../../components/modals/AddUser";
+import ViewUser from "../../components/modals/ViewUser";
+import UpdateUser from "../../components/modals/UpdateUser";
 import { formatRole, formatName } from "../../utils/helpers/formatters";
 
 const AccountManagement = () => {
-    const { users, fetchUsers, loading: storeLoading } = useAuthStore();
-    const [error, setError] = useState(null);
+    const { 
+        users, 
+        fetchUsers, 
+        loading, 
+        error,
+        addUser,
+        fetchUserById,
+        updateUser,
+        currentUser,
+        clearCurrentUser
+    } = useUserStore();
+    
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+    const [isViewUserModalOpen, setIsViewUserModalOpen] = useState(false);
+    const [isUpdateUserModalOpen, setIsUpdateUserModalOpen] = useState(false);
 
     // Filter users based on search term and role filter
     const filteredUsers = useMemo(() => {
@@ -42,25 +56,52 @@ const AccountManagement = () => {
     ];
 
     useEffect(() => {
-        const loadUsers = async () => {
-            try {
-                await fetchUsers();
-            } catch (err) {
-                setError(err.message);
-            }
-        };
-        loadUsers();
+        fetchUsers();
     }, [fetchUsers]);
 
     const handleAddUser = async (userData) => {
-        // Here you would typically call an API to create the user
-        console.log("Creating user:", userData);
-        // For now, just close the modal
-        // In a real app, you'd call something like: await createUser(userData);
-        // Then refetch users: await fetchUsers();
+        const result = await addUser(userData);
+        if (result.success) {
+            setIsAddUserModalOpen(false);
+        }
+        return result;
     };
 
-    if (storeLoading) return <Loading />;
+    const handleViewUser = async (userId) => {
+        const result = await fetchUserById(userId);
+        if (result.success) {
+            setIsViewUserModalOpen(true);
+        }
+    };
+
+    const handleEditUser = async (userId) => {
+        const result = await fetchUserById(userId);
+        if (result.success) {
+            setIsUpdateUserModalOpen(true);
+        }
+    };
+
+    const handleUpdateUser = async (userId, userData) => {
+        const result = await updateUser(userId, userData);
+        if (result.success) {
+            setIsUpdateUserModalOpen(false);
+            clearCurrentUser();
+        }
+        return result;
+    };
+
+    const handleCloseViewModal = () => {
+        setIsViewUserModalOpen(false);
+        clearCurrentUser();
+    };
+
+    const handleCloseUpdateModal = () => {
+        setIsUpdateUserModalOpen(false);
+        clearCurrentUser();
+    };
+
+    if (loading) return <Loading />;
+    
     if (error) {
         return (
             <div className="p-6 min-h-screen bg-gray-50">
@@ -252,12 +293,14 @@ const AccountManagement = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                                 <div className="flex justify-end space-x-2">
                                                     <button 
+                                                        onClick={() => handleViewUser(user.id)}
                                                         className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200"
                                                         title="View Details"
                                                     >
                                                         <EyeIcon className="w-4 h-4" />
                                                     </button>
                                                     <button 
+                                                        onClick={() => handleEditUser(user.id)}
                                                         className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-all duration-200"
                                                         title="Edit User"
                                                     >
@@ -299,8 +342,24 @@ const AccountManagement = () => {
                 onClose={() => setIsAddUserModalOpen(false)}
                 onSubmit={handleAddUser}
             />
-        </div>
-    );
+
+            {/* View User Modal */}
+             <ViewUser 
+                isOpen={isViewUserModalOpen}
+                onClose={handleCloseViewModal}
+                user={currentUser}
+            />
+            
+                        {/* Update User Modal */}
+                         <UpdateUser 
+                isOpen={isUpdateUserModalOpen}
+                onClose={handleCloseUpdateModal}
+                user={currentUser}
+                onSubmit={handleUpdateUser}
+            />
+            
+            </div>
+            );
 };
 
 export default AccountManagement;

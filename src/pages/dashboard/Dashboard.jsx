@@ -1,10 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../../config/axios";
-import Loading from "../../components/Loading";
 import useAuthStore from "../../utils/store/useAuthStore";
 
-// Dashboard.js - simplified
 const Dashboard = () => {
     const { user } = useAuthStore();
 
