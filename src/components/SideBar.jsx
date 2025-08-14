@@ -15,7 +15,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import ProfileMenu from "./ProfileMenu";
-import useAuthStore from "../utils/store/useAuthStore";
 import MobileSidebar from "./MobileSidebar";
 
 const menuByRole = {

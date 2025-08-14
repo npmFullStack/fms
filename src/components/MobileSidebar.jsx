@@ -1,18 +1,11 @@
 import { NavLink } from "react-router-dom";
 import {
-    HomeIcon,
-    TruckIcon,
-    ClipboardDocumentListIcon,
-    CurrencyDollarIcon,
-    ChartBarIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    PlusCircleIcon,
-    DocumentTextIcon,
     XMarkIcon
 } from "@heroicons/react/24/outline";
 import ProfileMenu from "./ProfileMenu";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
     const [showBooking, setShowBooking] = useState(false);

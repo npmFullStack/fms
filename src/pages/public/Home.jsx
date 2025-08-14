@@ -5,15 +5,11 @@ import {
     UserPlusIcon,
     ClipboardDocumentListIcon,
     EyeIcon,
-    PhoneIcon,
-    EnvelopeIcon,
-    MapPinIcon,
     ArrowRightIcon,
     ShieldCheckIcon,
     ClockIcon,
     CurrencyDollarIcon,
     ChatBubbleLeftRightIcon,
-    StarIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
 
@@ -234,8 +230,6 @@ const Home = () => {
                         </div>
                     </div>
                 </section>
-
-
 
                 {/* Footer */}
                 <footer className="bg-gray-800 text-white py-6">

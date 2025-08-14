@@ -24,16 +24,15 @@ const Register = () => {
     });
 
     const onSubmit = async data => {
-        try {
-            const response = await api.post("/auth/register", data);
-            setMessage("Registration successful!");
-            navigate("/login");
-        } catch (error) {
-            setMessage("Registration failed. Please try again.");
-        }
-    };
+    try {
+        await api.post("/auth/register", data);  // Removed the response assignment
+        setMessage("Registration successful!");
+        navigate("/login");
+    } catch (error) {
+        setMessage(error.response?.data?.message || "Registration failed. Please try again.");
+    }
+};
 
-    // Watch password field for confirm password validation
     const password = watch("password");
 
     return (
@@ -55,13 +54,15 @@ const Register = () => {
                 {/* Form Section */}
                 <div className="w-full md:w-1/2 p-8">
                     <div className="mb-8 text-center">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                            Create an account
-                        </h1>
-                        <p className="text-gray-600">
-                            Join us today — it's free!
-                        </p>
+                        <h1 className="page-title">Create an account</h1>
+                        <p className="page-subtitle">Join us today — it's free!</p>
                     </div>
+
+                    {message && (
+                        <div className={`mb-4 ${message.includes("successful") ? "bg-green-50 border border-green-200 text-green-700" : "error-message"}`}>
+                            {message}
+                        </div>
+                    )}
 
                     <form
                         onSubmit={handleSubmit(onSubmit)}
@@ -79,18 +80,12 @@ const Register = () => {
                                 <input
                                     id="firstName"
                                     type="text"
-                                    {...register("firstName", {
-                                        required: "First name is required"
-                                    })}
+                                    {...register("firstName")}
                                     placeholder="First name"
-                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                        errors.firstName
-                                            ? "focus:ring-0 border-red-500"
-                                            : "border-gray-300"
-                                    }`}
+                                    className={`input-field ${errors.firstName ? "input-error" : ""}`}
                                 />
                                 {errors.firstName && (
-                                    <p className="text-sm text-red-600 mt-1">
+                                    <p className="error-message">
                                         {errors.firstName.message}
                                     </p>
                                 )}
@@ -105,24 +100,19 @@ const Register = () => {
                                 <input
                                     id="lastName"
                                     type="text"
-                                    {...register("lastName", {
-                                        required: "Last name is required"
-                                    })}
+                                    {...register("lastName")}
                                     placeholder="Last name"
-                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                        errors.lastName
-                                            ? "focus:ring-0 border-red-500"
-                                            : "border-gray-300"
-                                    }`}
+                                    className={`input-field ${errors.lastName ? "input-error" : ""}`}
                                 />
                                 {errors.lastName && (
-                                    <p className="text-sm text-red-600 mt-1">
+                                    <p className="error-message">
                                         {errors.lastName.message}
                                     </p>
                                 )}
                             </div>
                         </div>
 
+                        {/* Email Field */}
                         <div>
                             <label
                                 htmlFor="email"
@@ -135,14 +125,10 @@ const Register = () => {
                                 type="email"
                                 {...register("email")}
                                 placeholder="Enter your email"
-                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                    errors.email
-                                        ? "border-red-500"
-                                        : "border-gray-300"
-                                }`}
+                                className={`input-field ${errors.email ? "input-error" : ""}`}
                             />
                             {errors.email && (
-                                <p className="text-sm text-red-600 mt-1">
+                                <p className="error-message">
                                     {errors.email.message}
                                 </p>
                             )}
@@ -162,11 +148,7 @@ const Register = () => {
                                     type={showPassword ? "text" : "password"}
                                     {...register("password")}
                                     placeholder="Create a password"
-                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                        errors.password
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                    }`}
+                                    className={`input-field ${errors.password ? "input-error" : ""}`}
                                 />
                                 <button
                                     type="button"
@@ -183,7 +165,7 @@ const Register = () => {
                                 </button>
                             </div>
                             {errors.password && (
-                                <p className="text-sm text-red-600 mt-1">
+                                <p className="error-message">
                                     {errors.password.message}
                                 </p>
                             )}
@@ -211,11 +193,7 @@ const Register = () => {
                                             "Passwords do not match"
                                     })}
                                     placeholder="Confirm your password"
-                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                        errors.confirmPassword
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                    }`}
+                                    className={`input-field ${errors.confirmPassword ? "input-error" : ""}`}
                                 />
                                 <button
                                     type="button"
@@ -234,7 +212,7 @@ const Register = () => {
                                 </button>
                             </div>
                             {errors.confirmPassword && (
-                                <p className="text-sm text-red-600 mt-1">
+                                <p className="error-message">
                                     {errors.confirmPassword.message}
                                 </p>
                             )}
@@ -243,7 +221,7 @@ const Register = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="btn-primary w-full"
                         >
                             Sign up
                         </button>

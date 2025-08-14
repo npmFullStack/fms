@@ -26,6 +26,18 @@
     .page-subtitle {
         @apply text-gray-600;
     }
+        /* Input Styles */
+        .input-field {
+        @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition;
+    }
+
+    .input-error {
+        @apply border-red-500 focus:ring-0 focus:border-red-500;
+    }
+
+    .error-message {
+        @apply text-sm text-red-600 mt-1;
+    }
     
     /* Buttons */
     .btn-primary {

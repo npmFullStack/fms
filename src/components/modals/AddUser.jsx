@@ -1,107 +1,60 @@
-import React, { useState } from 'react';
-import { XMarkIcon, UserPlusIcon } from '@heroicons/react/24/outline';
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useUserStore from "../../utils/store/useUserStore";
+import { userSchema } from "../../schemas/userSchema";
+import { UserPlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import Select from "react-select";
 
-const AddUser = ({ isOpen, onClose, onSubmit }) => {
-    const [formData, setFormData] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-        role: 'customer',
-        password: '',
-        confirm_password: ''
-    });
-    const [errors, setErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+const AddUser = ({ isOpen, onClose }) => {
+    const [message, setMessage] = useState("");
+    const addUser = useUserStore((state) => state.addUser);
 
     const roles = [
-        { value: 'customer', label: 'Customer' },
-        { value: 'marketing_coordinator', label: 'Marketing Coordinator' },
-        { value: 'admin_finance', label: 'Admin Finance' },
-        { value: 'general_manager', label: 'General Manager' }
+        { value: "customer", label: "Customer" },
+        { value: "marketing_coordinator", label: "Marketing Coordinator" },
+        { value: "admin_finance", label: "Admin Finance" },
+        { value: "general_manager", label: "General Manager" }
     ];
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        formState: { errors, isSubmitting }
+    } = useForm({
+        resolver: zodResolver(userSchema),
+        mode: "onChange",
+        defaultValues: {
+            role: roles[0]
         }
-    };
+    });
 
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!formData.first_name.trim()) {
-            newErrors.first_name = 'First name is required';
-        }
-
-        if (!formData.last_name.trim()) {
-            newErrors.last_name = 'Last name is required';
-        }
-
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
-        }
-
-        if (formData.password !== formData.confirm_password) {
-            newErrors.confirm_password = 'Passwords do not match';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) return;
-
-        setIsSubmitting(true);
+    const onSubmit = async (data) => {
         try {
-            await onSubmit(formData);
-            // Reset form on success
-            setFormData({
-                first_name: '',
-                last_name: '',
-                email: '',
-                role: 'customer',
-                password: '',
-                confirm_password: ''
-            });
-            setErrors({});
+            const userData = {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`,
+                role: data.role.value,
+                password: "password",
+                phone: data.phone || null,
+                profile_picture: data.profile_picture || null
+            };
+
+            await addUser(userData);
+            setMessage("User added successfully");
+            reset();
             onClose();
         } catch (error) {
-            setErrors({ submit: error.message || 'Failed to create user' });
-        } finally {
-            setIsSubmitting(false);
+            setMessage(error.message || "Failed to add user. Please try again.");
         }
     };
 
     const handleClose = () => {
-        setFormData({
-            first_name: '',
-            last_name: '',
-            email: '',
-            role: 'customer',
-            password: '',
-            confirm_password: ''
-        });
-        setErrors({});
+        reset();
+        setMessage("");
         onClose();
     };
 
@@ -110,8 +63,11 @@ const AddUser = ({ isOpen, onClose, onSubmit }) => {
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Backdrop */}
-            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={handleClose}></div>
-            
+            <div
+                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                onClick={handleClose}
+            ></div>
+
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -121,7 +77,9 @@ const AddUser = ({ isOpen, onClose, onSubmit }) => {
                             <div className="p-2 bg-blue-100 rounded-lg">
                                 <UserPlusIcon className="h-6 w-6 text-blue-600" />
                             </div>
-                            <h2 className="text-xl font-semibold text-gray-900">Add New User</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                Add New User
+                            </h2>
                         </div>
                         <button
                             onClick={handleClose}
@@ -132,128 +90,110 @@ const AddUser = ({ isOpen, onClose, onSubmit }) => {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                        {errors.submit && (
-                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-sm text-red-600">{errors.submit}</p>
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="p-6 space-y-6"
+                    >
+                        {message && (
+                            <div
+                                className={`mb-4 p-3 rounded-lg ${
+                                    message.includes("successful")
+                                        ? "bg-green-50 border border-green-200 text-green-700"
+                                        : "error-message"
+                                }`}
+                            >
+                                {message}
                             </div>
                         )}
 
                         {/* Name Fields */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    First Name *
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label htmlFor="firstName" className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                    First Name
                                 </label>
                                 <input
+                                    id="firstName"
                                     type="text"
-                                    name="first_name"
-                                    value={formData.first_name}
-                                    onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                                        errors.first_name ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`}
-                                    placeholder="Enter first name"
+                                    {...register("firstName")}
+                                    placeholder="First name"
+                                    className={`input-field ${errors.firstName ? "input-error" : ""}`}
                                 />
-                                {errors.first_name && (
-                                    <p className="text-xs text-red-600 mt-1">{errors.first_name}</p>
+                                {errors.firstName && (
+                                    <p className="error-message">
+                                        {errors.firstName.message}
+                                    </p>
                                 )}
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Last Name *
+                            <div className="flex-1">
+                                <label htmlFor="lastName" className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                    Last Name
                                 </label>
                                 <input
+                                    id="lastName"
                                     type="text"
-                                    name="last_name"
-                                    value={formData.last_name}
-                                    onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                                        errors.last_name ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`}
-                                    placeholder="Enter last name"
+                                    {...register("lastName")}
+                                    placeholder="Last name"
+                                    className={`input-field ${errors.lastName ? "input-error" : ""}`}
                                 />
-                                {errors.last_name && (
-                                    <p className="text-xs text-red-600 mt-1">{errors.last_name}</p>
+                                {errors.lastName && (
+                                    <p className="error-message">
+                                        {errors.lastName.message}
+                                    </p>
                                 )}
                             </div>
                         </div>
 
-                        {/* Email */}
+                        {/* Phone Field */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address *
+                            <label htmlFor="phone" className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                Phone Number
                             </label>
                             <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                }`}
-                                placeholder="Enter email address"
+                                id="phone"
+                                type="text"
+                                {...register("phone")}
+                                placeholder="e.g. +63 912 345 6789"
+                                className="input-field"
                             />
-                            {errors.email && (
-                                <p className="text-xs text-red-600 mt-1">{errors.email}</p>
-                            )}
                         </div>
 
-                        {/* Role */}
+                        {/* Profile Picture Field */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="profile_picture" className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                Profile Picture URL
+                            </label>
+                            <input
+                                id="profile_picture"
+                                type="text"
+                                {...register("profile_picture")}
+                                placeholder="https://example.com/photo.jpg"
+                                className="input-field"
+                            />
+                        </div>
+
+                        {/* Role Field */}
+                        <div>
+                            <label htmlFor="role" className="block text-left text-sm font-medium text-gray-700 mb-1">
                                 Role
                             </label>
-                            <select
+                            <Controller
                                 name="role"
-                                value={formData.role}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                            >
-                                {roles.map(role => (
-                                    <option key={role.value} value={role.value}>
-                                        {role.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Password Fields */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Password *
-                            </label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                }`}
-                                placeholder="Enter password"
+                                control={control}
+                                defaultValue={roles[0]}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        options={roles}
+                                        className="react-select-container"
+                                        classNamePrefix="react-select"
+                                    />
+                                )}
                             />
-                            {errors.password && (
-                                <p className="text-xs text-red-600 mt-1">{errors.password}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Confirm Password *
-                            </label>
-                            <input
-                                type="password"
-                                name="confirm_password"
-                                value={formData.confirm_password}
-                                onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                                    errors.confirm_password ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                }`}
-                                placeholder="Confirm password"
-                            />
-                            {errors.confirm_password && (
-                                <p className="text-xs text-red-600 mt-1">{errors.confirm_password}</p>
+                            {errors.role && (
+                                <p className="error-message">
+                                    {errors.role.message}
+                                </p>
                             )}
                         </div>
 
@@ -271,7 +211,7 @@ const AddUser = ({ isOpen, onClose, onSubmit }) => {
                                 disabled={isSubmitting}
                                 className="flex-1 px-4 py-2 text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                             >
-                                {isSubmitting ? 'Creating...' : 'Create User'}
+                                {isSubmitting ? "Creating..." : "Create User"}
                             </button>
                         </div>
                     </form>
