@@ -1,4 +1,12 @@
-import { XMarkIcon, UserCircleIcon, EnvelopeIcon, PhoneIcon, CalendarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { 
+    XMarkIcon, 
+    UserCircleIcon, 
+    EnvelopeIcon, 
+    PhoneIcon, 
+    CalendarIcon, 
+    ShieldCheckIcon,
+    InformationCircleIcon
+} from "@heroicons/react/24/outline";
 import { formatRole, formatName } from "../../utils/helpers/formatters";
 
 const ViewUser = ({ isOpen, onClose, user }) => {
@@ -14,125 +22,143 @@ const ViewUser = ({ isOpen, onClose, user }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900">User Details</h2>
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            {/* Backdrop */}
+            <div
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
+                onClick={onClose}
+            />
+
+            {/* Modal container */}
+            <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
+                    
+                    {/* Header */}
+                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-6 text-center">
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
-                            <XMarkIcon className="h-5 w-5 text-gray-500" />
+                            <XMarkIcon className="h-5 w-5" />
                         </button>
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                    {/* Profile Section */}
-                    <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex-shrink-0">
-                            {user.profile_picture ? (
-                                <img 
-                                    src={user.profile_picture} 
-                                    alt="Profile" 
-                                    className="h-20 w-20 rounded-full object-cover border-4 border-gray-200"
-                                />
-                            ) : (
-                                <UserCircleIcon className="h-20 w-20 text-gray-400" />
-                            )}
-                        </div>
-                        <div>
-                            <h3 className="text-2xl font-bold text-gray-900">
-                                {formatName(user.first_name, user.last_name)}
-                            </h3>
-                            <div className="mt-1">
-                                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                                    user.role === 'general_manager' 
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : user.role === 'admin_finance'
-                                        ? 'bg-purple-100 text-purple-800'
-                                        : user.role === 'marketing_coordinator'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                    {formatRole(user.role)}
-                                </span>
+                        
+                        <div className="flex flex-col items-center">
+                            <div className="p-2.5 bg-white/10 rounded-xl mb-3 backdrop-blur-sm">
+                                <UserCircleIcon className="h-6 w-6 text-white" />
                             </div>
+                            <h2 className="text-xl font-bold text-white mb-1">
+                                User Details
+                            </h2>
+                            <p className="text-blue-100 text-xs">
+                                View user account information
+                            </p>
                         </div>
                     </div>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Contact Information */}
-                        <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-900 border-b pb-2">Contact Information</h4>
-                            
-                            <div className="flex items-center space-x-3">
-                                <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                    {/* Content */}
+                    <div className="p-5 max-h-[calc(95vh-120px)] overflow-y-auto">
+                        <div className="space-y-5">
+                            {/* Profile Section */}
+                            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl">
+                                <div className="flex-shrink-0">
+                                    {user.profile_picture ? (
+                                        <img 
+                                            src={user.profile_picture} 
+                                            alt="Profile" 
+                                            className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-md"
+                                        />
+                                    ) : (
+                                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
+                                            <UserCircleIcon className="h-8 w-8 text-slate-400" />
+                                        </div>
+                                    )}
+                                </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500">Email</p>
-                                    <p className="text-gray-900">{user.email || 'Not provided'}</p>
+                                    <h3 className="text-lg font-bold text-slate-800">
+                                        {formatName(user.first_name, user.last_name)}
+                                    </h3>
+                                    <div className="mt-1">
+                                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                            user.role === 'general_manager' 
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : user.role === 'admin_finance'
+                                                ? 'bg-purple-100 text-purple-800'
+                                                : user.role === 'marketing_coordinator'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                            {formatRole(user.role)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <PhoneIcon className="h-5 w-5 text-gray-400" />
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Phone</p>
-                                    <p className="text-gray-900">{user.phone || 'Not provided'}</p>
+                            {/* Information Box */}
+                            <div className="info-box-modern">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                                        <InformationCircleIcon className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-slate-800 mb-2">
+                                            Account Status
+                                        </h4>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                user.is_active 
+                                                    ? 'bg-green-100 text-green-800' 
+                                                    : 'bg-red-100 text-red-800'
+                                            }`}>
+                                                {user.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                            <span className="text-xs text-slate-500">
+                                                • Created on {formatDate(user.created_at)}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+
+                            {/* Details Grid */}
+                            <div className="space-y-4">
+                                {/* Email */}
+                                <div className="input-container">
+                                    <label className="input-label-modern">
+                                        Email Address
+                                    </label>
+                                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
+                                        <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                                        <span className="text-slate-800">
+                                            {user.email || 'Not provided'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Phone */}
+                                <div className="input-container">
+                                    <label className="input-label-modern">
+                                        Phone Number
+                                    </label>
+                                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
+                                        <PhoneIcon className="h-5 w-5 text-slate-400" />
+                                        <span className="text-slate-800">
+                                            {user.phone || 'Not provided'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="btn-secondary-modern"
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
-
-                        {/* Account Information */}
-                        <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-900 border-b pb-2">Account Information</h4>
-                            
-                            <div className="flex items-center space-x-3">
-                                <CalendarIcon className="h-5 w-5 text-gray-400" />
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Created</p>
-                                    <p className="text-gray-900">{formatDate(user.created_at)}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-3">
-                                <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Status</p>
-                                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                                        user.is_active 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : 'bg-red-100 text-red-800'
-                                    }`}>
-                                        {user.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start space-x-3">
-                                <UserCircleIcon className="h-5 w-5 text-gray-400 mt-0.5" />
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">User ID</p>
-                                    <p className="text-gray-900 font-mono text-sm break-all">{user.id}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-xl">
-                    <div className="flex justify-end">
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                        >
-                            Close
-                        </button>
                     </div>
                 </div>
             </div>

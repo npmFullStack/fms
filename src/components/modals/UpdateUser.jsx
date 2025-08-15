@@ -16,8 +16,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { formatName } from "../../utils/helpers/formatters";
 import Select from "react-select";
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import useImageUpload from "../../utils/hooks/useImageUpload";
 import useModal from "../../utils/hooks/useModal";
 
@@ -29,7 +29,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
         handleImageChange,
         clearImage
     } = useImageUpload();
-    
+
     const {
         message,
         isLoading,
@@ -62,7 +62,8 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
 
     useEffect(() => {
         if (user && isOpen) {
-            const userRole = roles.find(role => role.value === user.role) || roles[0];
+            const userRole =
+                roles.find(role => role.value === user.role) || roles[0];
             reset({
                 firstName: user.first_name || "",
                 lastName: user.last_name || "",
@@ -73,7 +74,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
         }
     }, [user, isOpen, reset]);
 
-    const handleFormSubmit = async (data) => {
+    const handleFormSubmit = async data => {
         try {
             setIsLoading(true);
             setSuccessMessage("Uploading changes...");
@@ -82,6 +83,8 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
             formData.append("firstName", data.firstName);
             formData.append("lastName", data.lastName);
             formData.append("email", data.email);
+
+            // Handle role - send just the value to backend
             formData.append("role", data.role.value);
 
             if (data.phone) {
@@ -93,9 +96,9 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
             }
 
             const result = await onSubmit(user.id, formData);
-            
+
             if (result.success) {
-                setSuccessMessage('User updated successfully!');
+                setSuccessMessage("User updated successfully!");
                 setTimeout(() => {
                     handleClose();
                 }, 1500);
@@ -104,7 +107,9 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
             }
         } catch (error) {
             console.error("Error updating user:", error);
-            setErrorMessage(error.message || "An error occurred while updating the user");
+            setErrorMessage(
+                error.message || "An error occurred while updating the user"
+            );
         } finally {
             setIsLoading(false);
         }
@@ -132,8 +137,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
 
             {/* Modal container */}
             <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
-                    
+<div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 overflow-y-auto">
                     {/* Redesigned Header - Clean and minimal */}
                     <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-6 text-center">
                         {/* Close button */}
@@ -143,7 +147,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                         >
                             <XMarkIcon className="h-5 w-5" />
                         </button>
-                        
+
                         {/* Icon and title */}
                         <div className="flex flex-col items-center">
                             <div className="p-2.5 bg-white/10 rounded-xl mb-3 backdrop-blur-sm">
@@ -153,22 +157,25 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                 Edit User
                             </h2>
                             <p className="text-blue-100 text-xs">
-                                Update {formatName(user.first_name, user.last_name)}'s information
+                                Update{" "}
+                                {formatName(user.first_name, user.last_name)}'s
+                                information
                             </p>
                         </div>
                     </div>
 
                     {/* Form content */}
-                    <div className="p-5 max-h-[calc(95vh-120px)] overflow-y-auto">
+<div className="p-5">
                         <div className="space-y-5">
-                            
                             {/* Message Display */}
                             {(message.text || imageError) && (
-                                <div className={`p-3 rounded-xl border text-sm ${
-                                    message.type === "success"
-                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                        : "bg-red-50 border-red-200 text-red-700"
-                                }`}>
+                                <div
+                                    className={`p-3 rounded-xl border text-sm ${
+                                        message.type === "success"
+                                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                            : "bg-red-50 border-red-200 text-red-700"
+                                    }`}
+                                >
                                     <div className="flex items-center gap-2">
                                         <InformationCircleIcon className="h-4 w-4" />
                                         {message.text || imageError}
@@ -187,7 +194,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         </div>
                                     </div>
                                 </label>
-                                
+
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
                                     {/* Avatar preview */}
                                     <div className="relative w-12 h-12 rounded-full bg-white border-2 border-white shadow-md overflow-hidden">
@@ -224,9 +231,12 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                             className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
                                         >
                                             <PhotoIcon className="h-3 w-3" />
-                                            {user.profile_picture ? 'Change Image' : 'Choose Image'}
+                                            {user.profile_picture
+                                                ? "Change Image"
+                                                : "Choose Image"}
                                         </label>
-                                        {(previewImage || user.profile_picture) && (
+                                        {(previewImage ||
+                                            user.profile_picture) && (
                                             <button
                                                 type="button"
                                                 onClick={clearSelectedImage}
@@ -243,7 +253,10 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                             {/* Name Fields */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="input-container">
-                                    <label htmlFor="firstName" className="input-label-modern">
+                                    <label
+                                        htmlFor="firstName"
+                                        className="input-label-modern"
+                                    >
                                         First Name
                                     </label>
                                     <input
@@ -252,7 +265,9 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         {...register("firstName")}
                                         placeholder="Enter first name"
                                         className={`input-field-modern ${
-                                            errors.firstName ? "input-error" : ""
+                                            errors.firstName
+                                                ? "input-error"
+                                                : ""
                                         }`}
                                     />
                                     {errors.firstName && (
@@ -261,9 +276,12 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div className="input-container">
-                                    <label htmlFor="lastName" className="input-label-modern">
+                                    <label
+                                        htmlFor="lastName"
+                                        className="input-label-modern"
+                                    >
                                         Last Name
                                     </label>
                                     <input
@@ -285,7 +303,10 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
 
                             {/* Email Field */}
                             <div className="input-container">
-                                <label htmlFor="email" className="input-label-modern">
+                                <label
+                                    htmlFor="email"
+                                    className="input-label-modern"
+                                >
                                     Email Address
                                     <div className="group relative">
                                         <QuestionMarkCircleIcon className="tooltip-icon" />
@@ -318,7 +339,8 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         <div className="group relative">
                                             <QuestionMarkCircleIcon className="tooltip-icon" />
                                             <div className="tooltip">
-                                                Optional field, international format
+                                                Optional field, international
+                                                format
                                             </div>
                                         </div>
                                     </label>
@@ -332,7 +354,9 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                                 defaultCountry="PH"
                                                 placeholder="Enter phone number"
                                                 className={`phone-input-modern ${
-                                                    errors.phone ? "input-error" : ""
+                                                    errors.phone
+                                                        ? "input-error"
+                                                        : ""
                                                 }`}
                                             />
                                         )}
@@ -369,9 +393,14 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                                         minHeight: "40px",
                                                         fontSize: "0.875rem",
                                                         borderRadius: "0.75rem",
-                                                        borderColor: errors.role ? "#fca5a5" : "#cbd5e1",
+                                                        borderColor: errors.role
+                                                            ? "#fca5a5"
+                                                            : "#cbd5e1",
                                                         "&:hover": {
-                                                            borderColor: errors.role ? "#fca5a5" : "#94a3b8"
+                                                            borderColor:
+                                                                errors.role
+                                                                    ? "#fca5a5"
+                                                                    : "#94a3b8"
                                                         }
                                                     }),
                                                     option: provided => ({
@@ -409,15 +438,24 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         <div className="space-y-1.5 text-xs text-slate-600">
                                             <div className="flex items-start gap-2">
                                                 <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>Email changes will affect user login credentials</span>
+                                                <span>
+                                                    Email changes will affect
+                                                    user login credentials
+                                                </span>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <PhotoIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>Profile picture updates will be reflected immediately</span>
+                                                <span>
+                                                    Profile picture updates will
+                                                    be reflected immediately
+                                                </span>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>Role changes affect user permissions</span>
+                                                <span>
+                                                    Role changes affect user
+                                                    permissions
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
