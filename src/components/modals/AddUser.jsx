@@ -1,19 +1,46 @@
-import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useUserStore from "../../utils/store/useUserStore";
-import { userSchema } from "../../schemas/userSchema";
-import { UserPlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { addUserSchema } from "../../schemas/userSchema";
+import {
+    XMarkIcon,
+    QuestionMarkCircleIcon,
+    InformationCircleIcon,
+    ShieldCheckIcon,
+    EnvelopeIcon,
+    KeyIcon,
+    UserCircleIcon,
+    UserPlusIcon,
+    PhotoIcon,
+    TrashIcon
+} from "@heroicons/react/24/outline";
 import Select from "react-select";
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import useImageUpload from "../../utils/hooks/useImageUpload";
+import useModal from "../../utils/hooks/useModal";
 
 const AddUser = ({ isOpen, onClose }) => {
-    const [message, setMessage] = useState("");
-    const [previewImage, setPreviewImage] = useState(null);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const addUser = useUserStore((state) => state.addUser);
+    const {
+        previewImage,
+        selectedFile,
+        error: imageError,
+        handleImageChange,
+        clearImage
+    } = useImageUpload();
+    const {
+        message,
+        isLoading,
+        setIsLoading,
+        setSuccessMessage,
+        setErrorMessage,
+        handleClose: modalClose
+    } = useModal(() => {
+        reset();
+        clearImage();
+    });
+
+    const addUser = useUserStore(state => state.addUser);
 
     const roles = [
         { value: "customer", label: "Customer" },
@@ -29,7 +56,7 @@ const AddUser = ({ isOpen, onClose }) => {
         control,
         formState: { errors, isSubmitting }
     } = useForm({
-        resolver: zodResolver(userSchema),
+        resolver: zodResolver(addUserSchema),
         mode: "onChange",
         defaultValues: {
             role: roles[0],
@@ -37,304 +64,368 @@ const AddUser = ({ isOpen, onClose }) => {
         }
     });
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Validate file size (5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                setMessage("File size too large. Maximum 5MB allowed.");
-                return;
-            }
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                setMessage("Only image files are allowed.");
-                return;
-            }
-
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
-            setPreviewImage(previewUrl);
-            setSelectedFile(file);
-            setMessage(""); // Clear any previous error messages
-        } else {
-            setPreviewImage(null);
-            setSelectedFile(null);
-        }
-    };
-
-    const onSubmit = async (data) => {
+    const onSubmit = async data => {
         try {
-            setIsUploading(true);
-            setMessage("Uploading image...");
+            setIsLoading(true);
+            setSuccessMessage("Uploading image...");
 
-            // Create FormData for file upload
             const formData = new FormData();
-            
-            // Append form fields
-            formData.append('firstName', data.firstName);
-            formData.append('lastName', data.lastName);
-            formData.append('email', `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`);
-            formData.append('role', data.role.value);
-            formData.append('password', 'password');
-            
+            formData.append("firstName", data.firstName);
+            formData.append("lastName", data.lastName);
+            formData.append(
+                "email",
+                `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`
+            );
+            formData.append("role", data.role.value);
+            formData.append("password", "password");
+
             if (data.phone) {
-                formData.append('phone', data.phone);
+                formData.append("phone", data.phone);
             }
-            
+
             if (selectedFile) {
-                formData.append('profile_picture', selectedFile);
+                formData.append("profile_picture", selectedFile);
             }
 
             const result = await addUser(formData);
-            
+
             if (result.success) {
-                setMessage("User added successfully");
-                reset();
-                setPreviewImage(null);
-                setSelectedFile(null);
-                onClose();
+                setSuccessMessage("User added successfully");
+                setTimeout(() => {
+                    handleClose();
+                }, 1500);
             } else {
-                setMessage(result.error || "Failed to add user. Please try again.");
+                setErrorMessage(
+                    result.error || "Failed to add user. Please try again."
+                );
             }
         } catch (error) {
             console.error("Error submitting form:", error);
-            setMessage(error.message || "Failed to add user. Please try again.");
+            setErrorMessage(
+                error.message || "Failed to add user. Please try again."
+            );
         } finally {
-            setIsUploading(false);
+            setIsLoading(false);
         }
     };
 
     const handleClose = () => {
-        reset();
-        setPreviewImage(null);
-        setSelectedFile(null);
-        setMessage("");
+        modalClose();
         onClose();
     };
 
-    // Cleanup preview URL when component unmounts or image changes
-    useEffect(() => {
-        return () => {
-            if (previewImage) {
-                URL.revokeObjectURL(previewImage);
-            }
-        };
-    }, [previewImage]);
+    const clearSelectedImage = () => {
+        clearImage();
+        document.getElementById("profile_picture").value = "";
+    };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            {/* Backdrop */}
+            {/* Enhanced backdrop with blur effect */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
                 onClick={handleClose}
-            ></div>
+            />
 
-            {/* Modal */}
-            <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                        <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <UserPlusIcon className="h-6 w-6 text-blue-600" />
-                            </div>
-                            <h2 className="text-xl font-semibold text-gray-900">
-                                Add New User
-                            </h2>
-                        </div>
+            {/* Modal container */}
+            <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
+                    
+                    {/* Redesigned Header - Clean and minimal */}
+                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-6 text-center">
+                        {/* Close button */}
                         <button
                             onClick={handleClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
-                            <XMarkIcon className="h-5 w-5 text-gray-400" />
+                            <XMarkIcon className="h-5 w-5" />
                         </button>
+                        
+                        {/* Icon and title */}
+                        <div className="flex flex-col items-center">
+                            <div className="p-2.5 bg-white/10 rounded-xl mb-3 backdrop-blur-sm">
+                                <UserPlusIcon className="h-6 w-6 text-white" />
+                            </div>
+                            <h2 className="text-xl font-bold text-white mb-1">
+                                Add New User
+                            </h2>
+                            <p className="text-blue-100 text-xs">
+                                Create a new team member account
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-                        {message && (
-                            <div
-                                className={`mb-4 p-3 rounded-lg ${
-                                    message.includes("successful")
-                                        ? "bg-green-50 border border-green-200 text-green-700"
-                                        : "bg-red-50 border border-red-200 text-red-700"
-                                }`}
-                            >
-                                {message}
-                            </div>
-                        )}
+                    {/* Form content */}
+                    <div className="p-5 max-h-[calc(95vh-120px)] overflow-y-auto">
+                        <div className="space-y-5">
+                            
+                            {/* Message Display */}
+                            {(message.text || imageError) && (
+                                <div className={`p-3 rounded-xl border text-sm ${
+                                    message.type === "success"
+                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                        : "bg-red-50 border-red-200 text-red-700"
+                                }`}>
+                                    <div className="flex items-center gap-2">
+                                        <InformationCircleIcon className="h-4 w-4" />
+                                        {message.text || imageError}
+                                    </div>
+                                </div>
+                            )}
 
-                        {/* Name Fields */}
-                        <div className="flex gap-4">
-                            <div className="flex-1">
-                                <label htmlFor="firstName" className="block text-left text-sm font-medium text-gray-700 mb-1">
-                                    First Name
+                            {/* Profile Picture Upload */}
+                            <div className="input-container">
+                                <label className="input-label-modern">
+                                    Profile Picture
+                                    <div className="group relative">
+                                        <QuestionMarkCircleIcon className="tooltip-icon" />
+                                        <div className="tooltip">
+                                            Max 5MB, JPEG/PNG/GIF formats
+                                        </div>
+                                    </div>
                                 </label>
-                                <input
-                                    id="firstName"
-                                    type="text"
-                                    {...register("firstName")}
-                                    placeholder="First name"
-                                    className={`input-field ${errors.firstName ? "input-error" : ""}`}
-                                />
-                                {errors.firstName && (
-                                    <p className="error-message">
-                                        {errors.firstName.message}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <label htmlFor="lastName" className="block text-left text-sm font-medium text-gray-700 mb-1">
-                                    Last Name
-                                </label>
-                                <input
-                                    id="lastName"
-                                    type="text"
-                                    {...register("lastName")}
-                                    placeholder="Last name"
-                                    className={`input-field ${errors.lastName ? "input-error" : ""}`}
-                                />
-                                {errors.lastName && (
-                                    <p className="error-message">
-                                        {errors.lastName.message}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Phone Field */}
-                        <div>
-                            <label htmlFor="phone" className="block text-left text-sm font-medium text-gray-700 mb-1">
-                                Phone Number
-                            </label>
-                            <Controller
-                                name="phone"
-                                control={control}
-                                render={({ field }) => (
-                                    <PhoneInput
-                                        {...field}
-                                        international
-                                        defaultCountry="PH"
-                                        placeholder="Enter phone number"
-                                        className={`phone-input ${errors.phone ? "input-error" : ""}`}
-                                    />
-                                )}
-                            />
-                        </div>
-
-                        {/* Profile Picture Field */}
-                        <div>
-                            <label htmlFor="profile_picture" className="block text-left text-sm font-medium text-gray-700 mb-1">
-                                Profile Picture
-                            </label>
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    {previewImage ? (
-                                        <>
+                                
+                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
+                                    {/* Avatar preview */}
+                                    <div className="relative w-12 h-12 rounded-full bg-white border-2 border-white shadow-md overflow-hidden">
+                                        {previewImage ? (
                                             <img
                                                 src={previewImage}
                                                 alt="Preview"
-                                                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                                                onLoad={() => console.log("Image loaded successfully")}
-                                                onError={(e) => {
-                                                    console.error("Image failed to load:", e);
-                                                    console.log("Image src:", previewImage);
-                                                }}
+                                                className="w-full h-full object-cover"
                                             />
-                                            <div className="absolute -top-2 -right-2">
-                                                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                                                    <span className="text-white text-xs">✓</span>
-                                                </div>
+                                        ) : (
+                                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                                                <PhotoIcon className="h-5 w-5 text-slate-400" />
                                             </div>
-                                        </>
-                                    ) : (
-                                        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <span className="text-gray-400 text-xs">No image</span>
-                                        </div>
+                                        )}
+                                    </div>
+
+                                    {/* Upload controls */}
+                                    <div className="flex-1 space-y-1">
+                                        <input
+                                            id="profile_picture"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                        <label
+                                            htmlFor="profile_picture"
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                                        >
+                                            <PhotoIcon className="h-3 w-3" />
+                                            Choose Image
+                                        </label>
+                                        {previewImage && (
+                                            <button
+                                                type="button"
+                                                onClick={clearSelectedImage}
+                                                className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded-lg hover:bg-red-200 transition-colors"
+                                            >
+                                                <TrashIcon className="h-3 w-3" />
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Name Fields */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="input-container">
+                                    <label htmlFor="firstName" className="input-label-modern">
+                                        First Name
+                                    </label>
+                                    <input
+                                        id="firstName"
+                                        type="text"
+                                        {...register("firstName")}
+                                        placeholder="Enter first name"
+                                        className={`input-field-modern ${
+                                            errors.firstName ? "input-error" : ""
+                                        }`}
+                                    />
+                                    {errors.firstName && (
+                                        <p className="error-message">
+                                            {errors.firstName.message}
+                                        </p>
                                     )}
                                 </div>
-
-                                <div className="flex-1">
+                                
+                                <div className="input-container">
+                                    <label htmlFor="lastName" className="input-label-modern">
+                                        Last Name
+                                    </label>
                                     <input
-                                        id="profile_picture"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        className="block w-full text-sm text-gray-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-50 file:text-blue-700
-                      hover:file:bg-blue-100 cursor-pointer"
+                                        id="lastName"
+                                        type="text"
+                                        {...register("lastName")}
+                                        placeholder="Enter last name"
+                                        className={`input-field-modern ${
+                                            errors.lastName ? "input-error" : ""
+                                        }`}
                                     />
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Max file size: 5MB. Supported formats: JPEG, PNG, GIF
-                                    </p>
-
-                                    {/* Clear button for selected image */}
-                                    {previewImage && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setPreviewImage(null);
-                                                setSelectedFile(null);
-                                                document.getElementById("profile_picture").value = "";
-                                            }}
-                                            className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
-                                        >
-                                            Remove image
-                                        </button>
+                                    {errors.lastName && (
+                                        <p className="error-message">
+                                            {errors.lastName.message}
+                                        </p>
                                     )}
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Role Field */}
-                        <div>
-                            <label htmlFor="role" className="block text-left text-sm font-medium text-gray-700 mb-1">
-                                Role
-                            </label>
-                            <Controller
-                                name="role"
-                                control={control}
-                                defaultValue={roles[0]}
-                                render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        options={roles}
-                                        className="react-select-container"
-                                        classNamePrefix="react-select"
+                            {/* Phone and Role */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="input-container">
+                                    <label className="input-label-modern">
+                                        Phone Number
+                                        <div className="group relative">
+                                            <QuestionMarkCircleIcon className="tooltip-icon" />
+                                            <div className="tooltip">
+                                                Optional field, international format
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <Controller
+                                        name="phone"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <PhoneInput
+                                                {...field}
+                                                international
+                                                defaultCountry="PH"
+                                                placeholder="Enter phone number"
+                                                className={`phone-input-modern ${
+                                                    errors.phone ? "input-error" : ""
+                                                }`}
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
-                            {errors.role && (
-                                <p className="error-message">
-                                    {errors.role.message}
-                                </p>
-                            )}
-                        </div>
+                                    {errors.phone && (
+                                        <p className="error-message">
+                                            {errors.phone.message}
+                                        </p>
+                                    )}
+                                </div>
 
-                        {/* Actions */}
-                        <div className="flex space-x-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={handleClose}
-                                className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 transition-all duration-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isSubmitting || isUploading}
-                                className="flex-1 px-4 py-2 text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                            >
-                                {isUploading ? "Uploading..." : isSubmitting ? "Creating..." : "Create User"}
-                            </button>
+                                <div className="input-container">
+                                    <label className="input-label-modern">
+                                        Role
+                                        <div className="group relative">
+                                            <QuestionMarkCircleIcon className="tooltip-icon" />
+                                            <div className="tooltip">
+                                                Select user permission level
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <Controller
+                                        name="role"
+                                        control={control}
+                                        defaultValue={roles[0]}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                options={roles}
+                                                className="react-select-container"
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    control: provided => ({
+                                                        ...provided,
+                                                        minHeight: "40px",
+                                                        fontSize: "0.875rem",
+                                                        borderRadius: "0.75rem",
+                                                        borderColor: errors.role ? "#fca5a5" : "#cbd5e1",
+                                                        "&:hover": {
+                                                            borderColor: errors.role ? "#fca5a5" : "#94a3b8"
+                                                        }
+                                                    }),
+                                                    option: provided => ({
+                                                        ...provided,
+                                                        fontSize: "0.875rem",
+                                                        padding: "6px 12px"
+                                                    }),
+                                                    menu: provided => ({
+                                                        ...provided,
+                                                        zIndex: 20,
+                                                        borderRadius: "0.75rem"
+                                                    })
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                    {errors.role && (
+                                        <p className="error-message">
+                                            {errors.role.message}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Information Box */}
+                            <div className="info-box-modern">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                                        <InformationCircleIcon className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-slate-800 mb-2">
+                                            Account Setup Information
+                                        </h4>
+                                        <div className="space-y-1.5 text-xs text-slate-600">
+                                            <div className="flex items-start gap-2">
+                                                <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <span>Email generated as: firstname.lastname@example.com</span>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <KeyIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <span>Default password set to "password"</span>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <span>User can change password after first login</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={handleClose}
+                                    className="btn-secondary-modern"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit(onSubmit)}
+                                    disabled={isSubmitting || isLoading}
+                                    className="btn-primary-modern"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            "Uploading..."
+                                        </>
+                                    ) : isSubmitting ? (
+                                        <>
+                                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            "Creating..."
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserPlusIcon className="h-4 w-4" />
+                                            Create User
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

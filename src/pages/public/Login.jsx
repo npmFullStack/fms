@@ -73,16 +73,14 @@ const Login = () => {
                     >
                         {/* Error Message */}
                         {message && (
-                            <div className="error-message">
-                                {message}
-                            </div>
+                            <div className="error-message">{message}</div>
                         )}
 
                         {/* Email Field */}
                         <div>
                             <label
                                 htmlFor="email"
-                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                className="input-label-modern"
                             >
                                 Email Address
                             </label>
@@ -91,7 +89,9 @@ const Login = () => {
                                 type="email"
                                 {...register("email")}
                                 placeholder="Enter your email"
-                                className={`input-field ${errors.email ? "input-error" : ""}`}
+                                className={`input-field-modern ${
+                                    errors.email ? "input-error" : ""
+                                }`}
                             />
                             {errors.email && (
                                 <p className="error-message">
@@ -104,7 +104,7 @@ const Login = () => {
                         <div>
                             <label
                                 htmlFor="password"
-                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                className="input-label-modern"
                             >
                                 Password
                             </label>
@@ -114,7 +114,9 @@ const Login = () => {
                                     type={showPassword ? "text" : "password"}
                                     {...register("password")}
                                     placeholder="Enter your password"
-                                    className={`input-field ${errors.password ? "input-error" : ""}`}
+                                    className={`input-field-modern ${
+                                        errors.password ? "input-error" : ""
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -148,10 +150,7 @@ const Login = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="btn-primary w-full"
-                        >
+                        <button type="submit" className="btn-primary w-full">
                             Sign in
                         </button>
                     </form>

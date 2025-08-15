@@ -24,14 +24,17 @@ const Register = () => {
     });
 
     const onSubmit = async data => {
-    try {
-        await api.post("/auth/register", data);  // Removed the response assignment
-        setMessage("Registration successful!");
-        navigate("/login");
-    } catch (error) {
-        setMessage(error.response?.data?.message || "Registration failed. Please try again.");
-    }
-};
+        try {
+            await api.post("/auth/register", data); // Removed the response assignment
+            setMessage("Registration successful!");
+            navigate("/login");
+        } catch (error) {
+            setMessage(
+                error.response?.data?.message ||
+                    "Registration failed. Please try again."
+            );
+        }
+    };
 
     const password = watch("password");
 
@@ -55,11 +58,19 @@ const Register = () => {
                 <div className="w-full md:w-1/2 p-8">
                     <div className="mb-8 text-center">
                         <h1 className="page-title">Create an account</h1>
-                        <p className="page-subtitle">Join us today — it's free!</p>
+                        <p className="page-subtitle">
+                            Join us today — it's free!
+                        </p>
                     </div>
 
                     {message && (
-                        <div className={`mb-4 ${message.includes("successful") ? "bg-green-50 border border-green-200 text-green-700" : "error-message"}`}>
+                        <div
+                            className={`mb-4 ${
+                                message.includes("successful")
+                                    ? "bg-green-50 border border-green-200 text-green-700"
+                                    : "error-message"
+                            }`}
+                        >
                             {message}
                         </div>
                     )}
@@ -73,7 +84,7 @@ const Register = () => {
                             <div className="flex-1">
                                 <label
                                     htmlFor="firstName"
-                                    className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                    className="input-label-modern"
                                 >
                                     First Name
                                 </label>
@@ -82,7 +93,9 @@ const Register = () => {
                                     type="text"
                                     {...register("firstName")}
                                     placeholder="First name"
-                                    className={`input-field ${errors.firstName ? "input-error" : ""}`}
+                                    className={`input-field-modern ${
+                                        errors.firstName ? "input-error" : ""
+                                    }`}
                                 />
                                 {errors.firstName && (
                                     <p className="error-message">
@@ -93,7 +106,7 @@ const Register = () => {
                             <div className="flex-1">
                                 <label
                                     htmlFor="lastName"
-                                    className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                    className="input-label-modern"
                                 >
                                     Last Name
                                 </label>
@@ -102,7 +115,9 @@ const Register = () => {
                                     type="text"
                                     {...register("lastName")}
                                     placeholder="Last name"
-                                    className={`input-field ${errors.lastName ? "input-error" : ""}`}
+                                    className={`input-field-modern ${
+                                        errors.lastName ? "input-error" : ""
+                                    }`}
                                 />
                                 {errors.lastName && (
                                     <p className="error-message">
@@ -116,7 +131,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="email"
-                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                className="input-label-modern"
                             >
                                 Email Address
                             </label>
@@ -125,7 +140,9 @@ const Register = () => {
                                 type="email"
                                 {...register("email")}
                                 placeholder="Enter your email"
-                                className={`input-field ${errors.email ? "input-error" : ""}`}
+                                className={`input-field-modern ${
+                                    errors.email ? "input-error" : ""
+                                }`}
                             />
                             {errors.email && (
                                 <p className="error-message">
@@ -138,7 +155,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="password"
-                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                className="input-label-modern"
                             >
                                 Password
                             </label>
@@ -148,7 +165,9 @@ const Register = () => {
                                     type={showPassword ? "text" : "password"}
                                     {...register("password")}
                                     placeholder="Create a password"
-                                    className={`input-field ${errors.password ? "input-error" : ""}`}
+                                    className={`input-field-modern ${
+                                        errors.password ? "input-error" : ""
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -175,7 +194,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="confirmPassword"
-                                className="block text-left text-sm font-medium text-gray-700 mb-1"
+                                className="input-label-modern"
                             >
                                 Confirm Password
                             </label>
@@ -193,7 +212,11 @@ const Register = () => {
                                             "Passwords do not match"
                                     })}
                                     placeholder="Confirm your password"
-                                    className={`input-field ${errors.confirmPassword ? "input-error" : ""}`}
+                                    className={`input-field-modern ${
+                                        errors.confirmPassword
+                                            ? "input-error"
+                                            : ""
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -219,10 +242,7 @@ const Register = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="btn-primary w-full"
-                        >
+                        <button type="submit" className="btn-primary w-full">
                             Sign up
                         </button>
                     </form>
