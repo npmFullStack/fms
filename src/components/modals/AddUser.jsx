@@ -132,42 +132,36 @@ const AddUser = ({ isOpen, onClose }) => {
             {/* Modal container */}
             <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
                 <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
-                    
                     {/* Redesigned Header - Clean and minimal */}
-                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-6 text-center">
+                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-3 text-center">
                         {/* Close button */}
                         <button
                             onClick={handleClose}
-                            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                            className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
                             <XMarkIcon className="h-5 w-5" />
                         </button>
-                        
+
                         {/* Icon and title */}
                         <div className="flex flex-col items-center">
-                            <div className="p-2.5 bg-white/10 rounded-xl mb-3 backdrop-blur-sm">
-                                <UserPlusIcon className="h-6 w-6 text-white" />
-                            </div>
-                            <h2 className="text-xl font-bold text-white mb-1">
+                            <h2 className="text-xl font-bold text-white">
                                 Add New User
                             </h2>
-                            <p className="text-blue-100 text-xs">
-                                Create a new team member account
-                            </p>
                         </div>
                     </div>
 
                     {/* Form content */}
                     <div className="p-5 max-h-[calc(95vh-120px)] overflow-y-auto">
                         <div className="space-y-5">
-                            
                             {/* Message Display */}
                             {(message.text || imageError) && (
-                                <div className={`p-3 rounded-xl border text-sm ${
-                                    message.type === "success"
-                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                        : "bg-red-50 border-red-200 text-red-700"
-                                }`}>
+                                <div
+                                    className={`p-3 rounded-xl border text-sm ${
+                                        message.type === "success"
+                                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                            : "bg-red-50 border-red-200 text-red-700"
+                                    }`}
+                                >
                                     <div className="flex items-center gap-2">
                                         <InformationCircleIcon className="h-4 w-4" />
                                         {message.text || imageError}
@@ -186,7 +180,7 @@ const AddUser = ({ isOpen, onClose }) => {
                                         </div>
                                     </div>
                                 </label>
-                                
+
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
                                     {/* Avatar preview */}
                                     <div className="relative w-12 h-12 rounded-full bg-white border-2 border-white shadow-md overflow-hidden">
@@ -236,7 +230,10 @@ const AddUser = ({ isOpen, onClose }) => {
                             {/* Name Fields */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="input-container">
-                                    <label htmlFor="firstName" className="input-label-modern">
+                                    <label
+                                        htmlFor="firstName"
+                                        className="input-label-modern"
+                                    >
                                         First Name
                                     </label>
                                     <input
@@ -245,7 +242,9 @@ const AddUser = ({ isOpen, onClose }) => {
                                         {...register("firstName")}
                                         placeholder="Enter first name"
                                         className={`input-field-modern ${
-                                            errors.firstName ? "input-error" : ""
+                                            errors.firstName
+                                                ? "input-error"
+                                                : ""
                                         }`}
                                     />
                                     {errors.firstName && (
@@ -254,9 +253,12 @@ const AddUser = ({ isOpen, onClose }) => {
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div className="input-container">
-                                    <label htmlFor="lastName" className="input-label-modern">
+                                    <label
+                                        htmlFor="lastName"
+                                        className="input-label-modern"
+                                    >
                                         Last Name
                                     </label>
                                     <input
@@ -284,7 +286,8 @@ const AddUser = ({ isOpen, onClose }) => {
                                         <div className="group relative">
                                             <QuestionMarkCircleIcon className="tooltip-icon" />
                                             <div className="tooltip">
-                                                Optional field, international format
+                                                Optional field, international
+                                                format
                                             </div>
                                         </div>
                                     </label>
@@ -298,7 +301,9 @@ const AddUser = ({ isOpen, onClose }) => {
                                                 defaultCountry="PH"
                                                 placeholder="Enter phone number"
                                                 className={`phone-input-modern ${
-                                                    errors.phone ? "input-error" : ""
+                                                    errors.phone
+                                                        ? "input-error"
+                                                        : ""
                                                 }`}
                                             />
                                         )}
@@ -336,9 +341,14 @@ const AddUser = ({ isOpen, onClose }) => {
                                                         minHeight: "40px",
                                                         fontSize: "0.875rem",
                                                         borderRadius: "0.75rem",
-                                                        borderColor: errors.role ? "#fca5a5" : "#cbd5e1",
+                                                        borderColor: errors.role
+                                                            ? "#fca5a5"
+                                                            : "#cbd5e1",
                                                         "&:hover": {
-                                                            borderColor: errors.role ? "#fca5a5" : "#94a3b8"
+                                                            borderColor:
+                                                                errors.role
+                                                                    ? "#fca5a5"
+                                                                    : "#94a3b8"
                                                         }
                                                     }),
                                                     option: provided => ({
@@ -376,15 +386,24 @@ const AddUser = ({ isOpen, onClose }) => {
                                         <div className="space-y-1.5 text-xs text-slate-600">
                                             <div className="flex items-start gap-2">
                                                 <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>Email generated as: firstname.lastname@example.com</span>
+                                                <span>
+                                                    Email generated as:
+                                                    firstname.lastname@example.com
+                                                </span>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <KeyIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>Default password set to "password"</span>
+                                                <span>
+                                                    Default password set to
+                                                    "password"
+                                                </span>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
-                                                <span>User can change password after first login</span>
+                                                <span>
+                                                    User can change password
+                                                    after first login
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

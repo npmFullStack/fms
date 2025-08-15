@@ -137,35 +137,26 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
 
             {/* Modal container */}
             <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-<div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 overflow-y-auto">
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-y-auto">
                     {/* Redesigned Header - Clean and minimal */}
-                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-6 text-center">
+                    <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-3 text-center">
                         {/* Close button */}
                         <button
                             onClick={handleClose}
-                            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                            className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
                             <XMarkIcon className="h-5 w-5" />
                         </button>
 
                         {/* Icon and title */}
                         <div className="flex flex-col items-center">
-                            <div className="p-2.5 bg-white/10 rounded-xl mb-3 backdrop-blur-sm">
-                                <UserCircleIcon className="h-6 w-6 text-white" />
-                            </div>
-                            <h2 className="text-xl font-bold text-white mb-1">
-                                Edit User
+                            <h2 className="text-xl font-bold text-white">
+                                Edit User Profile
                             </h2>
-                            <p className="text-blue-100 text-xs">
-                                Update{" "}
-                                {formatName(user.first_name, user.last_name)}'s
-                                information
-                            </p>
                         </div>
                     </div>
-
                     {/* Form content */}
-<div className="p-5">
+                    <div className="p-5">
                         <div className="space-y-5">
                             {/* Message Display */}
                             {(message.text || imageError) && (
