@@ -29,7 +29,8 @@ const AccountManagement = () => {
         return users.map(user => ({
             ...user,
             fullName: formatName(user.first_name, user.last_name),
-            role: formatRole(user.role)
+            role: user.role,
+            displayRole: formatRole(user.role)
         }));
     }, [users]);
 
@@ -145,7 +146,7 @@ const AccountManagement = () => {
                         data={formattedUsers}
                         onView={handleViewUser}
                         onEdit={handleEditUser}
-                        onArchive={(id) => console.log("archive user", id)}
+                        onArchive={id => console.log("archive user", id)}
                         rightAction={
                             <button
                                 onClick={() => setIsAddUserModalOpen(true)}
