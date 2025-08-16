@@ -13,26 +13,28 @@ const Register = lazy(() => import("./pages/public/Register"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
 // Customer
-const BookingCreate = lazy(() => import("./pages/booking/BookingCreate")); // Unified D2D/P2P form
+const BookingCreate = lazy(() => import("./pages/booking/BookingCreate"));
 const BookingLogs = lazy(() => import("./pages/booking/BookingLogs"));
 const TrackOrder = lazy(() => import("./pages/booking/TrackOrder"));
 
 // Marketing Coordinator
-const Bookings = lazy(() => import("./pages/operations/Bookings")); // Master bookings table
+const Bookings = lazy(() => import("./pages/operations/Bookings"));
 const CargoMonitoring = lazy(() => import("./pages/operations/CargoMonitoring"));
-const Partners = lazy(() => import("./pages/operations/Partners")); // Shipping/trucking CRUD
+const Partners = lazy(() => import("./pages/operations/Partners"));
+const ShippingLines = lazy(() => import("./pages/operations/ShippingLines"));
+const TruckingCompanies = lazy(() => import("./pages/operations/TruckingCompanies"));
 const HouseWaybill = lazy(() => import("./pages/operations/HouseWaybill"));
 const IncidentReports = lazy(() => import("./pages/operations/IncidentReports"));
 
 // Admin Finance
 const AccountsReceivable = lazy(() => import("./pages/finance/AccountsReceivable"));
 const AccountsPayable = lazy(() => import("./pages/finance/AccountsPayable"));
-const PriceQuotes = lazy(() => import("./pages/finance/PriceQuotes")); // Negotiated rates log
+const PriceQuotes = lazy(() => import("./pages/finance/PriceQuotes"));
 const PaymentReconciliation = lazy(() => import("./pages/finance/PaymentReconciliation"));
 
 // General Manager
 const FinancialOverview = lazy(() => import("./pages/management/FinancialOverview"));
-const PartnerContracts = lazy(() => import("./pages/management/PartnerContracts")); // Contract PDFs
+const PartnerContracts = lazy(() => import("./pages/management/PartnerContracts"));
 const AuditLogs = lazy(() => import("./pages/management/AuditLogs"));
 const AccountManagement = lazy(() => import("./pages/management/AccountManagement"));
 
@@ -61,6 +63,8 @@ function App() {
                         <Route path="/bookings" element={<Bookings />} />
                         <Route path="/cargo-monitoring" element={<CargoMonitoring />} />
                         <Route path="/partners" element={<Partners />} />
+                        <Route path="/partners/shipping-lines" element={<ShippingLines />} />
+                        <Route path="/partners/trucking-companies" element={<TruckingCompanies />} />
                         <Route path="/house-waybill" element={<HouseWaybill />} />
                         <Route path="/incident-reports" element={<IncidentReports />} />
 
@@ -75,6 +79,8 @@ function App() {
                         <Route path="/partner-contracts" element={<PartnerContracts />} />
                         <Route path="/audit-logs" element={<AuditLogs />} />
                         <Route path="/account-management" element={<AccountManagement />} />
+                        <Route path="/partners/shipping-lines" element={<ShippingLines />} />
+                        <Route path="/partners/trucking-companies" element={<TruckingCompanies />} />
                     </Route>
                 </Routes>
             </Suspense>

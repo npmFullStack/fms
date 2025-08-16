@@ -13,7 +13,8 @@ import {
     ExclamationTriangleIcon,
     CalculatorIcon,
     ShieldCheckIcon,
-    UserGroupIcon
+    UserGroupIcon,
+    CubeIcon
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import ProfileMenu from "./ProfileMenu";
@@ -54,12 +55,30 @@ const menuByRole = {
             path: "/cargo-monitoring",
             icon: TruckIcon
         },
-        { name: "House Waybill", path: "/house-waybill", icon: DocumentIcon }, // Printable HWB
+        { name: "House Waybill", path: "/house-waybill", icon: DocumentIcon },
         {
             name: "Incident Reports",
             path: "/incident-reports",
             icon: ExclamationTriangleIcon
-        } // Damage/delay tracking
+        },
+        {
+            name: "Partners",
+            isDropdown: true,
+            path: "/partners",
+            icon: UserGroupIcon,
+            subLinks: [
+                {
+                    name: "Shipping Lines",
+                    path: "/partners/shipping-lines",
+                    icon: CubeIcon
+                },
+                {
+                    name: "Trucking Companies",
+                    path: "/partners/trucking-companies",
+                    icon: TruckIcon
+                }
+            ]
+        }
     ],
     admin_finance: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
@@ -77,7 +96,7 @@ const menuByRole = {
             name: "Payment Reconciliation",
             path: "/payment-reconciliation",
             icon: CalculatorIcon
-        } // AR/AP matching
+        }
     ],
     general_manager: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
@@ -86,11 +105,29 @@ const menuByRole = {
             path: "/financial-overview",
             icon: ChartBarIcon
         },
-        { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheckIcon }, // Track system changes
+        { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheckIcon },
         {
             name: "Account Management",
             path: "/account-management",
             icon: UserGroupIcon
+        },
+        {
+            name: "Partners",
+            isDropdown: true,
+            path: "/partners",
+            icon: UserGroupIcon,
+            subLinks: [
+                {
+                    name: "Shipping Lines",
+                    path: "/partners/shipping-lines",
+                    icon: CubeIcon
+                },
+                {
+                    name: "Trucking Companies",
+                    path: "/partners/trucking-companies",
+                    icon: TruckIcon
+                }
+            ]
         }
     ]
 };
