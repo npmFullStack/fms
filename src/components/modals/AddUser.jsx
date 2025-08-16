@@ -324,29 +324,27 @@ const AddUser = ({ isOpen, onClose }) => {
                                             </div>
                                         </div>
                                     </label>
-                                    <Controller
-                                        name="role"
-                                        control={control}
-                                        defaultValue={roles[0].value}
-                                        render={({ field }) => (
-                                            <Select
-                                                {...field}
-                                                options={roles}
-                                                getOptionValue={opt =>
-                                                    opt.value
-                                                }
-                                                getOptionLabel={opt =>
-                                                    opt.label
-                                                }
-                                                value={roles.find(
-                                                    r => r.value === field.value
-                                                )}
-                                                onChange={opt =>
-                                                    field.onChange(opt.value)
-                                                } // ✅ only store string
-                                            />
-                                        )}
-                                    />
+<Controller
+    name="role"
+    control={control}
+    defaultValue={roles[0].value}
+    render={({ field }) => (
+        <Select
+            {...field}
+            options={roles}
+            getOptionValue={opt => opt.value}
+            getOptionLabel={opt => opt.label}
+            value={roles.find(r => r.value === field.value)}
+            onChange={opt => field.onChange(opt.value)}
+            className={`react-select-container ${errors.role ? "react-select-error" : ""}`}
+            classNamePrefix="react-select"
+        />
+    )}
+/>
+{errors.role && (
+    <p className="error-message">{errors.role.message}</p>
+)}
+
 
                                     {errors.role && (
                                         <p className="error-message">

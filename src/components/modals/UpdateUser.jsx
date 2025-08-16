@@ -370,39 +370,13 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         name="role"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select
-                                                {...field}
-                                                options={roles}
-                                                className="react-select-container"
-                                                classNamePrefix="react-select"
-                                                styles={{
-                                                    control: provided => ({
-                                                        ...provided,
-                                                        minHeight: "40px",
-                                                        fontSize: "0.875rem",
-                                                        borderRadius: "0.75rem",
-                                                        borderColor: errors.role
-                                                            ? "#fca5a5"
-                                                            : "#cbd5e1",
-                                                        "&:hover": {
-                                                            borderColor:
-                                                                errors.role
-                                                                    ? "#fca5a5"
-                                                                    : "#94a3b8"
-                                                        }
-                                                    }),
-                                                    option: provided => ({
-                                                        ...provided,
-                                                        fontSize: "0.875rem",
-                                                        padding: "6px 12px"
-                                                    }),
-                                                    menu: provided => ({
-                                                        ...provided,
-                                                        zIndex: 20,
-                                                        borderRadius: "0.75rem"
-                                                    })
-                                                }}
-                                            />
+<Select
+    {...field}
+    options={roles}
+    className={`react-select-container ${errors.role ? "react-select-error" : ""}`}
+    classNamePrefix="react-select"
+/>
+
                                         )}
                                     />
                                     {errors.role && (

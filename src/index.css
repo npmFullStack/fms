@@ -11,62 +11,208 @@
 }
 
 @layer components {
-    /* Headings */
+    /* ---------------- Headings ---------------- */
     .heading {
         @apply text-4xl lg:text-5xl font-bold mb-6;
     }
-
     .subheading {
         @apply text-xl lg:text-2xl text-gray-600 mb-8;
     }
     .page-title {
         @apply text-3xl font-bold text-gray-800 mb-2;
     }
-
     .page-subtitle {
         @apply text-gray-600;
     }
 
-    /* Modern Input Styles */
+    /* ---------------- Inputs ---------------- */
     .input-container {
         @apply flex flex-col gap-1.5;
     }
-
     .input-label-modern {
         @apply flex items-center gap-2 text-sm font-semibold text-slate-700;
     }
-
     .input-field-modern {
-        @apply w-full px-4 py-2.5 bg-white border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+        @apply w-full px-4 py-2.5 bg-white border border-slate-300 rounded-md text-sm 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
     }
-
     .phone-input-modern {
-        @apply w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+        @apply w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
     }
-
     .input-error {
         @apply border-red-300 focus:ring-red-500 focus:border-red-300;
     }
-
     .error-message {
         @apply text-sm text-red-600 mt-1 font-medium bg-red-50 border border-red-300 p-2 rounded-md;
     }
+    /* ---------------- React Select ---------------- */
+    .react-select-container {
+        font-size: 0.875rem;
+    }
 
-    /* Modern Button Styles */
+    .react-select__control {
+        @apply min-h-[40px] text-sm rounded-xl border border-slate-300;
+        transition: all 0.2s ease;
+    }
+
+    .react-select__control:hover {
+        @apply border-slate-400;
+    }
+
+    .react-select__control--is-focused {
+        @apply ring-2 ring-blue-500 border-transparent;
+    }
+
+    .react-select__control--is-disabled {
+        @apply bg-gray-100 border-gray-200 cursor-not-allowed;
+    }
+
+    .react-select__option {
+        @apply text-sm px-3 py-1.5 cursor-pointer;
+    }
+
+    .react-select__option--is-focused {
+        @apply bg-slate-100;
+    }
+
+    .react-select__option--is-selected {
+        @apply bg-blue-600 text-white;
+    }
+
+    .react-select__menu {
+        @apply z-20 rounded-xl border border-slate-200 shadow-lg;
+    }
+
+    /* ---------------- Buttons ---------------- */
     .btn-primary-modern {
-        @apply flex-1 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-sm rounded-md hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2;
+        @apply flex-1 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-sm 
+               rounded-md hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed 
+               transition-all duration-200 flex items-center justify-center gap-2;
     }
-
     .btn-secondary-modern {
-        @apply flex-1 px-5 py-2.5 bg-slate-100 text-slate-700 font-medium text-sm rounded-md hover:bg-slate-200 transition-colors duration-200;
+        @apply flex-1 px-5 py-2.5 bg-slate-100 text-slate-700 font-medium text-sm 
+               rounded-md hover:bg-slate-200 transition-colors duration-200;
+    }
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 
+               bg-gradient-to-r from-blue-600 to-blue-700 
+               text-white text-sm font-medium rounded-xl 
+               hover:from-blue-700 hover:to-blue-800 
+               shadow-lg hover:shadow-xl 
+               transition-all duration-200;
+    }
+    .action-btn {
+        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg 
+               transition-all duration-200 shadow-sm hover:shadow-md;
     }
 
-    /* Modern Info Box */
+    /* ---------------- Info Boxes ---------------- */
     .info-box-modern {
         @apply bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md p-4 border border-blue-100;
     }
+    .info-box {
+        @apply bg-blue-50 rounded-md p-4 border border-blue-300 shadow-sm text-blue-700;
+    }
+    .info-content {
+        @apply flex items-start gap-3;
+    }
+    .info-list {
+        @apply space-y-2 text-xs text-blue-700;
+    }
+    .info-item {
+        @apply flex items-start gap-2;
+    }
+    .info-icon {
+        @apply h-3.5 w-3.5 mt-0.5 flex-shrink-0;
+    }
 
-    /* Tooltip Styles */
+    /* ---------------- Avatar ---------------- */
+    .avatar-container {
+        @apply relative w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200;
+    }
+    .avatar-placeholder {
+        @apply text-gray-400 text-xs;
+    }
+    .user-avatar {
+        @apply h-10 w-10 rounded-full object-cover border-2 border-gray-200;
+    }
+    .user-avatar-placeholder {
+        @apply h-10 w-10 text-gray-400;
+    }
+    .user-name {
+        @apply text-sm font-medium text-gray-900;
+    }
+    .user-email {
+        @apply text-sm text-gray-900;
+    }
+    .role-badge {
+        @apply inline-flex px-2.5 py-1 rounded-full text-xs font-medium;
+    }
+
+    /* ---------------- Cards ---------------- */
+    .stat-card {
+        @apply relative overflow-hidden rounded-2xl p-6 
+               shadow-lg border-0 backdrop-blur-sm text-white;
+    }
+    .stat-icon {
+        @apply p-2 rounded-lg;
+    }
+    .stat-icon-bg {
+        @apply absolute -right-4 -top-4 opacity-10;
+    }
+    .stat-content {
+        @apply relative z-10 flex items-center justify-between;
+    }
+    .stat-label {
+        @apply text-sm font-medium opacity-90 mb-1;
+    }
+    .stat-value {
+        @apply text-3xl font-bold;
+    }
+
+    /* ---------------- Table ---------------- */
+    .table-wrapper {
+        @apply bg-white/70 backdrop-blur-sm rounded-2xl 
+               shadow-lg border border-white/20 overflow-hidden;
+    }
+    .table-header {
+        @apply px-6 py-4 text-left text-xs font-semibold 
+               text-slate-600 uppercase tracking-wider;
+    }
+    .table-subheader {
+        @apply ml-2 text-sm font-normal text-gray-500;
+    }
+    .table-count {
+        @apply text-sm text-gray-500;
+    }
+    .table-th {
+        @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+    }
+    .table-td {
+        @apply px-6 py-4 whitespace-nowrap;
+    }
+    .table-cell {
+        @apply px-6 py-4 whitespace-nowrap text-sm text-slate-700;
+    }
+    .table-row {
+        @apply hover:bg-white/70 transition-all duration-200;
+    }
+
+    /* ---------------- Filters ---------------- */
+    .filter-bar {
+        @apply p-4 border-b border-slate-200/50 bg-slate-50/50 
+               flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4;
+    }
+    .filter-input {
+        @apply w-full sm:w-1/2 px-4 py-2 border border-gray-300 
+               rounded-md text-sm focus:ring-2 focus:ring-blue-500;
+    }
+    .filter-select {
+        @apply w-full sm:w-48 px-3 py-2 border border-gray-300 
+               rounded-md text-sm focus:ring-2 focus:ring-blue-500;
+    }
+    /* ---------------- Tooltip Styles ---------------- */
     .tooltip-icon {
         @apply h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help;
     }
@@ -74,203 +220,24 @@
     .tooltip {
         @apply invisible group-hover:visible absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs rounded-md py-2 px-3 whitespace-nowrap z-10;
     }
-
-    /* Legacy Input Styles (for backward compatibility) */
-    .input-field {
-        @apply w-full px-4 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition;
-    }
-
-    .input-label {
-        @apply flex items-center gap-2 text-sm font-medium text-gray-700;
-    }
-
-    .input-wrapper {
-        @apply relative;
-    }
-
-    .avatar-container {
-        @apply relative w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200;
-    }
-
-    .avatar-placeholder {
-        @apply text-gray-400 text-xs;
-    }
-
-    .file-input-container {
-        @apply flex-1;
-    }
-
-    .file-input-wrapper {
-        @apply flex items-center gap-4;
-    }
-
-    .remove-image-btn {
-        @apply mt-2 text-xs text-red-600 hover:text-red-800 underline;
-    }
-
-.info-box {
-  @apply bg-blue-50 rounded-md p-4 border border-blue-300 shadow-sm text-blue-700;
-}
-
-
-    .info-content {
-        @apply flex items-start gap-3;
-    }
-
-    .info-list {
-        @apply space-y-2 text-xs text-blue-700;
-    }
-
-    .info-item {
-        @apply flex items-start gap-2;
-    }
-
-    .info-icon {
-        @apply h-3.5 w-3.5 mt-0.5 flex-shrink-0;
-    }
-
-    /* Buttons */
-    .btn-primary {
-        @apply flex w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition;
-    }
-
-    .action-btn {
-        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200;
-    }
-
-    /* Cards */
-    .stat-card {
-        @apply rounded-xl p-4 shadow-sm border border-gray-100 flex items-center;
-    }
-
-    .stat-icon {
-        @apply p-2 rounded-lg;
-    }
-
-    .stat-label {
-        @apply text-sm font-medium text-gray-600;
-    }
-
-    .stat-value {
-        @apply text-xl font-bold text-gray-800;
-    }
-
-    /* Table */
-    .table-header {
-        @apply text-lg font-semibold text-gray-800;
-    }
-
-    .table-subheader {
-        @apply ml-2 text-sm font-normal text-gray-500;
-    }
-
-    .table-count {
-        @apply text-sm text-gray-500;
-    }
-
-    .table-th {
-        @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
-    }
-
-    .table-td {
-        @apply px-6 py-4 whitespace-nowrap;
-    }
-
-    /* User elements */
-    .user-avatar {
-        @apply h-10 w-10 rounded-full object-cover border-2 border-gray-200;
-    }
-
-    .user-avatar-placeholder {
-        @apply h-10 w-10 text-gray-400;
-    }
-
-    .user-name {
-        @apply text-sm font-medium text-gray-900;
-    }
-
-    .user-email {
-        @apply text-sm text-gray-900;
-    }
-
-    .role-badge {
-        @apply inline-flex px-2.5 py-1 rounded-full text-xs font-medium;
-    }
-
-    /* Empty state */
+    /* ---------------- Empty States ---------------- */
     .empty-state {
         @apply text-center py-12;
     }
-
     .empty-state-icon {
         @apply mx-auto h-12 w-12 text-gray-400;
     }
-
     .empty-state-title {
         @apply mt-2 text-sm font-medium text-gray-900;
     }
-
     .empty-state-description {
         @apply mt-1 text-sm text-gray-500;
     }
 
-    /* Page container */
+    /* ---------------- Misc ---------------- */
     .page-container {
         @apply p-6 min-h-screen bg-gray-50 relative;
     }
-
-    /* React Select customization */
-    .react-select-container {
-        @apply text-sm w-full;
-    }
-
-    .react-select__control {
-        @apply border-gray-300 hover:border-gray-400 min-h-[42px] !important;
-    }
-
-    .react-select__control--is-focused {
-        @apply border-blue-500 ring-2 ring-blue-200 shadow-none !important;
-    }
-
-    .react-select__option--is-selected {
-        @apply bg-blue-500 !important;
-    }
-
-    .react-select__option--is-focused {
-        @apply bg-blue-100 !important;
-    }
-
-    .react-select__indicator-separator {
-        @apply bg-gray-300 !important;
-    }
-
-    .react-select__placeholder {
-        @apply text-gray-400 !important;
-    }
-
-    .react-select__menu {
-        @apply z-10 !important;
-    }
-
-    /* Phone input styling */
-    .phone-input {
-        @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition;
-    }
-
-    .phone-input.input-error {
-        @apply border-red-500 focus:ring-0 focus:border-red-500;
-    }
-
-    /* Add this to fix the phone and role row */
-    .phone-role-container {
-        @apply grid grid-cols-1 md:grid-cols-2 gap-4;
-    }
-
-    .phone-role-field {
-        @apply w-full;
-    }
-
-    /* File input styling */
     .file-input {
         @apply block w-full text-sm text-gray-500
                file:mr-4 file:py-2 file:px-4
@@ -285,7 +252,6 @@
     .gradient {
         @apply bg-gradient-to-r from-[#178fff] to-[#006dd2] bg-clip-text text-transparent;
     }
-
     .gradient-bg {
         @apply bg-gradient-to-r from-[#178fff] to-[#006dd2];
     }

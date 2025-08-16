@@ -21,3 +21,22 @@ export const formatName = (firstName, lastName) => {
 
     return `${first} ${last}`;
 };
+
+export const formatDate = (dateString) => {
+    if (!dateString) return "Unknown";
+    
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    
+    try {
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch (e) {
+        console.error("Error formatting date:", e);
+        return "Invalid date";
+    }
+};
