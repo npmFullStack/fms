@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema } from "../../schemas/userSchema";
@@ -8,13 +8,10 @@ import {
     InformationCircleIcon,
     ShieldCheckIcon,
     EnvelopeIcon,
-    KeyIcon,
-    UserCircleIcon,
     UserPlusIcon,
     PhotoIcon,
     TrashIcon
 } from "@heroicons/react/24/outline";
-import { formatName } from "../../utils/helpers/formatters";
 import Select from "react-select";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -42,12 +39,12 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
         clearImage();
     });
 
-    const roles = [
-        { value: "customer", label: "Customer" },
-        { value: "marketing_coordinator", label: "Marketing Coordinator" },
-        { value: "admin_finance", label: "Admin Finance" },
-        { value: "general_manager", label: "General Manager" }
-    ];
+    const roles = useMemo(() => [
+    { value: "customer", label: "Customer" },
+    { value: "marketing_coordinator", label: "Marketing Coordinator" },
+    { value: "admin_finance", label: "Admin Finance" },
+    { value: "general_manager", label: "General Manager" }
+], []);
 
     const {
         register,
@@ -72,7 +69,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                 phone: user.phone || ""
             });
         }
-    }, [user, isOpen, reset]);
+    }, [user, isOpen, reset, roles]);
 
     const handleFormSubmit = async data => {
         try {

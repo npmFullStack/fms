@@ -9,9 +9,11 @@ import {
     ChevronUpIcon,
     PlusCircleIcon,
     DocumentTextIcon,
-    UserGroupIcon,
-    BuildingLibraryIcon,
-    BuildingStorefrontIcon
+    DocumentIcon,
+    ExclamationTriangleIcon,
+    CalculatorIcon,
+    ShieldCheckIcon,
+    UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import ProfileMenu from "./ProfileMenu";
@@ -52,16 +54,12 @@ const menuByRole = {
             path: "/cargo-monitoring",
             icon: TruckIcon
         },
+        { name: "House Waybill", path: "/house-waybill", icon: DocumentIcon }, // Printable HWB
         {
-            name: "Shipping Lines",
-            path: "/shipping-lines",
-            icon: BuildingLibraryIcon
-        },
-        {
-            name: "Trucking Companies",
-            path: "/trucking-companies",
-            icon: BuildingStorefrontIcon
-        }
+            name: "Incident Reports",
+            path: "/incident-reports",
+            icon: ExclamationTriangleIcon
+        } // Damage/delay tracking
     ],
     admin_finance: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
@@ -76,32 +74,23 @@ const menuByRole = {
             icon: CurrencyDollarIcon
         },
         {
-            name: "Billing & Invoices",
-            path: "/billing",
-            icon: DocumentTextIcon
-        }
+            name: "Payment Reconciliation",
+            path: "/payment-reconciliation",
+            icon: CalculatorIcon
+        } // AR/AP matching
     ],
     general_manager: [
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
         {
-            name: "Reports",
-            path: "/reports",
+            name: "Financial Overview",
+            path: "/financial-overview",
             icon: ChartBarIcon
         },
+        { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheckIcon }, // Track system changes
         {
             name: "Account Management",
             path: "/account-management",
             icon: UserGroupIcon
-        },
-        {
-            name: "Cargo Monitoring",
-            path: "/cargo-monitoring",
-            icon: TruckIcon
-        },
-        {
-            name: "Financial Overview",
-            path: "/financial-overview",
-            icon: CurrencyDollarIcon
         }
     ]
 };
@@ -119,7 +108,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
-    
+
     if (!user) return null;
 
     const role = user?.role || "customer";
@@ -136,7 +125,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
         );
     }
 
-    const handleDropdownClick = (path) => {
+    const handleDropdownClick = path => {
         setShowBooking(!showBooking);
         // Navigate to the main path when clicking the dropdown
         navigate(path);
@@ -159,7 +148,10 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 <button
                                     onClick={() => handleDropdownClick(path)}
                                     className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
-                                        window.location.pathname === path || window.location.pathname.startsWith(path)
+                                        window.location.pathname === path ||
+                                        window.location.pathname.startsWith(
+                                            path
+                                        )
                                             ? "bg-blue-600 text-white border-blue-500"
                                             : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
                                     }`}
@@ -167,7 +159,11 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <Icon
                                             className={`w-5 h-5 flex-shrink-0 ${
-                                                window.location.pathname === path || window.location.pathname.startsWith(path)
+                                                window.location.pathname ===
+                                                    path ||
+                                                window.location.pathname.startsWith(
+                                                    path
+                                                )
                                                     ? "text-white"
                                                     : "text-blue-600"
                                             }`}
@@ -238,7 +234,9 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                     }`}
                                 />
                                 {isOpen && (
-                                    <span className="font-medium truncate text-sm">{name}</span>
+                                    <span className="font-medium truncate text-sm">
+                                        {name}
+                                    </span>
                                 )}
                             </NavLink>
                         )

@@ -24,18 +24,17 @@ const useUserStore = create((set, get) => ({
     },
 
     // Add new user (admin function) - Updated to handle FormData
-    addUser: async (userData) => {
+    addUser: async userData => {
         set({ loading: true, error: null });
         try {
-            // Important: Don't set Content-Type header manually for FormData
-            // The browser will automatically set it with the correct boundary
+
             const config = {
                 headers: {
-                    "Accept": "application/json",
+                    Accept: "application/json"
                 }
             };
 
-            const response = await api.post("/users", userData, config);
+            await api.post("/users", userData, config);
 
             // Refresh user list after adding
             await get().fetchUsers();

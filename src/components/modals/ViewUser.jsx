@@ -3,8 +3,6 @@ import {
     UserCircleIcon,
     EnvelopeIcon,
     PhoneIcon,
-    CalendarIcon,
-    ShieldCheckIcon,
     InformationCircleIcon
 } from "@heroicons/react/24/outline";
 import { formatRole, formatName } from "../../utils/helpers/formatters";

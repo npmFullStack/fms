@@ -5,8 +5,7 @@ import {
     PencilSquareIcon,
     ArchiveBoxIcon,
     UserCircleIcon,
-    UserPlusIcon,
-    MagnifyingGlassIcon
+    UserPlusIcon
 } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import SearchBar from "../../components/SearchBar";

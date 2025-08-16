@@ -9,7 +9,6 @@ import {
     ShieldCheckIcon,
     EnvelopeIcon,
     KeyIcon,
-    UserCircleIcon,
     UserPlusIcon,
     PhotoIcon,
     TrashIcon
@@ -59,7 +58,7 @@ const AddUser = ({ isOpen, onClose }) => {
         resolver: zodResolver(addUserSchema),
         mode: "onChange",
         defaultValues: {
-            role: roles[0],
+            role: roles[0].value,
             phone: ""
         }
     });
@@ -76,7 +75,7 @@ const AddUser = ({ isOpen, onClose }) => {
                 "email",
                 `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`
             );
-            formData.append("role", data.role.value);
+            formData.append("role", data.role);
             formData.append("password", "password");
 
             if (data.phone) {
@@ -328,43 +327,27 @@ const AddUser = ({ isOpen, onClose }) => {
                                     <Controller
                                         name="role"
                                         control={control}
-                                        defaultValue={roles[0]}
+                                        defaultValue={roles[0].value}
                                         render={({ field }) => (
                                             <Select
                                                 {...field}
                                                 options={roles}
-                                                className="react-select-container"
-                                                classNamePrefix="react-select"
-                                                styles={{
-                                                    control: provided => ({
-                                                        ...provided,
-                                                        minHeight: "40px",
-                                                        fontSize: "0.875rem",
-                                                        borderRadius: "0.75rem",
-                                                        borderColor: errors.role
-                                                            ? "#fca5a5"
-                                                            : "#cbd5e1",
-                                                        "&:hover": {
-                                                            borderColor:
-                                                                errors.role
-                                                                    ? "#fca5a5"
-                                                                    : "#94a3b8"
-                                                        }
-                                                    }),
-                                                    option: provided => ({
-                                                        ...provided,
-                                                        fontSize: "0.875rem",
-                                                        padding: "6px 12px"
-                                                    }),
-                                                    menu: provided => ({
-                                                        ...provided,
-                                                        zIndex: 20,
-                                                        borderRadius: "0.75rem"
-                                                    })
-                                                }}
+                                                getOptionValue={opt =>
+                                                    opt.value
+                                                }
+                                                getOptionLabel={opt =>
+                                                    opt.label
+                                                }
+                                                value={roles.find(
+                                                    r => r.value === field.value
+                                                )}
+                                                onChange={opt =>
+                                                    field.onChange(opt.value)
+                                                } // ✅ only store string
                                             />
                                         )}
                                     />
+
                                     {errors.role && (
                                         <p className="error-message">
                                             {errors.role.message}
