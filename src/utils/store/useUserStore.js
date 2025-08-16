@@ -90,6 +90,33 @@ const useUserStore = create((set, get) => ({
         }
     },
 
+restrictUser: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    await api.put(`/users/${id}/restrict`);
+    await get().fetchUsers();
+    return { success: true };
+  } catch (err) {
+    const error = err.response?.data?.message || "Failed to restrict user";
+    set({ error, loading: false });
+    return { success: false, error };
+  }
+},
+
+unrestrictUser: async (id) => {
+  set({ loading: true, error: null });
+  try {
+    await api.put(`/users/${id}/unrestrict`);
+    await get().fetchUsers();
+    return { success: true };
+  } catch (err) {
+    const error = err.response?.data?.message || "Failed to unrestrict user";
+    set({ error, loading: false });
+    return { success: false, error };
+  }
+},
+
+
     // Clear current user
     clearCurrentUser: () => set({ currentUser: null }),
 
