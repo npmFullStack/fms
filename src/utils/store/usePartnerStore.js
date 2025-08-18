@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api from "../../config/axios";
 
-const usePartnerStore = create((set, get) => ({
+const usePartnerStore = create((set, get) => ({ 
   partners: [],
   loading: false,
   error: null,
@@ -12,22 +12,21 @@ const usePartnerStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const endpoint = type === 'shipping' 
-        ? '/shipping-lines' 
-        : type === 'trucking' 
-          ? '/trucking-companies' 
+      const endpoint = type === 'shipping'
+        ? '/shipping-lines'
+        : type === 'trucking'
+          ? '/trucking-companies'
           : null;
-      
+
       if (!endpoint) {
         throw new Error('Invalid partner type');
       }
 
       const res = await api.get(endpoint);
-      set({ 
-        partners: res.data.map(p => ({ ...p, type })), 
-        loading: false 
+      set({
+        partners: res.data.map(p => ({ ...p, type })),
+        loading: false
       });
-
       return { success: true };
     } catch (err) {
       const error = err.response?.data?.message || "Failed to fetch partners";
@@ -41,13 +40,12 @@ const usePartnerStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const endpoint = type === 'shipping' 
-        ? `/shipping-lines/${id}` 
+      const endpoint = type === 'shipping'
+        ? `/shipping-lines/${id}`
         : `/trucking-companies/${id}`;
-      
+
       const res = await api.get(endpoint);
       set({ currentPartner: { ...res.data, type }, loading: false });
-
       return { success: true, partner: res.data };
     } catch (err) {
       const error = err.response?.data?.message || "Failed to fetch partner";
@@ -61,10 +59,10 @@ const usePartnerStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const endpoint = type === 'shipping' 
-        ? '/shipping-lines' 
+      const endpoint = type === 'shipping'
+        ? '/shipping-lines'
         : '/trucking-companies';
-      
+
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -72,8 +70,6 @@ const usePartnerStore = create((set, get) => ({
       };
 
       await api.post(endpoint, partnerData, config);
-
-      // Refresh partner list after adding
       await get().fetchPartners(type);
       return { success: true };
     } catch (err) {
@@ -88,10 +84,10 @@ const usePartnerStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const endpoint = type === 'shipping' 
-        ? `/shipping-lines/${id}` 
+      const endpoint = type === 'shipping'
+        ? `/shipping-lines/${id}`
         : `/trucking-companies/${id}`;
-      
+
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -99,8 +95,6 @@ const usePartnerStore = create((set, get) => ({
       };
 
       await api.put(endpoint, updatedData, config);
-
-      // Refresh partner list after updating
       await get().fetchPartners(type);
       return { success: true };
     } catch (err) {
@@ -115,13 +109,11 @@ const usePartnerStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const endpoint = type === 'shipping' 
-        ? `/shipping-lines/${id}/toggle-status` 
+      const endpoint = type === 'shipping'
+        ? `/shipping-lines/${id}/toggle-status`
         : `/trucking-companies/${id}/toggle-status`;
-      
-      await api.patch(endpoint);
 
-      // Refresh partner list after toggling status
+      await api.patch(endpoint);
       await get().fetchPartners(type);
       return { success: true };
     } catch (err) {

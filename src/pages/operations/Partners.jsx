@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { 
+import {
   PlusCircleIcon,
   BuildingOfficeIcon,
   TruckIcon,
@@ -14,12 +14,13 @@ import PartnerTable from "../../components/tables/PartnerTable";
 import usePartnerStore from "../../utils/store/usePartnerStore";
 
 const Partners = () => {
-  const [activeTab, setActiveTab] = useState('shipping');
+  const [activeTab, setActiveTab] = useState("shipping");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const {
     partners,
@@ -42,6 +43,7 @@ const Partners = () => {
     const result = await addPartner(partnerData, activeTab);
     if (result.success) {
       setIsAddModalOpen(false);
+      setPreviewImage(null);
     }
     return result;
   };
@@ -64,6 +66,7 @@ const Partners = () => {
     if (result.success) {
       setIsUpdateModalOpen(false);
       clearCurrentPartner();
+      setPreviewImage(null);
     }
     return result;
   };
@@ -90,6 +93,7 @@ const Partners = () => {
     setIsUpdateModalOpen(false);
     clearCurrentPartner();
     setSelectedPartner(null);
+    setPreviewImage(null);
   };
 
   if (loading) return <Loading />;
@@ -211,9 +215,14 @@ const Partners = () => {
       {/* Add Partner Modal */}
       <AddPartner
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setPreviewImage(null);
+        }}
         onSubmit={handleAddPartner}
         type={activeTab}
+        previewImage={previewImage}
+        setPreviewImage={setPreviewImage}
       />
 
       {/* View Partner Modal */}
@@ -229,6 +238,8 @@ const Partners = () => {
         onClose={handleCloseUpdateModal}
         partner={selectedPartner}
         onSubmit={handleUpdatePartner}
+        previewImage={previewImage}
+        setPreviewImage={setPreviewImage}
       />
 
       {/* Delete Partner Modal */}

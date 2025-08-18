@@ -1,11 +1,7 @@
 import {
   XMarkIcon,
   BuildingOfficeIcon,
-  TruckIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  GlobeAltIcon,
-  MapIcon
+  TruckIcon
 } from "@heroicons/react/24/outline";
 
 const ViewPartner = ({ isOpen, onClose, partner }) => {
@@ -18,7 +14,7 @@ const ViewPartner = ({ isOpen, onClose, partner }) => {
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
       />
-      
+
       {/* Modal container */}
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100">
@@ -56,8 +52,8 @@ const ViewPartner = ({ isOpen, onClose, partner }) => {
             <div className="flex justify-center mb-6">
               <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden">
                 {partner.logo_url ? (
-                  <img 
-                    src={partner.logo_url} 
+                  <img
+                    src={partner.logo_url}
                     alt={partner.name}
                     className="w-full h-full object-cover"
                   />
@@ -73,90 +69,20 @@ const ViewPartner = ({ isOpen, onClose, partner }) => {
               </div>
             </div>
 
-            {/* Details */}
-            <div className="space-y-4">
-              {/* Contact Info */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                  Contact Information
-                </h3>
-                <div className="space-y-3">
-                  {partner.contact_email && (
-                    <div className="flex items-start gap-3">
-                      <EnvelopeIcon className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-slate-500">Email</p>
-                        <p className="text-sm font-medium text-slate-800">
-                          {partner.contact_email}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {partner.contact_phone && (
-                    <div className="flex items-start gap-3">
-                      <PhoneIcon className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-slate-500">Phone</p>
-                        <p className="text-sm font-medium text-slate-800">
-                          {partner.contact_phone}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {partner.website && (
-                    <div className="flex items-start gap-3">
-                      <GlobeAltIcon className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-slate-500">Website</p>
-                        <a 
-                          href={partner.website.startsWith('http') ? partner.website : `https://${partner.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-blue-600 hover:underline"
-                        >
-                          {partner.website}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Service Routes (for trucking companies) */}
-              {partner.type === 'trucking' && partner.service_routes && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                    Service Routes
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {partner.service_routes.map((route, index) => (
-                      <span 
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        <MapIcon className="h-3 w-3 mr-1" />
-                        {route}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Status */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                  Status
-                </h3>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    partner.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {partner.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {new Date(partner.created_at).toLocaleDateString()}
-                  </span>
-                </div>
+            {/* Status */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                Status
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  partner.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {partner.is_active ? 'Active' : 'Inactive'}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {new Date(partner.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>

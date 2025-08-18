@@ -15,19 +15,18 @@ import {
   BuildingOfficeIcon,
   TruckIcon
 } from "@heroicons/react/24/outline";
-import Select from "react-select";
 
 const PartnerTable = ({ 
-  data, 
-  onView, 
-  onEdit, 
-  onDelete, 
+  data,
+  onView,
+  onEdit,
+  onDelete,
   rightAction,
-  type 
+  type
 }) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState({ 
     pageIndex: 0,
     pageSize: 10
   });
@@ -40,7 +39,7 @@ const PartnerTable = ({
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             {row.original.logo_url ? (
-              <img
+              <img 
                 src={row.original.logo_url}
                 alt={row.getValue("name")}
                 className="w-10 h-10 rounded-full aspect-square object-cover border-2 border-slate-200"
@@ -58,24 +57,6 @@ const PartnerTable = ({
               {row.getValue("name")}
             </span>
           </div>
-        )
-      },
-      {
-        accessorKey: "contact_email",
-        header: "Email",
-        cell: info => (
-          <span className="text-slate-600 text-sm">
-            {info.getValue() || '-'}
-          </span>
-        )
-      },
-      {
-        accessorKey: "contact_phone",
-        header: "Phone",
-        cell: info => (
-          <span className="text-slate-600 text-sm">
-            {info.getValue() || '-'}
-          </span>
         )
       },
       {
@@ -127,7 +108,7 @@ const PartnerTable = ({
         )
       }
     ],
-    [onView, onEdit, onDelete]
+    [onView, onEdit, onDelete, type]
   );
 
   const table = useReactTable({
