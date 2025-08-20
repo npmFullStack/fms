@@ -39,27 +39,22 @@ const DeletePartner = ({ isOpen, onClose, onConfirm, partner }) => {
                   <TruckIcon className="h-6 w-6 text-white" />
                 )}
               </div>
-              <h2 className="text-xl font-bold text-white">
-                {partner.is_active ? 'Deactivate' : 'Reactivate'} {partner.type === 'shipping' ? 'Shipping Line' : 'Trucking Company'}
-              </h2>
+<h2 className="text-xl font-bold text-white">
+  Remove {partner.type === "shipping" ? "Shipping Line" : "Trucking Company"}
+</h2>
             </div>
           </div>
 
           {/* Content */}
           <div className="p-6 text-center space-y-4">
             <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto" />
-            <p className="text-slate-700">
-              Are you sure you want to{" "}
-              <span className="font-semibold">
-                {partner.is_active ? 'deactivate' : 'reactivate'}
-              </span>{" "}
-              <span className="font-bold">{partner.name}</span>?
-            </p>
-            <p className="text-sm text-slate-500">
-              {partner.is_active 
-                ? 'This will make the partner unavailable for new bookings.'
-                : 'This will make the partner available for new bookings again.'}
-            </p>
+<p className="text-slate-700">
+  Are you sure you want to <span className="font-semibold">remove</span>{" "}
+  <span className="font-bold">{partner.name}</span>?
+</p>
+<p className="text-sm text-slate-500">
+  This action will permanently remove this partner from the system.
+</p>
           </div>
 
           {/* Footer */}
@@ -70,17 +65,14 @@ const DeletePartner = ({ isOpen, onClose, onConfirm, partner }) => {
             >
               Cancel
             </button>
-            <button
-              onClick={() => onConfirm(partner.id, partner.type)}
-              className={`btn-primary-modern ${
-                partner.is_active 
-                  ? 'bg-red-600 hover:bg-red-700' 
-                  : 'bg-green-600 hover:bg-green-700'
-              } text-white`}
-            >
-              <TrashIcon className="h-4 w-4 mr-1" />
-              {partner.is_active ? 'Deactivate' : 'Reactivate'}
-            </button>
+<button
+  onClick={() => onConfirm(partner.id, partner.type)}
+  className="btn-primary-modern bg-red-600 hover:bg-red-700 text-white"
+>
+  <TrashIcon className="h-4 w-4 mr-1" />
+  Remove
+</button>
+
           </div>
         </div>
       </div>

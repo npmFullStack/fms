@@ -32,18 +32,18 @@ const Partners = () => {
         updatePartner,
         currentPartner,
         clearCurrentPartner,
-        togglePartnerStatus
+        removePartner
     } = usePartnerStore();
 
     useEffect(() => {
-        fetchPartners(activeTab);
-    }, [fetchPartners, activeTab]);
+        fetchPartners();
+    }, [fetchPartners]);
 
     const handleAddPartner = async partnerData => {
         const result = await addPartner(partnerData, activeTab);
         if (result.success) {
             setIsAddModalOpen(false);
-            // Removed setPreviewImage(null) - modal handles this internally
+
         }
         return result;
     };
@@ -77,7 +77,7 @@ const Partners = () => {
     };
 
     const handleConfirmDelete = async (partnerId, type) => {
-        const result = await togglePartnerStatus(partnerId, type);
+        const result = await removePartner(partnerId, type);
         if (result.success) {
             setIsDeleteModalOpen(false);
             setSelectedPartner(null);
@@ -121,6 +121,73 @@ const Partners = () => {
                             Manage shipping lines and trucking companies
                         </p>
                     </div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        {/* Total Partners */}
+                        <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600">
+                            <BuildingOfficeIcon className="stat-icon-bg h-24 w-24" />
+                            <div className="stat-content">
+                                <div>
+                                    <p className="stat-label">Total Partners</p>
+                                    <p className="stat-value">
+                                        {partners.filter(
+                                            p => p.type === "shipping"
+                                        ).length +
+                                            partners.filter(
+                                                p => p.type === "trucking"
+                                            ).length}
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                    <BuildingOfficeIcon className="h-6 w-6" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Total Shipping Lines */}
+                        <div className="stat-card bg-gradient-to-br from-blue-400 to-blue-500">
+                            <CubeIcon className="stat-icon-bg h-24 w-24" />
+                            <div className="stat-content">
+                                <div>
+                                    <p className="stat-label">
+                                        Total Shipping Lines
+                                    </p>
+                                    <p className="stat-value">
+                                        {
+                                            partners.filter(
+                                                p => p.type === "shipping"
+                                            ).length
+                                        }
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                    <CubeIcon className="h-6 w-6" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Total Trucking Companies */}
+                        <div className="stat-card bg-gradient-to-br from-orange-500 to-orange-600">
+                            <TruckIcon className="stat-icon-bg h-24 w-24" />
+                            <div className="stat-content">
+                                <div>
+                                    <p className="stat-label">
+                                        Total Trucking Companies
+                                    </p>
+                                    <p className="stat-value">
+                                        {
+                                            partners.filter(
+                                                p => p.type === "trucking"
+                                            ).length
+                                        }
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                    <TruckIcon className="h-6 w-6" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Tabs */}
                     <div className="flex border-b border-slate-200 mb-6">
@@ -146,68 +213,6 @@ const Partners = () => {
                             <TruckIcon className="h-5 w-5" />
                             Trucking Companies
                         </button>
-                    </div>
-
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600">
-                            <BuildingOfficeIcon className="stat-icon-bg h-24 w-24" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-label">Total Partners</p>
-                                    <p className="stat-value">
-                                        {partners.length}
-                                    </p>
-                                </div>
-                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <BuildingOfficeIcon className="h-6 w-6" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="stat-card bg-gradient-to-br from-blue-400 to-blue-500">
-                            <CubeIcon className="stat-icon-bg h-24 w-24" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-label">
-                                        Active Shipping Lines
-                                    </p>
-                                    <p className="stat-value">
-                                        {
-                                            partners.filter(
-                                                p =>
-                                                    p.type === "shipping" &&
-                                                    p.is_active
-                                            ).length
-                                        }
-                                    </p>
-                                </div>
-                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <CubeIcon className="h-6 w-6" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="stat-card bg-gradient-to-br from-orange-500 to-orange-600">
-                            <TruckIcon className="stat-icon-bg h-24 w-24" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-label">
-                                        Active Trucking Companies
-                                    </p>
-                                    <p className="stat-value">
-                                        {
-                                            partners.filter(
-                                                p =>
-                                                    p.type === "trucking" &&
-                                                    p.is_active
-                                            ).length
-                                        }
-                                    </p>
-                                </div>
-                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <TruckIcon className="h-6 w-6" />
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Partner Table */}
@@ -238,11 +243,9 @@ const Partners = () => {
                 isOpen={isAddModalOpen}
                 onClose={() => {
                     setIsAddModalOpen(false);
-
                 }}
                 onSubmit={handleAddPartner}
                 type={activeTab}
-
             />
 
             {/* View Partner Modal */}
@@ -258,7 +261,6 @@ const Partners = () => {
                 onClose={handleCloseUpdateModal}
                 partner={selectedPartner}
                 onSubmit={handleUpdatePartner}
-
             />
 
             {/* Delete Partner Modal */}

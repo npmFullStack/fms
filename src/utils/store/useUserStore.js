@@ -25,26 +25,33 @@ const useUserStore = create((set, get) => ({
 
     // Add new user (admin function) - Updated to handle FormData
     addUser: async userData => {
-        set({ loading: true, error: null });
-        try {
+    set({ loading: true, error: null });
+    try {
+        const config = {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        };
 
-            const config = {
-                headers: {
-                    Accept: "application/json"
-                }
-            };
+        await api.post("/users", userData, config);
 
-            await api.post("/users", userData, config);
+        // Fetch immediately (user shows up quickly)
+        await get().fetchUsers();
 
-            // Refresh user list after adding
+        // Schedule another fetch after 3s (when Cloudinary likely finished)
+        setTimeout(async () => {
             await get().fetchUsers();
-            return { success: true };
-        } catch (err) {
-            const error = err.response?.data?.message || "Failed to add user";
-            set({ error, loading: false });
-            return { success: false, error };
-        }
-    },
+        }, 3000);
+
+        set({ loading: false });
+        return { success: true };
+    } catch (err) {
+        const error = err.response?.data?.message || "Failed to add user";
+        set({ error, loading: false });
+        return { success: false, error };
+    }
+},
+
     // Fetch user by ID
     fetchUserById: async id => {
         set({ loading: true, error: null });
