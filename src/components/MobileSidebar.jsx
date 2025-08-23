@@ -8,9 +8,86 @@ import ProfileMenu from "./ProfileMenu";
 import { useState } from "react";
 
 const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
-    const [showBooking, setShowBooking] = useState(false);
+    const [openDropdowns, setOpenDropdowns] = useState({});
 
     if (!isOpen) return null;
+
+    const toggleDropdown = name => {
+        setOpenDropdowns(prev => ({
+            ...prev,
+            [name]: !prev[name]
+        }));
+    };
+
+    // Recursive renderer for links
+    const renderLinks = links => (
+        <div className="space-y-2">
+            {links.map(({ name, path, icon: Icon, isDropdown, subLinks }) =>
+                isDropdown ? (
+                    <div key={name} className="w-full">
+                        <button
+                            onClick={() => toggleDropdown(name)}
+                            className={`flex items-center justify-between w-full px-4 py-3 rounded-lg border shadow-sm transition-all duration-200 ${
+                                openDropdowns[name]
+                                    ? "bg-blue-600 text-white border-blue-500"
+                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
+                            }`}
+                        >
+                            <div className="flex items-center gap-3 overflow-hidden">
+                                <Icon
+                                    className={`w-5 h-5 shrink-0 ${
+                                        openDropdowns[name]
+                                            ? "text-white"
+                                            : "text-blue-600"
+                                    }`}
+                                />
+                                <span className="font-medium text-sm truncate">
+                                    {name}
+                                </span>
+                            </div>
+                            {openDropdowns[name] ? (
+                                <ChevronUpIcon className="w-4 h-4 shrink-0" />
+                            ) : (
+                                <ChevronDownIcon className="w-4 h-4 shrink-0" />
+                            )}
+                        </button>
+
+                        {openDropdowns[name] && subLinks && (
+                            <div className="mt-2">{renderLinks(subLinks)}</div>
+                        )}
+                    </div>
+                ) : (
+                    <NavLink
+                        key={path}
+                        to={path}
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 w-full px-4 py-3 rounded-lg border shadow-sm transition-all duration-200 ${
+                                isActive
+                                    ? "bg-blue-600 text-white border-blue-500"
+                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <Icon
+                                    className={`w-5 h-5 shrink-0 ${
+                                        isActive
+                                            ? "text-white"
+                                            : "text-blue-600"
+                                    }`}
+                                />
+                                <span className="font-medium text-sm truncate">
+                                    {name}
+                                </span>
+                            </>
+                        )}
+                    </NavLink>
+                )
+            )}
+        </div>
+    );
 
     return (
         <>
@@ -20,10 +97,10 @@ const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
                 onClick={onClose}
             />
 
-            {/* Mobile drawer */}
-            <div className="fixed top-0 left-0 h-full w-80 bg-gray-50 shadow-2xl z-50 transform transition-transform duration-300 md:hidden border-r border-gray-200">
+            {/* Mobile Drawer */}
+            <div className="fixed top-0 left-0 h-full w-80 bg-gray-50 shadow-2xl z-50 transform transition-transform duration-300 md:hidden border-r border-gray-200 flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-600">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-600 shrink-0">
                     <h2 className="text-lg font-semibold text-white">Menu</h2>
                     <button
                         onClick={onClose}
@@ -33,101 +110,13 @@ const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
                     </button>
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex flex-col gap-2 p-4 flex-grow overflow-y-auto">
-                    {navLinks.map(
-                        ({ name, path, icon: Icon, isDropdown, subLinks }) =>
-                            isDropdown ? (
-                                <div key={name} className="w-full">
-                                    <button
-                                        onClick={() =>
-                                            setShowBooking(!showBooking)
-                                        }
-                                        className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
-                                            showBooking
-                                                ? "bg-blue-600 text-white border-blue-500"
-                                                : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <Icon
-                                                className={`w-5 h-5 flex-shrink-0 ${
-                                                    showBooking
-                                                        ? "text-white"
-                                                        : "text-blue-600"
-                                                }`}
-                                            />
-                                            <span className="font-medium">
-                                                {name}
-                                            </span>
-                                        </div>
-                                        {showBooking ? (
-                                            <ChevronUpIcon className="w-4 h-4" />
-                                        ) : (
-                                            <ChevronDownIcon className="w-4 h-4" />
-                                        )}
-                                    </button>
-
-                                    {showBooking && (
-                                        <div className="mt-2 space-y-1">
-                                            {subLinks.map(sub => (
-                                                <NavLink
-                                                    key={sub.path}
-                                                    to={sub.path}
-                                                    onClick={onClose}
-                                                    className={({ isActive }) =>
-                                                        `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
-                                                            isActive
-                                                                ? "bg-blue-600 text-white border-blue-500"
-                                                                : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
-                                                        }`
-                                                    }
-                                                >
-                                                    <sub.icon
-                                                        className={`w-5 h-5 flex-shrink-0 ${
-                                                            window.location
-                                                                .pathname ===
-                                                            sub.path
-                                                                ? "text-white"
-                                                                : "text-blue-600"
-                                                        }`}
-                                                    />
-                                                    <span className="font-medium">
-                                                        {sub.name}
-                                                    </span>
-                                                </NavLink>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <NavLink
-                                    key={path}
-                                    to={path}
-                                    onClick={onClose}
-                                    className={({ isActive }) =>
-                                        `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border shadow-sm ${
-                                            isActive
-                                                ? "bg-blue-600 text-white border-blue-500"
-                                                : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
-                                        }`
-                                    }
-                                >
-                                    <Icon
-                                        className={`w-5 h-5 flex-shrink-0 ${
-                                            window.location.pathname === path
-                                                ? "text-white"
-                                                : "text-blue-600"
-                                        }`}
-                                    />
-                                    <span className="font-medium">{name}</span>
-                                </NavLink>
-                            )
-                    )}
+                {/* Navigation (scrollable) */}
+                <nav className="flex-1 overflow-y-auto p-4">
+                    {renderLinks(navLinks)}
                 </nav>
 
                 {/* Profile at bottom */}
-                <div className="border-t border-gray-200 p-4">
+                <div className="border-t border-gray-200 p-4 shrink-0">
                     <ProfileMenu
                         user={user}
                         navigate={navigate}
