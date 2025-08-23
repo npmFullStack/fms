@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Select from "react-select";
 import useTable from "../../utils/hooks/useTable";
+import usePagination from "../../utils/hooks/usePagination";
 
 const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
   const roles = [
@@ -121,10 +122,8 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
     [onView, onEdit, onRestrict]
   );
 
-  const { table, globalFilter, setGlobalFilter } = useTable({
-    data,
-    columns
-  });
+  const { table, globalFilter, setGlobalFilter } = useTable({ data, columns });
+  const { paginationInfo, actions } = usePagination(table, data?.length);
 
   return (
     <div className="table-wrapper">
@@ -133,7 +132,7 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">User Accounts</h2>
-            <p className="table-count">Total: {data?.length || 0} users</p>
+            <p className="table-count">Total: {paginationInfo.totalItems} users</p>
           </div>
           {rightAction}
         </div>
@@ -215,26 +214,30 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center px-4 py-2 border-t bg-slate-50">
-        <button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span>
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </span>
-        <button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Next
-        </button>
+      {/* Pagination */}
+      <div className="px-6 py-4 border-t border-slate-200/50 bg-slate-50/30">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-500">
+            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} (
+            {paginationInfo.totalItems} total)
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={actions.previousPage}
+              disabled={!actions.canPrevious}
+              className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <button
+              onClick={actions.nextPage}
+              disabled={!actions.canNext}
+              className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

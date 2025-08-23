@@ -7,7 +7,6 @@ import {
 } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import AddPartner from "../../components/modals/AddPartner";
-import ViewPartner from "../../components/modals/ViewPartner";
 import UpdatePartner from "../../components/modals/UpdatePartner";
 import DeletePartner from "../../components/modals/DeletePartner";
 import PartnerTable from "../../components/tables/PartnerTable";
@@ -16,7 +15,6 @@ import usePartnerStore from "../../utils/store/usePartnerStore";
 const Partners = () => {
     const [activeTab, setActiveTab] = useState("shipping");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedPartner, setSelectedPartner] = useState(null);
@@ -30,7 +28,6 @@ const Partners = () => {
         addPartner,
         fetchPartnerById,
         updatePartner,
-        currentPartner,
         clearCurrentPartner,
         removePartner
     } = usePartnerStore();
@@ -48,10 +45,6 @@ const Partners = () => {
         return result;
     };
 
-    const handleViewPartner = partner => {
-        setSelectedPartner(partner);
-        setIsViewModalOpen(true);
-    };
 
     const handleEditPartner = async partner => {
         const result = await fetchPartnerById(partner.id, partner.type);
@@ -84,16 +77,12 @@ const Partners = () => {
         }
     };
 
-    const handleCloseViewModal = () => {
-        setIsViewModalOpen(false);
-        setSelectedPartner(null);
-    };
+    
 
     const handleCloseUpdateModal = () => {
         setIsUpdateModalOpen(false);
         clearCurrentPartner();
         setSelectedPartner(null);
-        // Removed setPreviewImage(null) - modal handles this internally
     };
 
     if (loading) return <Loading />;
@@ -218,7 +207,7 @@ const Partners = () => {
                     {/* Partner Table */}
                     <PartnerTable
                         data={partners.filter(p => p.type === activeTab)}
-                        onView={handleViewPartner}
+                        
                         onEdit={handleEditPartner}
                         onDelete={handleDeleteClick}
                         type={activeTab}
@@ -248,12 +237,7 @@ const Partners = () => {
                 type={activeTab}
             />
 
-            {/* View Partner Modal */}
-            <ViewPartner
-                isOpen={isViewModalOpen}
-                onClose={handleCloseViewModal}
-                partner={selectedPartner}
-            />
+ 
 
             {/* Update Partner Modal */}
             <UpdatePartner

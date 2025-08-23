@@ -14,9 +14,6 @@ import {
     CalculatorIcon,
     ShieldCheckIcon,
     UserGroupIcon,
-    CubeIcon,
-    GlobeAltIcon,
-    MapIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ProfileMenu from "./ProfileMenu";
@@ -67,52 +64,8 @@ const menuByRole = {
         },
         {
             name: "Partners",
-            isDropdown: true,
             path: "/partners",
-            icon: UserGroupIcon,
-            subLinks: [
-                {
-                    name: "Shipping Lines",
-                    isDropdown: true,
-                    path: "/partners/shipping-lines",
-                    icon: CubeIcon,
-                    subLinks: [
-                        {
-                            name: "Vessels",
-                            path: "/partners/shipping-lines/vessels",
-                            icon: GlobeAltIcon
-                        },
-                        {
-                            name: "Routes",
-                            path: "/partners/shipping-lines/routes",
-                            icon: MapIcon
-                        },
-                        {
-                            name: "Container Pricing",
-                            path: "/partners/shipping-lines/container-pricing",
-                            icon: CurrencyDollarIcon
-                        }
-                    ]
-                },
-                {
-                    name: "Trucking Companies",
-                    isDropdown: true,
-                    path: "/partners/trucking-companies",
-                    icon: TruckIcon,
-                    subLinks: [
-                        {
-                            name: "Trucks",
-                            path: "/partners/trucking-companies/trucks",
-                            icon: TruckIcon
-                        },
-                        {
-                            name: "Routes & Pricing",
-                            path: "/partners/trucking-companies/routes-pricing",
-                            icon: MapIcon
-                        }
-                    ]
-                }
-            ]
+            icon: UserGroupIcon
         }
     ],
     admin_finance: [
@@ -148,52 +101,8 @@ const menuByRole = {
         },
         {
             name: "Partners",
-            isDropdown: true,
             path: "/partners",
-            icon: UserGroupIcon,
-            subLinks: [
-                {
-                    name: "Shipping Lines",
-                    isDropdown: true,
-                    path: "/partners/shipping-lines",
-                    icon: CubeIcon,
-                    subLinks: [
-                        {
-                            name: "Vessels",
-                            path: "/partners/shipping-lines/vessels",
-                            icon: GlobeAltIcon
-                        },
-                        {
-                            name: "Routes",
-                            path: "/partners/shipping-lines/routes",
-                            icon: MapIcon
-                        },
-                        {
-                            name: "Container Pricing",
-                            path: "/partners/shipping-lines/container-pricing",
-                            icon: CurrencyDollarIcon
-                        }
-                    ]
-                },
-                {
-                    name: "Trucking Companies",
-                    isDropdown: true,
-                    path: "/partners/trucking-companies",
-                    icon: TruckIcon,
-                    subLinks: [
-                        {
-                            name: "Trucks",
-                            path: "/partners/trucking-companies/trucks",
-                            icon: TruckIcon
-                        },
-                        {
-                            name: "Routes & Pricing",
-                            path: "/partners/trucking-companies/routes-pricing",
-                            icon: MapIcon
-                        }
-                    ]
-                }
-            ]
+            icon: UserGroupIcon
         }
     ]
 };

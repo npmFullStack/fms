@@ -13,12 +13,11 @@ const Register = lazy(() => import("./pages/public/Register"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
 // Customer
-const BookingCreate = lazy(() => import("./pages/booking/BookingCreate"));
+const Bookings = lazy(() => import("./pages/booking/Bookings"));
 const BookingLogs = lazy(() => import("./pages/booking/BookingLogs"));
 const TrackOrder = lazy(() => import("./pages/booking/TrackOrder"));
 
 // Marketing Coordinator
-const Bookings = lazy(() => import("./pages/operations/Bookings"));
 const CargoMonitoring = lazy(() =>
     import("./pages/operations/CargoMonitoring")
 );
@@ -87,8 +86,8 @@ function App() {
 
                         {/* Customer */}
                         <Route
-                            path="/booking/create"
-                            element={<BookingCreate />}
+                            path="/bookings"
+                            element={<Bookings />}
                         />
                         <Route path="/booking/logs" element={<BookingLogs />} />
                         <Route path="/track-order" element={<TrackOrder />} />
@@ -100,14 +99,15 @@ function App() {
                             element={<CargoMonitoring />}
                         />
                         <Route path="/partners" element={<Partners />} />
-                        <Route
-                            path="/partners/shipping-lines"
-                            element={<ShippingLines />}
-                        />
-                        <Route
-                            path="/partners/trucking-companies"
-                            element={<TruckingCompanies />}
-                        />
+<Route
+  path="/partners/shipping-lines/:id"
+  element={<ShippingLines />}
+/>
+<Route
+  path="/partners/trucking-companies/:id"
+  element={<TruckingCompanies />}
+/>
+
                         <Route
                             path="/house-waybill"
                             element={<HouseWaybill />}
