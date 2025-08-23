@@ -229,13 +229,21 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 toggleDropdown(name);
                                 navigate(path);
                             }}
-                            className={`flex items-center justify-between w-full px-4 py-2 rounded-lg border shadow-sm transition-all ${
+                            className={`flex w-full rounded-lg border shadow-sm transition-all ${
+                                isOpen
+                                    ? "items-center justify-between px-4 py-2"
+                                    : "justify-center p-2"
+                            } ${
                                 isActiveParent
                                     ? "bg-blue-600 text-white border-blue-500"
                                     : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"
                             }`}
                         >
-                            <div className="flex items-center gap-2 overflow-hidden">
+                            <div
+                                className={`flex items-center overflow-hidden ${
+                                    isOpen ? "gap-2" : "justify-center"
+                                }`}
+                            >
                                 <Icon
                                     className={`w-5 h-5 shrink-0 ${
                                         isActiveParent
@@ -269,7 +277,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 ))}
                         </button>
                         {openDropdowns[name] && subLinks && isOpen && (
-                            <div>{renderLinks(subLinks)}</div>
+                            <div className="ml-4">{renderLinks(subLinks)}</div>
                         )}
                     </div>
                 ) : (
@@ -277,7 +285,11 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                         key={path}
                         to={path}
                         className={({ isActive }) =>
-                            `flex items-center gap-2 w-full px-4 py-2 rounded-lg border shadow-sm transition-all ${
+                            `flex rounded-lg border shadow-sm transition-all ${
+                                isOpen
+                                    ? "items-center gap-2 px-4 py-2"
+                                    : "justify-center p-2"
+                            } ${
                                 isActive
                                     ? "bg-blue-600 text-white border-blue-500"
                                     : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-blue-200"

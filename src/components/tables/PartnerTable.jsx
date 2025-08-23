@@ -1,11 +1,5 @@
-import { useMemo, useState } from "react";
-import { useReactTable, flexRender } from "@tanstack/react-table";
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  getPaginationRowModel
-} from "@tanstack/table-core";
+import { useMemo } from "react";
+import { flexRender } from "@tanstack/react-table";
 import {
   EyeIcon,
   PencilIcon,
@@ -13,24 +7,11 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   BuildingOfficeIcon,
-  TruckIcon
+  TruckIcon,
 } from "@heroicons/react/24/outline";
+import useTable from "../../utils/hooks/useTable";
 
-const PartnerTable = ({ 
-  data,
-  onView,
-  onEdit,
-  onDelete,
-  rightAction,
-  type
-}) => {
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({ 
-    pageIndex: 0,
-    pageSize: 10
-  });
-
+const PartnerTable = ({ data, onView, onEdit, onDelete, rightAction, type }) => {
   const columns = useMemo(
     () => [
       {
@@ -39,30 +20,28 @@ const PartnerTable = ({
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             {row.original.logo_url ? (
-              <img 
+              <img
                 src={row.original.logo_url}
                 alt={row.getValue("name")}
-                className="w-10 h-10 rounded-full aspect-square object-cover border-2 border-slate-200"
+                className="w-10 h-10 rounded-full object-cover border-2 border-slate-200"
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                {type === 'shipping' ? (
+                {type === "shipping" ? (
                   <BuildingOfficeIcon className="h-5 w-5 text-slate-400" />
                 ) : (
                   <TruckIcon className="h-5 w-5 text-slate-400" />
                 )}
               </div>
             )}
-            <span className="font-medium text-slate-700">
-              {row.getValue("name")}
-            </span>
+            <span className="font-medium text-slate-700">{row.getValue("name")}</span>
           </div>
-        )
+        ),
       },
       {
         accessorKey: "status",
         header: "Status",
-        cell: ({ row }) => (
+        cell: ({ row }) =>
           row.original.is_active ? (
             <span className="px-2 py-1 text-xs rounded-lg bg-green-100 text-green-700 font-medium">
               Active
@@ -71,8 +50,7 @@ const PartnerTable = ({
             <span className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 font-medium">
               Inactive
             </span>
-          )
-        )
+          ),
       },
       {
         id: "actions",
@@ -105,27 +83,15 @@ const PartnerTable = ({
               <TrashIcon className="w-4 h-4" />
             </button>
           </div>
-        )
-      }
+        ),
+      },
     ],
     [onView, onEdit, onDelete, type]
   );
 
-  const table = useReactTable({
+  const { table, globalFilter, setGlobalFilter } = useTable({
     data,
     columns,
-    state: {
-      sorting,
-      globalFilter,
-      pagination
-    },
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel()
   });
 
   return (
@@ -135,10 +101,11 @@ const PartnerTable = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">
-              {type === 'shipping' ? 'Shipping Lines' : 'Trucking Companies'}
+              {type === "shipping" ? "Shipping Lines" : "Trucking Companies"}
             </h2>
             <p className="table-count">
-              Total: {data?.length || 0} {type === 'shipping' ? 'shipping lines' : 'trucking companies'}
+              Total: {data?.length || 0}{" "}
+              {type === "shipping" ? "shipping lines" : "trucking companies"}
             </p>
           </div>
           {rightAction}
@@ -147,34 +114,29 @@ const PartnerTable = ({
 
       {/* Filter Bar */}
       <div className="filter-bar">
-        <div className="flex flex-col sm:flex-row gap-4 flex-1">
-          <input
-            type="text"
-            value={globalFilter ?? ""}
-            onChange={e => setGlobalFilter(e.target.value)}
-            placeholder={`Search ${type === 'shipping' ? 'shipping lines' : 'trucking companies'}...`}
-            className="filter-input"
-          />
-        </div>
+        <input
+          type="text"
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder={`Search ${type === "shipping" ? "shipping lines" : "trucking companies"}...`}
+          className="filter-input"
+        />
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-50/50">
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     className="table-header cursor-pointer select-none hover:bg-slate-100/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getIsSorted() === "asc" && (
                         <ChevronUpIcon className="w-4 h-4" />
                       )}
@@ -189,32 +151,26 @@ const PartnerTable = ({
           </thead>
           <tbody className="divide-y divide-slate-200/50">
             {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map(row => (
+              table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="table-row">
-                  {row.getVisibleCells().map(cell => (
-                    <td
-                      key={cell.id}
-                      className="table-cell"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="table-cell">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length}> 
+                <td colSpan={columns.length}>
                   <div className="empty-state">
-                    {type === 'shipping' ? (
+                    {type === "shipping" ? (
                       <BuildingOfficeIcon className="empty-state-icon" />
                     ) : (
                       <TruckIcon className="empty-state-icon" />
                     )}
                     <h3 className="empty-state-title">
-                      No {type === 'shipping' ? 'shipping lines' : 'trucking companies'} found
+                      No {type === "shipping" ? "shipping lines" : "trucking companies"} found
                     </h3>
                     <p className="empty-state-description">
                       Try adjusting your search to find partners.
@@ -231,8 +187,8 @@ const PartnerTable = ({
       <div className="px-6 py-4 border-t border-slate-200/50 bg-slate-50/30">
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-500">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()} ({data?.length || 0} total)
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} (
+            {data?.length || 0} total)
           </span>
           <div className="flex gap-2">
             <button
