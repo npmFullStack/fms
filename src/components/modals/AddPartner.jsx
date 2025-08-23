@@ -9,10 +9,9 @@ import {
     QuestionMarkCircleIcon,
     InformationCircleIcon,
     PhotoIcon,
-    TrashIcon,
-    BuildingOfficeIcon,
-    TruckIcon
+    TrashIcon
 } from "@heroicons/react/24/outline";
+
 
 const AddPartner = ({ isOpen, onClose, type }) => {
     const {

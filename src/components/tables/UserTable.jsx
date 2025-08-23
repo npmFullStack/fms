@@ -7,7 +7,7 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   ChevronUpIcon,
-  ChevronDownIcon,
+  ChevronDownIcon
 } from "@heroicons/react/24/outline";
 import Select from "react-select";
 import useTable from "../../utils/hooks/useTable";
@@ -18,7 +18,7 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
     { value: "customer", label: "Customer" },
     { value: "marketing_coordinator", label: "Marketing Coordinator" },
     { value: "admin_finance", label: "Admin Finance" },
-    { value: "general_manager", label: "General Manager" },
+    { value: "general_manager", label: "General Manager" }
   ];
 
   const columns = useMemo(
@@ -32,16 +32,16 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
               <img
                 src={row.original.profile_picture}
                 alt={row.getValue("fullName")}
-                className="w-12 h-12 rounded-full object-cover border-2 border-slate-200"
+                className="w-10 h-10 rounded-full object-cover border-2 border-slate-200"
               />
             ) : (
-              <UserCircleIcon className="w-12 h-12 text-slate-400" />
+              <UserCircleIcon className="w-10 h-10 text-slate-400" />
             )}
             <span className="font-medium text-slate-700">
               {row.getValue("fullName")}
             </span>
           </div>
-        ),
+        )
       },
       { accessorKey: "email", header: "Email" },
       {
@@ -52,18 +52,19 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
             customer: "bg-gray-100 text-gray-800",
             marketing_coordinator: "bg-blue-100 text-blue-800",
             admin_finance: "bg-green-100 text-green-800",
-            general_manager: "bg-purple-100 text-purple-800",
+            general_manager: "bg-purple-100 text-purple-800"
           };
           return (
             <span
               className={`px-2 py-1 text-xs rounded-lg ${
-                roleColors[row.original.role] || "bg-gray-100 text-gray-800"
+                roleColors[row.original.role] ||
+                "bg-gray-100 text-gray-800"
               }`}
             >
               {row.original.displayRole}
             </span>
           );
-        },
+        }
       },
       {
         accessorKey: "status",
@@ -77,26 +78,35 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
             <span className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 font-medium">
               Restricted
             </span>
-          ),
+          )
       },
       {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => (
           <div className="flex gap-2">
-            <button onClick={() => onView(row.original.id)} className="action-btn bg-blue-50 text-blue-600">
+            <button
+              onClick={() => onView(row.original.id)}
+              className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
+              title="View User"
+            >
               <EyeIcon className="w-4 h-4" />
             </button>
-            <button onClick={() => onEdit(row.original.id)} className="action-btn bg-emerald-50 text-emerald-600">
+            <button
+              onClick={() => onEdit(row.original.id)}
+              className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+              title="Edit User"
+            >
               <PencilIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => onRestrict(row.original)}
               className={`action-btn ${
                 row.original.is_active
-                  ? "bg-red-50 text-red-600"
-                  : "bg-green-50 text-green-600"
+                  ? "bg-red-50 text-red-600 hover:bg-red-100"
+                  : "bg-green-50 text-green-600 hover:bg-green-100"
               }`}
+              title={row.original.is_active ? "Restrict User" : "Unrestrict User"}
             >
               {row.original.is_active ? (
                 <LockClosedIcon className="w-4 h-4" />
@@ -105,66 +115,127 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
               )}
             </button>
           </div>
-        ),
-      },
+        )
+      }
     ],
     [onView, onEdit, onRestrict]
   );
 
   const { table, globalFilter, setGlobalFilter } = useTable({
     data,
-    columns,
+    columns
   });
 
   return (
     <div className="table-wrapper">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-slate-200/50 bg-gradient-to-r from-slate-50 to-slate-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800">User Accounts</h2>
+            <p className="table-count">Total: {data?.length || 0} users</p>
+          </div>
+          {rightAction}
+        </div>
+      </div>
+
       {/* Filter Bar */}
-      <div className="filter-bar flex gap-4">
+      <div className="filter-bar flex gap-4 relative">
         <input
           type="text"
           value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          onChange={e => setGlobalFilter(e.target.value)}
           placeholder="Search users..."
           className="filter-input"
         />
-        <Select
-          options={roles}
-          onChange={(opt) => setGlobalFilter(opt?.value || "")}
-          placeholder="Filter by role..."
-        />
+        <div className="w-60">
+          <Select
+            options={roles}
+            onChange={opt => setGlobalFilter(opt?.value || "")}
+            placeholder="Filter by role..."
+            menuPortalTarget={document.body}
+            styles={{
+              menuPortal: base => ({ ...base, zIndex: 9999 })
+            }}
+          />
+        </div>
       </div>
 
       {/* Table */}
-      <table className="w-full">
-        <thead>
-          {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id}>
-              {hg.headers.map((header) => (
-                <th
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                  className="cursor-pointer"
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {header.column.getIsSorted() === "asc" && <ChevronUpIcon className="w-4 h-4" />}
-                  {header.column.getIsSorted() === "desc" && <ChevronDownIcon className="w-4 h-4" />}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-slate-50/50">
+            {table.getHeaderGroups().map(hg => (
+              <tr key={hg.id}>
+                {hg.headers.map(header => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className="table-header cursor-pointer select-none hover:bg-slate-100/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getIsSorted() === "asc" && (
+                        <ChevronUpIcon className="w-4 h-4" />
+                      )}
+                      {header.column.getIsSorted() === "desc" && (
+                        <ChevronDownIcon className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="divide-y divide-slate-200/50">
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="table-row">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="table-cell">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length}>
+                  <div className="empty-state">
+                    <UserCircleIcon className="empty-state-icon" />
+                    <h3 className="empty-state-title">No users found</h3>
+                    <p className="empty-state-description">
+                      Try adjusting your search or filters.
+                    </p>
+                  </div>
                 </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center px-4 py-2 border-t bg-slate-50">
+        <button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
+        </span>
+        <button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

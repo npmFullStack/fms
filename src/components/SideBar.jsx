@@ -277,7 +277,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 ))}
                         </button>
                         {openDropdowns[name] && subLinks && isOpen && (
-                            <div className="ml-4">{renderLinks(subLinks)}</div>
+                            <div className="mt-1">{renderLinks(subLinks)}</div>
                         )}
                     </div>
                 ) : (

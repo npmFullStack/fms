@@ -1,4 +1,4 @@
-const Booking = () => {
+const Bookings = () => {
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">Booking</h1>
@@ -7,4 +7,4 @@ const Booking = () => {
     );
 };
 
-export default Booking;
+export default Bookings;
