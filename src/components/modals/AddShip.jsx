@@ -1,12 +1,16 @@
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm, Controller } from "react-hook-form";
+import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shipSchema } from "../../schemas/shipSchema";
 import useModal from "../../utils/hooks/useModal";
 import {
   XMarkIcon,
   InformationCircleIcon,
-  CubeIcon
+  CubeIcon,
+  PlusCircleIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
+import { PH_PORTS } from "../../utils/helpers/shipRoutes";
 
 const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
   const {
@@ -16,22 +20,41 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
     setSuccessMessage,
     setErrorMessage,
     handleClose: modalClose
-  } = useModal(() => {
-    reset();
-  });
+  } = useModal(() => reset());
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting }
   } = useForm({
     resolver: zodResolver(shipSchema),
     mode: "onChange",
     defaultValues: {
-      shippingLineId: shippingLineId
+      shippingLineId,
+      name: "",
+      vesselNumber: "",
+      routes: []
     }
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "routes"
+  });
+
+  const handleAddRoute = () => {
+    append({
+      origin: null,
+      destination: null,
+      pricing: [
+        { type: "LCL", price: "" },
+        { type: "20FT", price: "" },
+        { type: "40FT", price: "" }
+      ]
+    });
+  };
 
   const onFormSubmit = async (data) => {
     try {
@@ -73,7 +96,7 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
 
       {/* Modal container */}
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden">
           {/* Header */}
           <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-3 text-center">
             <button
@@ -132,7 +155,6 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
               <div className="input-container">
                 <label htmlFor="vesselNumber" className="input-label-modern">
                   Vessel Number
-                  <span className="text-slate-400 text-sm ml-1">(Optional)</span>
                 </label>
                 <input
                   id="vesselNumber"
@@ -144,51 +166,105 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
                   }`}
                 />
                 {errors.vesselNumber && (
-                  <p className="error-message">{errors.vesselNumber.message}</p>
+                  <p className="error-message">
+                    {errors.vesselNumber.message}
+                  </p>
                 )}
               </div>
 
-              {/* IMO Number Field */}
-              <div className="input-container">
-                <label htmlFor="imoNumber" className="input-label-modern">
-                  IMO Number
-                  <span className="text-slate-400 text-sm ml-1">(Optional)</span>
-                </label>
-                <input
-                  id="imoNumber"
-                  type="text"
-                  {...register("imoNumber")}
-                  placeholder="Enter IMO number"
-                  className={`input-field-modern ${
-                    errors.imoNumber ? "input-error" : ""
-                  }`}
-                />
-                {errors.imoNumber && (
-                  <p className="error-message">{errors.imoNumber.message}</p>
+              {/* Routes Section */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-slate-700 text-lg">
+                    Routes & Pricing
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleAddRoute}
+                    className="flex items-center gap-2 text-blue-600 hover:underline"
+                  >
+                    <PlusCircleIcon className="w-5 h-5" /> Add Route
+                  </button>
+                </div>
+
+                {fields.length === 0 && (
+                  <p className="text-sm text-slate-500">No routes added yet.</p>
                 )}
+
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="border rounded-lg p-4 mb-4 bg-slate-50"
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-slate-700">
+                        Route {index + 1}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Origin and Destination */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <label className="input-label-modern">Origin</label>
+                        <Controller
+                          name={`routes.${index}.origin`}
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              options={PH_PORTS}
+                              placeholder="Select origin port"
+                              className="react-select-modern"
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <label className="input-label-modern">Destination</label>
+                        <Controller
+                          name={`routes.${index}.destination`}
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              options={PH_PORTS}
+                              placeholder="Select destination port"
+                              className="react-select-modern"
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pricing Section */}
+                    {["LCL", "20FT", "40FT"].map((type, priceIndex) => (
+                      <div key={type} className="mb-2">
+                        <label className="input-label-modern">{type} Price</label>
+                        <input
+                          type="number"
+                          {...register(`routes.${index}.pricing.${priceIndex}.price`)}
+                          className="input-field-modern"
+                          placeholder={`Enter ${type} price`}
+                        />
+                        <input
+                          type="hidden"
+                          value={type}
+                          {...register(`routes.${index}.pricing.${priceIndex}.type`)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
 
-              {/* Capacity TEU Field */}
-              <div className="input-container">
-                <label htmlFor="capacityTeu" className="input-label-modern">
-                  Capacity (TEU)
-                  <span className="text-slate-400 text-sm ml-1">(Optional)</span>
-                </label>
-                <input
-                  id="capacityTeu"
-                  type="number"
-                  {...register("capacityTeu")}
-                  placeholder="Enter capacity in TEU"
-                  className={`input-field-modern ${
-                    errors.capacityTeu ? "input-error" : ""
-                  }`}
-                />
-                {errors.capacityTeu && (
-                  <p className="error-message">{errors.capacityTeu.message}</p>
-                )}
-              </div>
-
-              {/* Hidden field for shipping line ID */}
+              {/* Hidden shipping line ID */}
               <input type="hidden" {...register("shippingLineId")} />
 
               {/* Action Buttons */}
