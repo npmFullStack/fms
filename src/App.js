@@ -67,6 +67,7 @@ const AuditLogs = lazy(() => import("./pages/management/AuditLogs"));
 const AccountManagement = lazy(() =>
     import("./pages/management/AccountManagement")
 );
+const Ship = lazy(() => import("./pages/operations/shipping-lines/Ship"));
 
 function App() {
     return (
@@ -85,10 +86,7 @@ function App() {
                         <Route path="/dashboard" element={<Dashboard />} />
 
                         {/* Customer */}
-                        <Route
-                            path="/bookings"
-                            element={<Bookings />}
-                        />
+                        <Route path="/bookings" element={<Bookings />} />
                         <Route path="/booking/logs" element={<BookingLogs />} />
                         <Route path="/track-order" element={<TrackOrder />} />
 
@@ -99,14 +97,18 @@ function App() {
                             element={<CargoMonitoring />}
                         />
                         <Route path="/partners" element={<Partners />} />
-<Route
-  path="/partners/shipping-lines/:id"
-  element={<ShippingLines />}
-/>
-<Route
-  path="/partners/trucking-companies/:id"
-  element={<TruckingCompanies />}
-/>
+                        <Route
+                            path="/operations/shipping-lines/:id"
+                            element={<ShippingLines />}
+                        />
+                        <Route
+                            path="/operations/shipping-lines/:shippingLineId/ships/:shipId"
+                            element={<Ship />}
+                        />
+                        <Route
+                            path="/operations/trucking-companies/:id"
+                            element={<TruckingCompanies />}
+                        />
 
                         <Route
                             path="/house-waybill"
@@ -119,25 +121,25 @@ function App() {
 
                         {/* Shipping Line sub-pages */}
                         <Route
-                            path="/partners/shipping-lines/vessels"
+                            path="/operations/shipping-lines/vessels"
                             element={<Vessels />}
                         />
                         <Route
-                            path="/partners/shipping-lines/routes"
+                            path="/operations/shipping-lines/routes"
                             element={<RoutesSL />}
                         />
                         <Route
-                            path="/partners/shipping-lines/container-pricing"
+                            path="/operations/shipping-lines/container-pricing"
                             element={<ContainerPricing />}
                         />
 
                         {/* Trucking Companies sub-pages */}
                         <Route
-                            path="/partners/trucking-companies/trucks"
+                            path="/operations/trucking-companies/trucks"
                             element={<Trucks />}
                         />
                         <Route
-                            path="/partners/trucking-companies/routes-pricing"
+                            path="/operations/trucking-companies/routes-pricing"
                             element={<RoutesPricing />}
                         />
 

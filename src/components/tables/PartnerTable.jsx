@@ -63,8 +63,8 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                             onClick={() =>
                                 navigate(
                                     row.original.type === "shipping"
-                                        ? `/partners/shipping-lines/${row.original.id}`
-                                        : `/partners/trucking-companies/${row.original.id}`
+                                        ? `/operations/shipping-lines/${row.original.id}`
+                                        : `/operations/trucking-companies/${row.original.id}`
                                 )
                             }
                             className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
