@@ -31,21 +31,6 @@ const IncidentReports = lazy(() =>
     import("./pages/operations/IncidentReports")
 );
 
-// Shipping Line sub-pages
-const Vessels = lazy(() => import("./pages/operations/shipping-lines/Vessels"));
-const RoutesSL = lazy(() => import("./pages/operations/shipping-lines/Routes"));
-const ContainerPricing = lazy(() =>
-    import("./pages/operations/shipping-lines/ContainerPricing")
-);
-
-// Trucking Companies sub-pages
-const Trucks = lazy(() =>
-    import("./pages/operations/trucking-companies/Trucks")
-);
-const RoutesPricing = lazy(() =>
-    import("./pages/operations/trucking-companies/RoutesPricing")
-);
-
 // Admin Finance
 const AccountsReceivable = lazy(() =>
     import("./pages/finance/AccountsReceivable")
@@ -67,7 +52,6 @@ const AuditLogs = lazy(() => import("./pages/management/AuditLogs"));
 const AccountManagement = lazy(() =>
     import("./pages/management/AccountManagement")
 );
-const Ship = lazy(() => import("./pages/operations/shipping-lines/Ship"));
 
 function App() {
     return (
@@ -102,10 +86,6 @@ function App() {
                             element={<ShippingLines />}
                         />
                         <Route
-                            path="/operations/shipping-lines/:shippingLineId/ships/:shipId"
-                            element={<Ship />}
-                        />
-                        <Route
                             path="/operations/trucking-companies/:id"
                             element={<TruckingCompanies />}
                         />
@@ -119,29 +99,6 @@ function App() {
                             element={<IncidentReports />}
                         />
 
-                        {/* Shipping Line sub-pages */}
-                        <Route
-                            path="/operations/shipping-lines/vessels"
-                            element={<Vessels />}
-                        />
-                        <Route
-                            path="/operations/shipping-lines/routes"
-                            element={<RoutesSL />}
-                        />
-                        <Route
-                            path="/operations/shipping-lines/container-pricing"
-                            element={<ContainerPricing />}
-                        />
-
-                        {/* Trucking Companies sub-pages */}
-                        <Route
-                            path="/operations/trucking-companies/trucks"
-                            element={<Trucks />}
-                        />
-                        <Route
-                            path="/operations/trucking-companies/routes-pricing"
-                            element={<RoutesPricing />}
-                        />
 
                         {/* Admin Finance */}
                         <Route
