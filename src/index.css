@@ -219,7 +219,14 @@
     }
 
     .tooltip {
-        @apply invisible group-hover:visible absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs rounded-md py-2 px-3 whitespace-nowrap z-10;
+        @apply invisible group-hover:visible fixed bg-slate-800 text-white text-xs rounded-md py-2 px-3 whitespace-nowrap shadow-lg;
+        z-index: 99999;
+        transform: translateX(-50%);
+    }
+    
+    /* Tooltip container to handle positioning */
+    .tooltip-container {
+        @apply relative;
     }
     /* ---------------- Empty States ---------------- */
     .empty-state {

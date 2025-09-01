@@ -138,7 +138,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 toggleDropdown(name);
                                 navigate(path);
                             }}
-                            className={`flex w-full rounded-lg border shadow-sm transition-all ${
+                            className={`flex w-full rounded-lg border shadow-sm transition-all duration-300 ${
                                 isOpen
                                     ? "items-center justify-between px-4 py-2"
                                     : "justify-center p-2"
@@ -149,19 +149,19 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                             }`}
                         >
                             <div
-                                className={`flex items-center overflow-hidden ${
+                                className={`flex items-center overflow-hidden transition-all duration-300 ${
                                     isOpen ? "gap-2" : "justify-center"
                                 }`}
                             >
                                 <Icon
-                                    className={`w-5 h-5 shrink-0 ${
+                                    className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
                                         isActiveParent
                                             ? "text-white"
                                             : "text-blue-600"
                                     }`}
                                 />
                                 {isOpen && (
-                                    <span className="font-medium text-sm truncate">
+                                    <span className="font-medium text-sm truncate transition-opacity duration-300">
                                         {name}
                                     </span>
                                 )}
@@ -169,7 +169,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                             {isOpen &&
                                 (openDropdowns[name] ? (
                                     <ChevronUpIcon
-                                        className={`w-4 h-4 shrink-0 ${
+                                        className={`w-4 h-4 shrink-0 transition-all duration-300 ${
                                             isActiveParent
                                                 ? "text-white"
                                                 : "text-blue-600"
@@ -177,7 +177,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                     />
                                 ) : (
                                     <ChevronDownIcon
-                                        className={`w-4 h-4 shrink-0 ${
+                                        className={`w-4 h-4 shrink-0 transition-all duration-300 ${
                                             isActiveParent
                                                 ? "text-white"
                                                 : "text-blue-600"
@@ -186,7 +186,9 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                 ))}
                         </button>
                         {openDropdowns[name] && subLinks && isOpen && (
-                            <div className="mt-1">{renderLinks(subLinks)}</div>
+                            <div className="mt-1 pl-4 transition-all duration-300 ease-in-out">
+                                {renderLinks(subLinks)}
+                            </div>
                         )}
                     </div>
                 ) : (
@@ -194,7 +196,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                         key={path}
                         to={path}
                         className={({ isActive }) =>
-                            `flex rounded-lg border shadow-sm transition-all ${
+                            `flex rounded-lg border shadow-sm transition-all duration-300 ${
                                 isOpen
                                     ? "items-center gap-2 px-4 py-2"
                                     : "justify-center p-2"
@@ -208,14 +210,14 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                         {({ isActive }) => (
                             <>
                                 <Icon
-                                    className={`w-5 h-5 shrink-0 ${
+                                    className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
                                         isActive
                                             ? "text-white"
                                             : "text-blue-600"
                                     }`}
                                 />
                                 {isOpen && (
-                                    <span className="font-medium text-sm truncate">
+                                    <span className="font-medium text-sm truncate transition-opacity duration-300">
                                         {name}
                                     </span>
                                 )}
@@ -240,7 +242,10 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
 
     return (
         <div
-            className={`bg-gray-50 border-r border-gray-200 text-gray-800 p-4 flex flex-col transition-all duration-300 hidden md:flex ${className}`}
+            className={`bg-gray-50 border-r border-gray-200 text-gray-800 p-4 flex flex-col transition-all duration-300 ease-in-out hidden md:flex ${
+                isOpen ? "w-64" : "w-20"
+            } ${className}`}
+            style={{ transitionProperty: 'width, transform' }}
         >
             <nav className="flex flex-col gap-2 flex-grow">
                 {renderLinks(navLinks)}
