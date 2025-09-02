@@ -2,6 +2,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bookingSchema } from "../../schemas/bookingSchema";
+import { stepSchemas } from "../../schemas/bookingSchema";
 import useBookingStore from "../../utils/store/useBookingStore";
 import usePartnerStore from "../../utils/store/usePartnerStore";
 import useShippingLineStore from "../../utils/store/useShippingLineStore";
@@ -18,9 +19,13 @@ import {
   EnvelopeIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  XMarkIcon,
+  InformationCircleIcon
 } from "@heroicons/react/24/outline";
 import Select from "react-select";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import useModal from "../../utils/hooks/useModal";
 import { useEffect, useState } from "react";
 
@@ -42,7 +47,6 @@ const AddBooking = ({ isOpen, onClose }) => {
   const createBooking = useBookingStore(state => state.createBooking);
   const { partners, fetchPartners } = usePartnerStore();
   const { ships, fetchShips } = useShippingLineStore();
-
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedShippingLine, setSelectedShippingLine] = useState(null);
   const [selectedShip, setSelectedShip] = useState(null);
@@ -70,7 +74,9 @@ const AddBooking = ({ isOpen, onClose }) => {
     watch,
     setValue,
     trigger,
-    getValues
+    getValues,
+    setError,
+    clearErrors
   } = useForm({
     resolver: zodResolver(bookingSchema),
     mode: "onChange",
@@ -110,45 +116,53 @@ const AddBooking = ({ isOpen, onClose }) => {
 
   const shippingLines = partners.filter(p => p.type === "shipping");
 
-  const handleShippingLineChange = async (selectedOption) => {
+  const handleShippingLineChange = async selectedOption => {
     setSelectedShippingLine(selectedOption);
     setSelectedShip(null);
-    setValue("shipping_line_id", selectedOption?.value || "", { shouldValidate: true });
+    setValue("shipping_line_id", selectedOption?.value || "", {
+      shouldValidate: true
+    });
     setValue("ship_id", "", { shouldValidate: true });
-    
     if (selectedOption) {
       await fetchShips(selectedOption.value);
     }
   };
 
-  const handleShipChange = (selectedOption) => {
+  const handleShipChange = selectedOption => {
     setSelectedShip(selectedOption);
-    setValue("ship_id", selectedOption?.value || "", { shouldValidate: true });
+    setValue("ship_id", selectedOption?.value || "", {
+      shouldValidate: true
+    });
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     try {
       setIsLoading(true);
-      
+
       const bookingData = {
         ...data,
         preferred_departure: new Date(data.preferred_departure).toISOString(),
-        preferred_delivery: data.preferred_delivery ? new Date(data.preferred_delivery).toISOString() : null
+        preferred_delivery: data.preferred_delivery
+          ? new Date(data.preferred_delivery).toISOString()
+          : null
       };
 
       const result = await createBooking(bookingData);
-
       if (result.success) {
         setSuccessMessage("Booking created successfully");
         setTimeout(() => {
           handleClose();
         }, 1500);
       } else {
-        setErrorMessage(result.error || "Failed to create booking. Please try again.");
+        setErrorMessage(
+          result.error || "Failed to create booking. Please try again."
+        );
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setErrorMessage(error.message || "Failed to create booking. Please try again.");
+      setErrorMessage(
+        error.message || "Failed to create booking. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -159,22 +173,62 @@ const AddBooking = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const nextStep = async () => {
-    const fieldsToValidate = getStepFields(currentStep);
-    const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+  const nextStep = async (e) => {
+    e?.preventDefault(); // Prevent form submission
+    e?.stopPropagation(); // Stop event bubbling
     
-    console.log("Next step validation:", isValid, fieldsToValidate);
+    console.log("Next step clicked, current step:", currentStep);
     
-    if (isValid) {
-      setCurrentStep(prev => prev + 1);
+    // Clear previous errors
+    clearErrors();
+    
+    // Get current step fields
+    const stepFields = getStepFields(currentStep);
+    console.log("Step fields:", stepFields);
+    
+    // Trigger validation for current step fields only
+    const isStepValid = await trigger(stepFields);
+    console.log("Is step valid:", isStepValid);
+    console.log("Current errors:", errors);
+    
+    if (!isStepValid) {
+      console.log("Validation failed, current errors:", errors);
+      return;
     }
+
+    // Additional validation using step schema
+    const currentSchema = stepSchemas[currentStep - 1];
+    const values = getValues();
+    
+    // Filter values to only include fields for current step
+    const stepValues = {};
+    stepFields.forEach(field => {
+      stepValues[field] = values[field];
+    });
+    
+    console.log("Step values for validation:", stepValues);
+    
+    const result = currentSchema.safeParse(stepValues);
+    console.log("Schema validation result:", result);
+    
+    if (!result.success) {
+      console.log("Schema validation errors:", result.error.errors);
+      // Show validation errors in RHF
+      result.error.errors.forEach(err => {
+        setError(err.path[0], { message: err.message });
+      });
+      return;
+    }
+
+    console.log("Moving to next step");
+    setCurrentStep(prev => prev + 1);
   };
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
   };
 
-  const getStepFields = (step) => {
+  const getStepFields = step => {
     switch (step) {
       case 1:
         return ["first_name", "last_name", "email", "phone"];
@@ -195,9 +249,16 @@ const AddBooking = ({ isOpen, onClose }) => {
   const TooltipIcon = ({ text }) => (
     <div className="relative group inline-block ml-2">
       <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 cursor-help" />
-      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 z-50 whitespace-nowrap">
+      <div
+        className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden
+          group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 z-50
+          whitespace-nowrap"
+      >
         {text}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+        <div
+          className="absolute top-full left-1/2 transform -translate-x-1/2 border-4
+            border-transparent border-t-gray-800"
+        ></div>
       </div>
     </div>
   );
@@ -209,7 +270,9 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "First Name",
       type: "text",
       step: 1,
-      register: register("first_name", { required: "First name is required" }),
+      register: register("first_name", {
+        required: "First name is required"
+      }),
       error: errors.first_name?.message,
       placeholder: "Enter customer's first name"
     },
@@ -218,7 +281,9 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "Last Name",
       type: "text",
       step: 1,
-      register: register("last_name", { required: "Last name is required" }),
+      register: register("last_name", {
+        required: "Last name is required"
+      }),
       error: errors.last_name?.message,
       placeholder: "Enter customer's last name"
     },
@@ -236,15 +301,40 @@ const AddBooking = ({ isOpen, onClose }) => {
     {
       name: "phone",
       label: "Phone Number",
-      type: "tel",
+      type: "custom",
       step: 1,
-      register: register("phone"),
       error: errors.phone?.message,
-      placeholder: "Enter customer's phone number",
       withTooltip: true,
-      tooltipText: "Optional - Customer's contact number for updates"
+      tooltipText: "Optional - Customer's contact number for updates",
+      customRender: () => (
+        <div>
+          <div className="flex items-center mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <TooltipIcon text="Optional - Customer's contact number for updates" />
+          </div>
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <PhoneInput
+                value={value}
+                onChange={onChange}
+                defaultCountry="PH"
+                className="input-field-modern"
+                placeholder="Enter phone number"
+              />
+            )}
+          />
+          {errors.phone && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.phone.message}
+            </p>
+          )}
+        </div>
+      )
     },
-
     // Step 2: Shipping Details
     {
       name: "shipping_line_id",
@@ -279,7 +369,11 @@ const AddBooking = ({ isOpen, onClose }) => {
                 getOptionLabel={option => (
                   <div className="flex items-center gap-2">
                     {option.logo && (
-                      <img src={option.logo} alt="" className="w-6 h-6 rounded" />
+                      <img
+                        src={option.logo}
+                        alt=""
+                        className="w-6 h-6 rounded"
+                      />
                     )}
                     <span>{option.label}</span>
                   </div>
@@ -291,7 +385,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             )}
           />
           {errors.shipping_line_id && (
-            <p className="text-red-500 text-sm mt-1">{errors.shipping_line_id.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.shipping_line_id.message}
+            </p>
           )}
         </div>
       )
@@ -329,7 +425,9 @@ const AddBooking = ({ isOpen, onClose }) => {
                   <div>
                     <div className="font-medium">{option.label}</div>
                     {option.vessel && (
-                      <div className="text-sm text-gray-500">Vessel: {option.vessel}</div>
+                      <div className="text-sm text-gray-500">
+                        Vessel: {option.vessel}
+                      </div>
                     )}
                   </div>
                 )}
@@ -341,7 +439,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             )}
           />
           {errors.ship_id && (
-            <p className="text-red-500 text-sm mt-1">{errors.ship_id.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.ship_id.message}
+            </p>
           )}
         </div>
       )
@@ -378,7 +478,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             )}
           />
           {errors.container_type && (
-            <p className="text-red-500 text-sm mt-1">{errors.container_type.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.container_type.message}
+            </p>
           )}
         </div>
       )
@@ -415,12 +517,13 @@ const AddBooking = ({ isOpen, onClose }) => {
             )}
           />
           {errors.booking_mode && (
-            <p className="text-red-500 text-sm mt-1">{errors.booking_mode.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.booking_mode.message}
+            </p>
           )}
         </div>
       )
     },
-
     // Step 3: Route & Dates
     {
       name: "origin",
@@ -438,7 +541,9 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "Destination",
       type: "text",
       step: 3,
-      register: register("destination", { required: "Destination is required" }),
+      register: register("destination", {
+        required: "Destination is required"
+      }),
       error: errors.destination?.message,
       placeholder: "e.g., Singapore Port",
       withTooltip: true,
@@ -449,7 +554,9 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "Preferred Departure",
       type: "date",
       step: 3,
-      register: register("preferred_departure", { required: "Departure date is required" }),
+      register: register("preferred_departure", {
+        required: "Departure date is required"
+      }),
       error: errors.preferred_departure?.message,
       withTooltip: true,
       tooltipText: "Estimated date when cargo should depart"
@@ -464,14 +571,15 @@ const AddBooking = ({ isOpen, onClose }) => {
       withTooltip: true,
       tooltipText: "Estimated date when cargo should be delivered"
     },
-
     // Step 4: Cargo Details
     {
       name: "commodity",
       label: "Commodity",
       type: "text",
       step: 4,
-      register: register("commodity", { required: "Commodity is required" }),
+      register: register("commodity", {
+        required: "Commodity is required"
+      }),
       error: errors.commodity?.message,
       placeholder: "e.g., Electronics, Furniture, etc.",
       withTooltip: true,
@@ -482,7 +590,7 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "Quantity",
       type: "number",
       step: 4,
-      register: register("quantity", { 
+      register: register("quantity", {
         required: "Quantity is required",
         valueAsNumber: true,
         min: { value: 1, message: "Quantity must be at least 1" }
@@ -492,14 +600,13 @@ const AddBooking = ({ isOpen, onClose }) => {
       withTooltip: true,
       tooltipText: "Number of containers or units"
     },
-
     // Step 5: Pricing
     {
       name: "freight_charge",
       label: "Freight Charge",
       type: "number",
       step: 5,
-      register: register("freight_charge", { 
+      register: register("freight_charge", {
         valueAsNumber: true,
         min: { value: 0, message: "Freight charge cannot be negative" }
       }),
@@ -513,7 +620,7 @@ const AddBooking = ({ isOpen, onClose }) => {
       label: "Trucking Charge",
       type: "number",
       step: 5,
-      register: register("trucking_charge", { 
+      register: register("trucking_charge", {
         valueAsNumber: true,
         min: { value: 0, message: "Trucking charge cannot be negative" }
       }),
@@ -542,66 +649,199 @@ const AddBooking = ({ isOpen, onClose }) => {
     title: "Booking Information",
     items: [
       {
-        icon: <TruckIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />,
+        icon: (
+          <TruckIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
         text: "All shipping details will be confirmed after booking"
       },
       {
-        icon: <MapPinIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />,
+        icon: (
+          <MapPinIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
         text: "Trucking will be arranged based on booking mode"
       },
       {
-        icon: <CalendarIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />,
+        icon: (
+          <CalendarIcon className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
         text: "Dates are estimates and subject to change based on availability"
       }
     ]
   };
 
   return (
-    <FormModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Create New Booking"
-      message={message}
-      isLoading={isLoading}
-      isSubmitting={isSubmitting}
-      onSubmit={handleSubmit(onSubmit)}
-      fields={currentStepFields}
-      infoBox={infoBox}
-      buttonText={currentStep === 5 ? "Create Booking" : "Next"}
-      customFooter={(
-        <div className="flex justify-between mt-6">
-          {currentStep > 1 && (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-              Previous
-            </button>
-          )}
+    <>
+      {/* Custom Modal instead of FormModal for better control */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={handleClose}
+          />
           
-          {currentStep < 5 ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ml-auto"
-            >
-              Next
-              <ArrowRightIcon className="h-4 w-4" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors ml-auto"
-            >
-              Create Booking
-            </button>
-          )}
+          {/* Modal */}
+          <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[95vh] overflow-hidden">
+              {/* Header */}
+              <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-3 text-center">
+                <button
+                  onClick={handleClose}
+                  className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+                <h2 className="text-xl font-bold text-white">Create New Booking</h2>
+                <div className="text-white/80 text-sm mt-1">
+                  Step {currentStep} of 5
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit(onSubmit)}>
+                {/* Content */}
+                <div className="p-5 max-h-[calc(95vh-200px)] overflow-y-auto space-y-5">
+                  {/* Message */}
+                  {message && (
+                    <div
+                      className={`p-3 rounded-xl border text-sm ${
+                        message.type === "success"
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                          : "bg-red-50 border-red-200 text-red-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <InformationCircleIcon className="h-4 w-4" />
+                        {message.text}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fields */}
+                  {currentStepFields.map(f => (
+                    <div key={f.name} className="space-y-2">
+                      {f.type === "custom" && f.customRender ? (
+                        f.customRender()
+                      ) : (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {f.label}
+                            {f.withTooltip && (
+                              <TooltipIcon text={f.tooltipText} />
+                            )}
+                          </label>
+                          {f.type === "textarea" ? (
+                            <textarea
+                              {...f.register}
+                              placeholder={f.placeholder}
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                f.error ? "border-red-300" : "border-gray-300"
+                              }`}
+                            />
+                          ) : (
+                            <input
+                              type={f.type}
+                              {...f.register}
+                              placeholder={f.placeholder}
+                              disabled={f.disabled}
+                              min={f.min}
+                              step={f.step}
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                f.error ? "border-red-300" : "border-gray-300"
+                              } ${f.disabled ? "bg-gray-100" : ""}`}
+                            />
+                          )}
+                          {f.error && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {f.error}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Info Box */}
+                  {infoBox && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 bg-blue-100 rounded-lg">
+                          <InformationCircleIcon className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-slate-800 mb-2">
+                            {infoBox.title}
+                          </h4>
+                          <div className="space-y-1.5 text-xs text-slate-600">
+                            {infoBox.items.map((item, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                {item.icon}
+                                <span>{item.text}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-5 border-t border-gray-200">
+                  <div className="flex justify-between">
+                    {currentStep > 1 && (
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <ArrowLeftIcon className="h-4 w-4" />
+                        Previous
+                      </button>
+                    )}
+                    
+                    <div className="flex gap-3 ml-auto">
+                      <button
+                        type="button"
+                        onClick={handleClose}
+                        className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      
+                      {currentStep < 5 ? (
+                        <button
+                          type="button"
+                          onClick={nextStep}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Next
+                          <ArrowRightIcon className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={isSubmitting || isLoading}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        >
+                          {isLoading || isSubmitting ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              Creating...
+                            </>
+                          ) : (
+                            "Create Booking"
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
-    />
+    </>
   );
 };
 
