@@ -5,276 +5,214 @@ import { shipSchema } from "../../schemas/shipSchema";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
 import {
-    InformationCircleIcon,
-    CubeIcon,
-    PlusCircleIcon,
-    TrashIcon,
-    QuestionMarkCircleIcon
+  PlusCircleIcon,
+  TrashIcon,
+  QuestionMarkCircleIcon
 } from "@heroicons/react/24/outline";
-import { PH_PORTS } from "../../utils/helpers/shipRoutes";
+
+const containerSizes = [
+  { value: "LCL", label: "LCL" },
+  { value: "20FT", label: "20FT" },
+  { value: "40FT", label: "40FT" }
+];
 
 const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
-    const {
-        message,
-        isLoading,
-        setIsLoading,
-        setSuccessMessage,
-        setErrorMessage,
-        handleClose: modalClose
-    } = useModal(() => reset());
+  const {
+    message,
+    isLoading,
+    setIsLoading,
+    setSuccessMessage,
+    setErrorMessage,
+    handleClose: modalClose
+  } = useModal(() => reset());
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        control,
-        formState: { errors, isSubmitting }
-    } = useForm({
-        resolver: zodResolver(shipSchema),
-        mode: "onChange",
-        defaultValues: {
-            shippingLineId,
-            name: "",
-            vesselNumber: "",
-            routes: []
-        }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    resolver: zodResolver(shipSchema),
+    mode: "onChange",
+    defaultValues: {
+      shippingLineId,
+      vesselNumber: "",
+      containers: []
+    }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "containers"
+  });
+
+  const handleAddContainer = () => {
+    append({
+      size: null,
+      vanNumber: ""
     });
+  };
 
-    const { fields, append, remove } = useFieldArray({
-        control,
-        name: "routes"
-    });
+  const onFormSubmit = async (data) => {
+    try {
+      setIsLoading(true);
+      setSuccessMessage("Adding ship...");
 
-    const handleAddRoute = () => {
-        append({
-            origin: null,
-            destination: null,
-            pricing: [
-                { type: "LCL", price: "" },
-                { type: "20FT", price: "" },
-                { type: "40FT", price: "" }
-            ]
-        });
-    };
+      const result = await onSubmit(data);
 
-    const onFormSubmit = async data => {
-        try {
-            setIsLoading(true);
-            setSuccessMessage("Adding ship...");
+      if (result.success) {
+        setSuccessMessage("Ship added successfully");
+        setTimeout(() => {
+          handleClose();
+        }, 1500);
+      } else {
+        setErrorMessage(
+          result.error || "Failed to add ship. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrorMessage(
+        error.message || "Failed to add ship. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            const result = await onSubmit(data);
+  const handleClose = () => {
+    modalClose();
+    onClose();
+  };
 
-            if (result.success) {
-                setSuccessMessage("Ship added successfully");
-                setTimeout(() => {
-                    handleClose();
-                }, 1500);
-            } else {
-                setErrorMessage(
-                    result.error || "Failed to add ship. Please try again."
-                );
+  // Define fields for FormModal
+  const fieldsConfig = [
+    // Vessel Number Field
+    {
+      name: "vesselNumber",
+      label: "Vessel Number",
+      type: "text",
+      register: register("vesselNumber"),
+      error: errors.vesselNumber?.message,
+      placeholder: "Enter vessel number"
+    },
+    // Containers Section
+    {
+      name: "containers",
+      label: "Containers",
+      type: "custom",
+      withTooltip: true,
+      tooltipText: "Add containers with size and van number",
+      customRender: () => (
+        <div>
+          {fields.length === 0 && (
+            <p className="text-sm text-slate-500 mb-4">
+              No containers added yet. Click "Add Container" below to create one.
+            </p>
+          )}
+
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="border rounded-lg p-4 mb-4 bg-slate-50"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-medium text-slate-700">
+                  Container {index + 1}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  className="flex items-center gap-1 text-red-500 hover:text-red-700"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  Remove
+                </button>
+              </div>
+
+              {/* Container Size Select */}
+              <div className="mb-4">
+                <label className="input-label-modern">Container Size</label>
+                <Controller
+                  name={`containers.${index}.size`}
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={containerSizes}
+                      getOptionValue={(opt) => opt.value}
+                      getOptionLabel={(opt) => opt.label}
+                      value={containerSizes.find(
+                        (s) => s.value === field.value
+                      )}
+                      onChange={(opt) => field.onChange(opt.value)}
+                      placeholder="Select container size"
+                      className="react-select-modern"
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Van Number Input */}
+              <div>
+                <label className="input-label-modern">Van Number</label>
+                <input
+                  type="text"
+                  {...register(`containers.${index}.vanNumber`)}
+                  className="input-field-modern"
+                  placeholder="Enter van number"
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* Add Container Button at the Bottom */}
+          <div className="flex items-center justify-start mt-4">
+            <button
+              type="button"
+              onClick={handleAddContainer}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusCircleIcon className="w-5 h-5" /> Add Container
+            </button>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const infoBox = {
+    title: "Container Information",
+    items: [
+      {
+        icon: <QuestionMarkCircleIcon className="h-3 w-3 text-blue-600" />,
+        text: "Add one or more containers with size and van number"
+      }
+    ]
+  };
+
+  return (
+    <FormModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Add Ship"
+      message={
+        message.text
+          ? {
+              type: message.type,
+              text: message.text
             }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            setErrorMessage(
-                error.message || "Failed to add ship. Please try again."
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleClose = () => {
-        modalClose();
-        onClose();
-    };
-
-    // Define fields for FormModal
-    const fieldsConfig = [
-        // Ship Name Field
-        {
-            name: "name",
-            label: "Ship Name",
-            type: "text",
-            register: register("name"),
-            error: errors.name?.message,
-            placeholder: "Enter ship name"
-        },
-        // Vessel Number Field
-        {
-            name: "vesselNumber",
-            label: "Vessel Number",
-            type: "text",
-            register: register("vesselNumber"),
-            error: errors.vesselNumber?.message,
-            placeholder: "Enter vessel number"
-        },
-        // Routes Section (custom render)
-        {
-            name: "routes",
-            label: "Routes & Pricing",
-            type: "custom",
-            withTooltip: true,
-            tooltipText:
-                "Add shipping routes with origin, destination, and pricing for different container types",
-            customRender: () => (
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <button
-                            type="button"
-                            onClick={handleAddRoute}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <PlusCircleIcon className="w-5 h-5" /> Add Route
-                        </button>
-                    </div>
-
-                    {fields.length === 0 && (
-                        <p className="text-sm text-slate-500 mb-4">
-                            No routes added yet. Click "Add Route" to create
-                            your first route.
-                        </p>
-                    )}
-
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className="border rounded-lg p-4 mb-4 bg-slate-50"
-                        >
-                            <div className="flex justify-between items-center mb-4">
-                                <h4 className="font-medium text-slate-700">
-                                    Route {index + 1}
-                                </h4>
-                                <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="flex items-center gap-1 text-red-500 hover:text-red-700"
-                                >
-                                    <TrashIcon className="w-4 h-4" />
-                                    Remove
-                                </button>
-                            </div>
-
-                            {/* Origin and Destination - Vertical layout */}
-                            <div className="space-y-4 mb-4">
-                                <div>
-                                    <label className="input-label-modern">
-                                        Origin Port
-                                    </label>
-                                    <Controller
-                                        name={`routes.${index}.origin`}
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select
-                                                {...field}
-                                                options={PH_PORTS}
-                                                placeholder="Select origin port"
-                                                className="react-select-modern"
-                                            />
-                                        )}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="input-label-modern">
-                                        Destination Port
-                                    </label>
-                                    <Controller
-                                        name={`routes.${index}.destination`}
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select
-                                                {...field}
-                                                options={PH_PORTS}
-                                                placeholder="Select destination port"
-                                                className="react-select-modern"
-                                            />
-                                        )}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Pricing Section */}
-                            <div className="space-y-3">
-                                <h5 className="font-medium text-slate-700 text-sm">
-                                    Pricing
-                                </h5>
-                                {["LCL", "20FT", "40FT"].map(
-                                    (type, priceIndex) => (
-                                        <div
-                                            key={type}
-                                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
-                                        >
-                                            <label className="input-label-modern md:col-span-2">
-                                                {type} Container Price
-                                            </label>
-                                            <div className="md:col-span-2">
-                                                <input
-                                                    type="number"
-                                                    {...register(
-                                                        `routes.${index}.pricing.${priceIndex}.price`
-                                                    )}
-                                                    className="input-field-modern"
-                                                    placeholder={`Enter ${type} price`}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    value={type}
-                                                    {...register(
-                                                        `routes.${index}.pricing.${priceIndex}.type`
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )
-        }
-    ];
-
-    // Info box for additional information
-    const infoBox = {
-        title: "Route Information",
-        items: [
-            {
-                icon: (
-                    <QuestionMarkCircleIcon className="h-3 w-3 text-blue-600" />
-                ),
-                text: "Add at least one route with origin, destination, and pricing"
-            },
-            {
-                icon: (
-                    <QuestionMarkCircleIcon className="h-3 w-3 text-blue-600" />
-                ),
-                text: "Pricing should include LCL, 20FT, and 40FT container types"
-            }
-        ]
-    };
-
-    return (
-        <FormModal
-            isOpen={isOpen}
-            onClose={handleClose}
-            title="Add Ship"
-            message={
-                message.text
-                    ? {
-                          type: message.type,
-                          text: message.text
-                      }
-                    : null
-            }
-            isLoading={isLoading}
-            isSubmitting={isSubmitting}
-            onSubmit={handleSubmit(onFormSubmit)}
-            fields={fieldsConfig}
-            infoBox={infoBox}
-            buttonText="Add Ship"
-        />
-    );
+          : null
+      }
+      isLoading={isLoading}
+      isSubmitting={isSubmitting}
+      onSubmit={handleSubmit(onFormSubmit)}
+      fields={fieldsConfig}
+      infoBox={infoBox}
+      buttonText="Add Ship"
+    />
+  );
 };
 
 export default AddShip;

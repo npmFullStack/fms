@@ -62,7 +62,7 @@ const FormModal = ({
 
         {/* Modal */}
         <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[95vh] overflow-hidden">
             {/* Header */}
             <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl px-6 py-3 text-center">
               <button
