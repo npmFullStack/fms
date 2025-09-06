@@ -1,3 +1,4 @@
+// src/components/modals/booking/BookingStep1.jsx
 import { Controller } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -5,8 +6,66 @@ import "react-phone-number-input/style.css";
 const BookingStep1 = ({ register, control, errors }) => {
   return (
     <div className="space-y-4">
-      {/* Shipper, first_name, last_name, email same as before */}
+      {/* HWB Number (readonly auto-generated) */}
+      <div>
+        <label className="input-label-modern">HWB Number</label>
+        <input
+          {...register("hwb_number")}
+          className="input-field-modern bg-gray-100"
+          readOnly
+        />
+      </div>
 
+      {/* Booking Number (readonly auto-generated) */}
+      <div>
+        <label className="input-label-modern">Booking Number</label>
+        <input
+          {...register("booking_number")}
+          className="input-field-modern bg-gray-100"
+          readOnly
+        />
+      </div>
+
+      {/* Shipper */}
+      <div>
+        <label className="input-label-modern">Shipper</label>
+        <input
+          {...register("shipper", { required: "Shipper is required" })}
+          placeholder="Enter shipper/company name"
+          className={`input-field-modern ${errors.shipper ? "input-error" : ""}`}
+        />
+        {errors.shipper && (
+          <p className="error-message">{errors.shipper.message}</p>
+        )}
+      </div>
+
+      {/* Contact Person */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="input-label-modern">First Name</label>
+          <input
+            {...register("first_name", { required: "First name is required" })}
+            placeholder="e.g. Juan"
+            className={`input-field-modern ${errors.first_name ? "input-error" : ""}`}
+          />
+          {errors.first_name && (
+            <p className="error-message">{errors.first_name.message}</p>
+          )}
+        </div>
+        <div>
+          <label className="input-label-modern">Last Name</label>
+          <input
+            {...register("last_name", { required: "Last name is required" })}
+            placeholder="e.g. Dela Cruz"
+            className={`input-field-modern ${errors.last_name ? "input-error" : ""}`}
+          />
+          {errors.last_name && (
+            <p className="error-message">{errors.last_name.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Contact Number */}
       <div>
         <label className="input-label-modern">Phone Number</label>
         <Controller
@@ -30,7 +89,9 @@ const BookingStep1 = ({ register, control, errors }) => {
             />
           )}
         />
-        {errors.phone && <p className="error-message">{errors.phone.message}</p>}
+        {errors.phone && (
+          <p className="error-message">{errors.phone.message}</p>
+        )}
       </div>
     </div>
   );

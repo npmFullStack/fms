@@ -32,152 +32,162 @@ const BookingTable = ({ data, onView, onEdit, onDelete, rightAction }) => {
     ];
 
     const columns = useMemo(
-        () => [
-            {
-                accessorKey: "id",
-                header: "Booking ID",
-                cell: ({ row }) => (
-                    <span className="font-mono text-sm text-slate-600">
-                        #{row.original.id.slice(0, 8)}
-                    </span>
-                )
-            },
-            {
-                accessorKey: "customer_name",
-                header: "Customer",
-                cell: ({ row }) => (
-                    <div>
-                        <div className="font-medium text-slate-800">
-                            {row.original.customer_first_name}{" "}
-                            {row.original.customer_last_name}
-                        </div>
-                        {row.original.customer_phone && (
-                            <div className="text-sm text-slate-500">
-                                {row.original.customer_phone}
-                            </div>
-                        )}
-                    </div>
-                )
-            },
-            {
-                accessorKey: "route",
-                header: "Route",
-                cell: ({ row }) => (
-                    <div>
-                        <div className="font-medium text-slate-800">
-                            {row.original.origin} → {row.original.destination}
-                        </div>
-                        <div className="text-sm text-slate-500 capitalize">
-                            {row.original.booking_mode
-                                ?.toLowerCase()
-                                .replace(/_/g, " ")}
-                        </div>
-                    </div>
-                )
-            },
-            {
-                accessorKey: "container_type",
-                header: "Container",
-                cell: ({ row }) => {
-                    const containerColors = {
-                        LCL: "bg-blue-100 text-blue-800",
-                        "20FT": "bg-green-100 text-green-800",
-                        "40FT": "bg-purple-100 text-purple-800"
-                    };
-                    return (
-                        <span
-                            className={`px-2 py-1 text-xs rounded-lg ${
-                                containerColors[row.original.container_type] ||
-                                "bg-gray-100 text-gray-800"
-                            }`}
-                        >
-                            {row.original.container_type}
-                        </span>
-                    );
-                }
-            },
-            {
-                accessorKey: "shipping_line_name",
-                header: "Shipping Line",
-                cell: ({ row }) => row.original.shipping_line_name || "-"
-            },
-            {
-                accessorKey: "status",
-                header: "Status",
-                cell: ({ row }) => {
-                    const statusColors = {
-                        BOOKED: "bg-blue-100 text-blue-700",
-                        IN_TRANSIT: "bg-yellow-100 text-yellow-700",
-                        ARRIVED: "bg-green-100 text-green-700",
-                        DELIVERED: "bg-emerald-100 text-emerald-700",
-                        CANCELLED: "bg-red-100 text-red-700"
-                    };
-                    return (
-                        <span
-                            className={`px-2 py-1 text-xs rounded-lg font-medium ${
-                                statusColors[row.original.status] ||
-                                "bg-gray-100 text-gray-700"
-                            }`}
-                        >
-                            {row.original.status?.replace(/_/g, " ")}
-                        </span>
-                    );
-                }
-            },
-            {
-                accessorKey: "dates",
-                header: "Dates",
-                cell: ({ row }) => (
-                    <div className="text-sm">
-                        <div>
-                            Depart:{" "}
-                            {new Date(
-                                row.original.preferred_departure
-                            ).toLocaleDateString()}
-                        </div>
-                        {row.original.preferred_delivery && (
-                            <div>
-                                Delivery:{" "}
-                                {new Date(
-                                    row.original.preferred_delivery
-                                ).toLocaleDateString()}
-                            </div>
-                        )}
-                    </div>
-                )
-            },
-            {
-                id: "actions",
-                header: "Actions",
-                cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onView(row.original.id)}
-                            className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
-                            title="View Booking"
-                        >
-                            <EyeIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => onEdit(row.original.id)}
-                            className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                            title="Edit Booking"
-                        >
-                            <PencilIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => onDelete(row.original)}
-                            className="action-btn bg-red-50 text-red-600 hover:bg-red-100"
-                            title="Delete Booking"
-                        >
-                            <TrashIcon className="w-4 h-4" />
-                        </button>
-                    </div>
-                )
-            }
-        ],
-        [onView, onEdit, onDelete]
-    );
+  () => [
+    {
+      accessorKey: "id",
+      header: "Booking ID",
+      cell: ({ row }) => (
+        <span className="font-mono text-sm text-slate-600">
+          #{row.original.id.slice(0, 8)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "customer_name",
+      header: "Customer",
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium text-slate-800">
+            {row.original.customer_first_name} {row.original.customer_last_name}
+          </div>
+          {row.original.customer_phone && (
+            <div className="text-sm text-slate-500">
+              {row.original.customer_phone}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "route",
+      header: "Route",
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium text-slate-800">
+            {row.original.origin} → {row.original.destination}
+          </div>
+          <div className="text-sm text-slate-500 capitalize">
+            {row.original.booking_mode?.toLowerCase().replace(/_/g, " ")}
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "ship",
+      header: "Ship",
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium text-slate-800">
+            {row.original.vessel_number || "-"}
+          </div>
+          <div className="text-sm text-slate-500">
+            {row.original.shipping_line_name || "-"}
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "container",
+      header: "Container",
+      cell: ({ row }) => {
+        const containerColors = {
+          LCL: "bg-blue-100 text-blue-800",
+          "20FT": "bg-green-100 text-green-800",
+          "40FT": "bg-purple-100 text-purple-800",
+        };
+        return (
+          <div className="flex flex-col gap-1">
+            <span
+              className={`px-2 py-1 text-xs rounded-lg ${
+                containerColors[row.original.container_type] ||
+                "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {row.original.container_type}
+            </span>
+            {row.original.van_number && (
+              <span className="text-xs text-slate-500 font-mono">
+                {row.original.van_number}
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const statusColors = {
+          BOOKED: "bg-blue-100 text-blue-700",
+          IN_TRANSIT: "bg-yellow-100 text-yellow-700",
+          ARRIVED: "bg-green-100 text-green-700",
+          DELIVERED: "bg-emerald-100 text-emerald-700",
+          CANCELLED: "bg-red-100 text-red-700",
+        };
+        return (
+          <span
+            className={`px-2 py-1 text-xs rounded-lg font-medium ${
+              statusColors[row.original.status] ||
+              "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {row.original.status?.replace(/_/g, " ")}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "dates",
+      header: "Dates",
+      cell: ({ row }) => (
+        <div className="text-sm">
+          <div>
+            Depart:{" "}
+            {new Date(row.original.preferred_departure).toLocaleDateString()}
+          </div>
+          {row.original.preferred_delivery && (
+            <div>
+              Delivery:{" "}
+              {new Date(row.original.preferred_delivery).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => onView(row.original.id)}
+            className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
+            title="View Booking"
+          >
+            <EyeIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onEdit(row.original.id)}
+            className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+            title="Edit Booking"
+          >
+            <PencilIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(row.original)}
+            className="action-btn bg-red-50 text-red-600 hover:bg-red-100"
+            title="Delete Booking"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ],
+  [onView, onEdit, onDelete]
+);
+
 
     const { table, globalFilter, setGlobalFilter } = useTable({
         data,

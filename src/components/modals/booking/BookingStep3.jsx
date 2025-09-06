@@ -1,224 +1,280 @@
-import { useState, Suspense, lazy, useRef } from "react";
-import { Controller } from "react-hook-form";
-import { MapPinIcon } from "@heroicons/react/24/outline";
-import "leaflet/dist/leaflet.css";
+// src/components/modals/booking/BookingStep3.jsx
+import { useEffect, useState, useMemo } from "react";
+import { useWatch } from "react-hook-form";
+import { useDebounce } from "use-debounce";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
+import { getPortByValue } from "../../../utils/helpers/shipRoutes";
 
-// Fix default marker icons in Leaflet
+import "leaflet/dist/leaflet.css";
 delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
 
-// Dynamically import MapContainer
-const MapContainer = lazy(() =>
-  import("react-leaflet").then(mod => ({ default: mod.MapContainer }))
-);
-const { TileLayer, Marker, useMapEvents } = require("react-leaflet");
-
-function MapClickHandler({ type, onMapClick }) {
-  useMapEvents({
-    click(e) {
-      onMapClick(e, type);
-    },
+// Custom colored markers
+const markerIcon = (color) =>
+  new L.Icon({
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
   });
+
+// Auto-fit map to markers
+const FitBounds = ({ positions }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (positions.length > 0) {
+      const bounds = L.latLngBounds(positions);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [positions, map]);
   return null;
-}
+};
 
-const BookingStep3 = ({ register, control, errors, setValue, getValues }) => {
-  const [originLocation, setOriginLocation] = useState(null);
-  const [destinationLocation, setDestinationLocation] = useState(null);
-  const [addressSearch, setAddressSearch] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const mapRef = useRef();
+const BookingStep3 = ({ control, errors, setValue }) => {
+  const bookingMode = useWatch({ control, name: "booking_mode" });
+  const originPort = useWatch({ control, name: "origin_port" });
+  const destinationPort = useWatch({ control, name: "destination_port" });
+  const pickup = useWatch({ control, name: "pickup_location" });
+  const delivery = useWatch({ control, name: "delivery_location" });
 
-  const handleMapClick = (e, type) => {
-    const { lat, lng } = e.latlng;
+  const [pickupCoords, setPickupCoords] = useState(null);
+  const [deliveryCoords, setDeliveryCoords] = useState(null);
 
-    if (type === "origin") {
-      setOriginLocation({ lat, lng });
-      setValue("origin_lat", lat);
-      setValue("origin_lng", lng);
+  // Suggestions
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [deliverySuggestions, setDeliverySuggestions] = useState([]);
 
-      fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-      )
-        .then(res => res.json())
-        .then(data => {
-          if (data?.display_name) setValue("origin", data.display_name);
-        });
-    } else {
-      setDestinationLocation({ lat, lng });
-      setValue("destination_lat", lat);
-      setValue("destination_lng", lng);
+  const [debouncedPickup] = useDebounce(pickup, 600);
+  const [debouncedDelivery] = useDebounce(delivery, 600);
 
-      fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-      )
-        .then(res => res.json())
-        .then(data => {
-          if (data?.display_name) setValue("destination", data.display_name);
-        });
+  const geocode = async (place) => {
+    if (!place) return null;
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          place
+        )}`
+      );
+      return await res.json();
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      return [];
     }
   };
 
-  const searchAddress = () => {
-    if (!addressSearch.trim()) return;
-    fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        addressSearch
-      )}`
-    )
-      .then(res => res.json())
-      .then(data => setSearchResults(data));
+  // Pickup suggestions
+  useEffect(() => {
+    if (debouncedPickup) {
+      geocode(debouncedPickup).then((results) =>
+        setPickupSuggestions(results.slice(0, 5))
+      );
+    } else setPickupSuggestions([]);
+  }, [debouncedPickup]);
+
+  // Delivery suggestions
+  useEffect(() => {
+    if (debouncedDelivery) {
+      geocode(debouncedDelivery).then((results) =>
+        setDeliverySuggestions(results.slice(0, 5))
+      );
+    } else setDeliverySuggestions([]);
+  }, [debouncedDelivery]);
+
+  const selectPickup = (s) => {
+    setValue("pickup_location", s.display_name);
+    setPickupCoords({ lat: parseFloat(s.lat), lng: parseFloat(s.lon) });
+    setValue("pickup_lat", parseFloat(s.lat));
+    setValue("pickup_lng", parseFloat(s.lon));
+    setPickupSuggestions([]);
   };
 
-  const selectSearchResult = (result, type) => {
-    const { lat, lon, display_name } = result;
-    if (type === "origin") {
-      setOriginLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
-      setValue("origin_lat", lat);
-      setValue("origin_lng", lon);
-      setValue("origin", display_name);
-    } else {
-      setDestinationLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
-      setValue("destination_lat", lat);
-      setValue("destination_lng", lon);
-      setValue("destination", display_name);
-    }
-    setAddressSearch("");
-    setSearchResults([]);
+  const selectDelivery = (s) => {
+    setValue("delivery_location", s.display_name);
+    setDeliveryCoords({ lat: parseFloat(s.lat), lng: parseFloat(s.lon) });
+    setValue("delivery_lat", parseFloat(s.lat));
+    setValue("delivery_lng", parseFloat(s.lon));
+    setDeliverySuggestions([]);
   };
+
+  // Ports
+  const originPortObj = originPort
+    ? getPortByValue(originPort.value || originPort)
+    : null;
+  const destinationPortObj = destinationPort
+    ? getPortByValue(destinationPort.value || destinationPort)
+    : null;
+
+  // Marker positions
+  const positions = useMemo(() => {
+    const pts = [];
+    if (pickupCoords) pts.push([pickupCoords.lat, pickupCoords.lng]);
+    if (originPortObj) pts.push([originPortObj.lat, originPortObj.lng]);
+    if (destinationPortObj) pts.push([destinationPortObj.lat, destinationPortObj.lng]);
+    if (deliveryCoords) pts.push([deliveryCoords.lat, deliveryCoords.lng]);
+    return pts;
+  }, [pickupCoords, originPortObj, destinationPortObj, deliveryCoords]);
 
   return (
-    <div className="space-y-6">
-      {/* Origin */}
-      <div>
-        <label className="input-label-modern flex items-center gap-1">
-          <MapPinIcon className="h-4 w-4 text-blue-600" /> Origin Location
-        </label>
-
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={addressSearch}
-            onChange={(e) => setAddressSearch(e.target.value)}
-            placeholder="Search for address..."
-            className="flex-1 input-field-modern"
-          />
-          <button
-            type="button"
-            onClick={searchAddress}
-            className="btn-primary-modern"
-          >
-            Search
-          </button>
-        </div>
-
-        {searchResults.length > 0 && (
-          <div className="border rounded-lg max-h-40 overflow-y-auto">
-            {searchResults.map((res, i) => (
-              <div
-                key={i}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => selectSearchResult(res, "origin")}
-              >
-                {res.display_name}
-              </div>
-            ))}
+    <div className="space-y-4">
+      {bookingMode === "DOOR_TO_DOOR" ? (
+        <>
+          {/* Pickup Input */}
+          <div className="relative">
+            <label className="input-label-modern flex items-center gap-2">
+              Pickup Location
+              <span className="material-icons text-gray-400 text-sm">search</span>
+            </label>
+            <input
+              type="text"
+              value={pickup || ""}
+              onChange={(e) => setValue("pickup_location", e.target.value)}
+              className="input-field-modern"
+              placeholder="Type pickup location"
+            />
+            {pickupSuggestions.length > 0 && (
+              <ul className="absolute bg-white border rounded-md shadow-lg mt-1 w-full max-h-40 overflow-y-auto z-[9999]">
+                {pickupSuggestions.map((s, i) => (
+                  <li
+                    key={i}
+                    className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                    onClick={() => selectPickup(s)}
+                  >
+                    {s.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {errors.pickup_location && (
+              <p className="error-message">{errors.pickup_location.message}</p>
+            )}
           </div>
-        )}
 
-        <div className="h-64 border rounded-lg overflow-hidden mt-2">
-          <Suspense fallback={<div className="h-64 bg-gray-100">Loading map...</div>}>
-            <MapContainer
-              center={[14.5995, 120.9842]} // Manila center
-              zoom={13}
-              style={{ height: "100%", width: "100%" }}
-              ref={mapRef}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
-              />
-              <MapClickHandler type="origin" onMapClick={handleMapClick} />
-              {originLocation && <Marker position={[originLocation.lat, originLocation.lng]} />}
-            </MapContainer>
-          </Suspense>
-        </div>
-
-        <input type="hidden" {...register("origin", { required: "Origin is required" })} />
-        <input type="hidden" {...register("origin_lat", { required: true })} />
-        <input type="hidden" {...register("origin_lng", { required: true })} />
-        {errors.origin && <p className="error-message">{errors.origin.message}</p>}
-      </div>
-
-      {/* Destination */}
-      <div>
-        <label className="input-label-modern flex items-center gap-1">
-          <MapPinIcon className="h-4 w-4 text-blue-600" /> Destination Location
-        </label>
-
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={addressSearch}
-            onChange={(e) => setAddressSearch(e.target.value)}
-            placeholder="Search for address..."
-            className="flex-1 input-field-modern"
-          />
-          <button
-            type="button"
-            onClick={searchAddress}
-            className="btn-primary-modern"
-          >
-            Search
-          </button>
-        </div>
-
-        {searchResults.length > 0 && (
-          <div className="border rounded-lg max-h-40 overflow-y-auto">
-            {searchResults.map((res, i) => (
-              <div
-                key={i}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => selectSearchResult(res, "destination")}
-              >
-                {res.display_name}
-              </div>
-            ))}
+          {/* Delivery Input */}
+          <div className="relative">
+            <label className="input-label-modern flex items-center gap-2">
+              Delivery Location
+              <span className="material-icons text-gray-400 text-sm">search</span>
+            </label>
+            <input
+              type="text"
+              value={delivery || ""}
+              onChange={(e) => setValue("delivery_location", e.target.value)}
+              className="input-field-modern"
+              placeholder="Type delivery location"
+            />
+            {deliverySuggestions.length > 0 && (
+              <ul className="absolute bg-white border rounded-md shadow-lg mt-1 w-full max-h-40 overflow-y-auto z-[9999]">
+                {deliverySuggestions.map((s, i) => (
+                  <li
+                    key={i}
+                    className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                    onClick={() => selectDelivery(s)}
+                  >
+                    {s.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {errors.delivery_location && (
+              <p className="error-message">{errors.delivery_location.message}</p>
+            )}
           </div>
-        )}
 
-        <div className="h-64 border rounded-lg overflow-hidden mt-2">
-          <Suspense fallback={<div className="h-64 bg-gray-100">Loading map...</div>}>
+          {/* Leaflet Map */}
+          <div className="h-96 w-full rounded-lg overflow-hidden border relative z-0">
             <MapContainer
-              center={[14.5995, 120.9842]}
-              zoom={13}
+              center={positions[0] || { lat: 12.8797, lng: 121.774 }}
+              zoom={6}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer
+                attribution='&copy; <a href="https://osm.org">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
               />
-              <MapClickHandler type="destination" onMapClick={handleMapClick} />
-              {destinationLocation && (
-                <Marker position={[destinationLocation.lat, destinationLocation.lng]} />
+
+              {/* Fit bounds */}
+              <FitBounds positions={positions} />
+
+              {/* Markers */}
+              {pickupCoords && (
+                <Marker position={pickupCoords} icon={markerIcon("green")}>
+                  <Popup>Pickup: {pickup}</Popup>
+                </Marker>
+              )}
+              {originPortObj && (
+                <Marker
+                  position={{ lat: originPortObj.lat, lng: originPortObj.lng }}
+                  icon={markerIcon("yellow")}
+                >
+                  <Popup>Origin Port: {originPortObj.label}</Popup>
+                </Marker>
+              )}
+              {destinationPortObj && (
+                <Marker
+                  position={{
+                    lat: destinationPortObj.lat,
+                    lng: destinationPortObj.lng,
+                  }}
+                  icon={markerIcon("blue")}
+                >
+                  <Popup>Destination Port: {destinationPortObj.label}</Popup>
+                </Marker>
+              )}
+              {deliveryCoords && (
+                <Marker position={deliveryCoords} icon={markerIcon("red")}>
+                  <Popup>Delivery: {delivery}</Popup>
+                </Marker>
+              )}
+
+              {/* Multi-leg route (pickup → origin port → destination port → delivery) */}
+              {positions.length >= 2 && (
+                <Polyline
+                  positions={positions}
+                  pathOptions={{ color: "purple", weight: 4 }}
+                />
               )}
             </MapContainer>
-          </Suspense>
-        </div>
+          </div>
 
-        <input type="hidden" {...register("destination", { required: "Destination is required" })} />
-        <input type="hidden" {...register("destination_lat", { required: true })} />
-        <input type="hidden" {...register("destination_lng", { required: true })} />
-        {errors.destination && <p className="error-message">{errors.destination.message}</p>}
-      </div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-6 text-sm mt-2">
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+              Pickup
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
+              Origin Port
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+              Destination Port
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+              Delivery
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-6 h-0.5 bg-purple-600"></span>
+              Full Route
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-gray-600">
+          Pickup/Delivery map is only required for{" "}
+          <strong>Door-to-Door</strong> bookings.
+        </p>
+      )}
     </div>
   );
 };
