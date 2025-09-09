@@ -1,91 +1,57 @@
-import { Controller } from "react-hook-form";
-import Datetime from "react-datetime";
-import "react-datetime/css/react-datetime.css";
+// src/components/modals/booking/BookingStep4.jsx
+import { useEffect } from "react";
+import { useWatch } from "react-hook-form";
 
-const BookingStep4 = ({ control, errors }) => {
+const BookingStep4 = ({ control, register, errors, setValue }) => {
+  const freight = useWatch({ control, name: "freight_charge" }) || 0;
+  const trucking = useWatch({ control, name: "trucking_charge" }) || 0;
+
+  // Auto-calc total
+  useEffect(() => {
+    const total = Number(freight) + Number(trucking);
+    setValue("total_amount", total);
+  }, [freight, trucking, setValue]);
+
   return (
-    <div className="space-y-6">
-      {/* Departure */}
+    <div className="space-y-4">
+      {/* Freight Charge */}
       <div>
-        <label className="input-label-modern">Preferred Departure</label>
-        <Controller
-          name="preferred_departure"
-          control={control}
-          rules={{ required: "Departure date is required" }}
-          render={({ field }) => (
-            <Datetime
-              {...field}
-              onChange={(date) => field.onChange(date?.toISOString?.() || date)}
-              value={field.value ? new Date(field.value) : ""}
-              dateFormat="YYYY-MM-DD"
-              timeFormat="HH:mm"
-              className="input-field-modern"
-            />
-          )}
+        <label className="input-label-modern">Freight Charge (₱)</label>
+        <input
+          type="number"
+          step="0.01"
+          {...register("freight_charge", { valueAsNumber: true })}
+          className="input-field-modern"
+          placeholder="Enter freight charge"
         />
-        {errors.preferred_departure && (
-          <p className="error-message">{errors.preferred_departure.message}</p>
+        {errors.freight_charge && (
+          <p className="error-message">{errors.freight_charge.message}</p>
         )}
       </div>
 
-      {/* Delivery */}
+      {/* Trucking Charge */}
       <div>
-        <label className="input-label-modern">Preferred Delivery</label>
-        <Controller
-          name="preferred_delivery"
-          control={control}
-          render={({ field }) => (
-            <Datetime
-              {...field}
-              onChange={(date) => field.onChange(date?.toISOString?.() || date)}
-              value={field.value ? new Date(field.value) : ""}
-              dateFormat="YYYY-MM-DD"
-              timeFormat="HH:mm"
-              className="input-field-modern"
-            />
-          )}
-        />
-      </div>
-
-      {/* Commodity */}
-      <div>
-        <label className="input-label-modern">Commodity</label>
-        <input
-          {...control.register("commodity", { required: "Commodity is required" })}
-          placeholder="e.g., Electronics, Furniture"
-          className={`input-field-modern ${errors.commodity ? "input-error" : ""}`}
-        />
-        {errors.commodity && <p className="error-message">{errors.commodity.message}</p>}
-      </div>
-
-      {/* Quantity */}
-      <div>
-        <label className="input-label-modern">Quantity</label>
+        <label className="input-label-modern">Trucking Charge (₱)</label>
         <input
           type="number"
-          min="1"
-          {...control.register("quantity", { required: "Quantity is required" })}
-          className={`input-field-modern ${errors.quantity ? "input-error" : ""}`}
+          step="0.01"
+          {...register("trucking_charge", { valueAsNumber: true })}
+          className="input-field-modern"
+          placeholder="Enter trucking charge"
         />
-        {errors.quantity && <p className="error-message">{errors.quantity.message}</p>}
+        {errors.trucking_charge && (
+          <p className="error-message">{errors.trucking_charge.message}</p>
+        )}
       </div>
 
-      {/* Van + Seal */}
+      {/* Auto Total */}
       <div>
-        <label className="input-label-modern">Van Number</label>
+        <label className="input-label-modern font-semibold">Total Amount</label>
         <input
-          {...control.register("van_number")}
-          placeholder="Enter container number"
-          className="input-field-modern"
-        />
-      </div>
-
-      <div>
-        <label className="input-label-modern">Seal Number</label>
-        <input
-          {...control.register("seal_number")}
-          placeholder="Enter seal number"
-          className="input-field-modern"
+          type="number"
+          {...register("total_amount", { valueAsNumber: true })}
+          className="input-field-modern bg-gray-100"
+          readOnly
         />
       </div>
     </div>

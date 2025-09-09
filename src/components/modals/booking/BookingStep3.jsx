@@ -235,11 +235,32 @@ const BookingStep3 = ({ control, errors, setValue }) => {
                 </Marker>
               )}
 
-              {/* Multi-leg route (pickup → origin port → destination port → delivery) */}
-              {positions.length >= 2 && (
+              {/* Multi-leg polyline with styled segments */}
+              {pickupCoords && originPortObj && (
                 <Polyline
-                  positions={positions}
-                  pathOptions={{ color: "purple", weight: 4 }}
+                  positions={[
+                    [pickupCoords.lat, pickupCoords.lng],
+                    [originPortObj.lat, originPortObj.lng],
+                  ]}
+                  pathOptions={{ color: "green", weight: 4 }}
+                />
+              )}
+              {originPortObj && destinationPortObj && (
+                <Polyline
+                  positions={[
+                    [originPortObj.lat, originPortObj.lng],
+                    [destinationPortObj.lat, destinationPortObj.lng],
+                  ]}
+                  pathOptions={{ color: "blue", weight: 4, dashArray: "10, 10" }}
+                />
+              )}
+              {destinationPortObj && deliveryCoords && (
+                <Polyline
+                  positions={[
+                    [destinationPortObj.lat, destinationPortObj.lng],
+                    [deliveryCoords.lat, deliveryCoords.lng],
+                  ]}
+                  pathOptions={{ color: "red", weight: 4 }}
                 />
               )}
             </MapContainer>
@@ -264,8 +285,16 @@ const BookingStep3 = ({ control, errors, setValue }) => {
               Delivery
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-6 h-0.5 bg-purple-600"></span>
-              Full Route
+              <span className="w-6 h-0.5 bg-green-500"></span>
+              Truck In (Pickup → Origin Port)
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-6 h-0.5 border-t-2 border-blue-500 border-dashed"></span>
+              Sea Route (Origin → Destination Port)
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-6 h-0.5 bg-red-500"></span>
+              Truck Out (Destination Port → Delivery)
             </div>
           </div>
         </>

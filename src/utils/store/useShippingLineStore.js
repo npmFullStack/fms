@@ -1,16 +1,33 @@
+// utils/store/useShippingLineStore.js
 import { create } from "zustand";
 import api from "../../config/axios";
 
 const useShippingLineStore = create((set, get) => ({
+    shippingLines: [],
     ships: [],
     loading: false,
     error: null,
     currentShip: null,
 
+    // Fetch all shipping lines
+    fetchShippingLines: async () => {
+        set({ loading: true, error: null });
+        try {
+            const res = await api.get("/shipping-lines");
+            set({ shippingLines: res.data, loading: false });
+            return { success: true, data: res.data };
+        } catch (err) {
+            const error = err.response?.data?.message || "Failed to fetch shipping lines";
+            set({ error, loading: false });
+            return { success: false, error };
+        }
+    },
+
     // Fetch all ships (with containers) for a shipping line
-    fetchShips: async shippingLineId => {
-        if (!shippingLineId)
+    fetchShips: async (shippingLineId) => {
+        if (!shippingLineId) {
             return { success: false, error: "Shipping Line ID is required" };
+        }
 
         set({ loading: true, error: null });
         try {
@@ -24,17 +41,30 @@ const useShippingLineStore = create((set, get) => ({
                 ships: shippingLineShips,
                 loading: false
             });
-            return { success: true };
+            return { success: true, data: shippingLineShips };
         } catch (err) {
-            const error =
-                err.response?.data?.message || "Failed to fetch ships";
-            set({ error, loading: false });
+            const error = err.response?.data?.message || "Failed to fetch ships";
+            set({ error, loading: false, ships: [] });
+            return { success: false, error };
+        }
+    },
+
+    // Fetch all ships (without filtering)
+    fetchAllShips: async () => {
+        set({ loading: true, error: null });
+        try {
+            const res = await api.get("/ships");
+            set({ ships: res.data, loading: false });
+            return { success: true, data: res.data };
+        } catch (err) {
+            const error = err.response?.data?.message || "Failed to fetch ships";
+            set({ error, loading: false, ships: [] });
             return { success: false, error };
         }
     },
 
     // Fetch ship by ID
-    fetchShipById: async id => {
+    fetchShipById: async (id) => {
         set({ loading: true, error: null });
         try {
             const res = await api.get(`/ships/${id}`);
@@ -48,18 +78,18 @@ const useShippingLineStore = create((set, get) => ({
     },
 
     // Add new ship
-    addShip: async shipData => {
+    addShip: async (shipData) => {
         set({ loading: true, error: null });
         try {
-            await api.post("/ships", shipData);
-
+            const res = await api.post("/ships", shipData);
+            
             // Refresh ships list for the shipping line
-            if (shipData.shippingLineId) {
-                await get().fetchShips(shipData.shippingLineId);
+            if (shipData.shipping_line_id) {
+                await get().fetchShips(shipData.shipping_line_id);
             }
 
             set({ loading: false });
-            return { success: true };
+            return { success: true, data: res.data };
         } catch (err) {
             const error = err.response?.data?.message || "Failed to add ship";
             set({ error, loading: false });
@@ -71,25 +101,24 @@ const useShippingLineStore = create((set, get) => ({
     updateShip: async (id, updatedData) => {
         set({ loading: true, error: null });
         try {
-            await api.put(`/ships/${id}`, updatedData);
+            const res = await api.put(`/ships/${id}`, updatedData);
 
             // Refresh ships list for the shipping line
-            if (updatedData.shippingLineId) {
-                await get().fetchShips(updatedData.shippingLineId);
+            if (updatedData.shipping_line_id) {
+                await get().fetchShips(updatedData.shipping_line_id);
             }
 
             set({ loading: false });
-            return { success: true };
+            return { success: true, data: res.data };
         } catch (err) {
-            const error =
-                err.response?.data?.message || "Failed to update ship";
+            const error = err.response?.data?.message || "Failed to update ship";
             set({ error, loading: false });
             return { success: false, error };
         }
     },
 
     // Remove ship
-    removeShip: async id => {
+    removeShip: async (id) => {
         const currentShips = get().ships;
         const shipToDelete = currentShips.find(ship => ship.id === id);
 
@@ -105,8 +134,7 @@ const useShippingLineStore = create((set, get) => ({
             set({ loading: false });
             return { success: true };
         } catch (err) {
-            const error =
-                err.response?.data?.message || "Failed to remove ship";
+            const error = err.response?.data?.message || "Failed to remove ship";
             set({ error, loading: false });
             return { success: false, error };
         }
@@ -119,10 +147,19 @@ const useShippingLineStore = create((set, get) => ({
     clearError: () => set({ error: null }),
 
     // Set loading state
-    setLoading: loading => set({ loading }),
+    setLoading: (loading) => set({ loading }),
 
     // Clear all ships (for cleanup)
-    clearShips: () => set({ ships: [], currentShip: null, error: null })
+    clearShips: () => set({ ships: [], currentShip: null, error: null }),
+
+    // Clear all data
+    clearAll: () => set({ 
+        shippingLines: [], 
+        ships: [], 
+        currentShip: null, 
+        error: null,
+        loading: false 
+    })
 }));
 
 export default useShippingLineStore;

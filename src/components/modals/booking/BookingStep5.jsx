@@ -1,65 +1,56 @@
-import Select from "react-select";
-import { Controller } from "react-hook-form";
+// src/components/modals/booking/BookingStep5.jsx
+import { useWatch } from "react-hook-form";
 
-const statusOptions = [
-  { value: "PENDING", label: "Pending" },
-  { value: "CONFIRMED", label: "Confirmed" },
-  { value: "IN_TRANSIT", label: "In Transit" },
-  { value: "ARRIVED", label: "Arrived" },
-  { value: "DELIVERED", label: "Delivered" },
-  { value: "COMPLETED", label: "Completed" },
-];
+const BookingStep5 = ({ control }) => {
+  const data = useWatch({ control });
 
-const BookingStep5 = ({ control, register, errors }) => {
   return (
-    <div className="space-y-4">
-      {/* Freight */}
+    <div className="space-y-6 text-sm">
+      <h3 className="text-lg font-semibold">Review Booking Details</h3>
+
+      {/* Shipper Info */}
       <div>
-        <label className="input-label-modern">Freight Charge</label>
-        <input
-          type="number"
-          step="0.01"
-          {...register("freight_charge")}
-          className="input-field-modern"
-        />
+        <h4 className="font-medium mb-2">Shipper Info</h4>
+        <ul className="list-disc list-inside space-y-1">
+          <li>
+            Name: {data.first_name} {data.last_name}
+          </li>
+          <li>Phone: {data.phone}</li>
+        </ul>
       </div>
 
-      {/* Trucking */}
+      {/* Shipment Info */}
       <div>
-        <label className="input-label-modern">Trucking Charge</label>
-        <input
-          type="number"
-          step="0.01"
-          {...register("trucking_charge")}
-          className="input-field-modern"
-        />
+        <h4 className="font-medium mb-2">Shipment</h4>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Booking #: {data.booking_number}</li>
+          <li>HWB #: {data.hwb_number}</li>
+          <li>
+            Container: {data.quantity} × {data.container_type}
+          </li>
+          <li>Mode: {data.booking_mode}</li>
+          <li>
+            Route: {data.origin} → {data.destination}
+          </li>
+        </ul>
       </div>
 
-      {/* Total */}
+      {/* Charges */}
       <div>
-        <label className="input-label-modern">Total Amount</label>
-        <input
-          type="number"
-          step="0.01"
-          {...register("total_amount")}
-          className="input-field-modern bg-gray-100"
-          disabled
-        />
+        <h4 className="font-medium mb-2">Charges</h4>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Freight: ₱{data.freight_charge}</li>
+          <li>Trucking: ₱{data.trucking_charge}</li>
+          <li className="font-semibold">
+            Total: ₱{data.total_amount?.toLocaleString()}
+          </li>
+        </ul>
       </div>
 
-      {/* Status */}
-      <div>
-        <label className="input-label-modern">Status</label>
-        <Controller
-          name="status"
-          control={control}
-          rules={{ required: "Status is required" }}
-          render={({ field }) => (
-            <Select {...field} options={statusOptions} placeholder="Select status" />
-          )}
-        />
-        {errors.status && <p className="error-message">{errors.status.message}</p>}
-      </div>
+      <p className="text-gray-600 text-xs">
+        Please review all details carefully before clicking{" "}
+        <strong>Create Booking</strong>.
+      </p>
     </div>
   );
 };
