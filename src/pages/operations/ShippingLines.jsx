@@ -12,7 +12,7 @@ import UpdateShip from "../../components/modals/UpdateShip";
 import DeleteShip from "../../components/modals/DeleteShip";
 import ViewShip from "../../components/modals/ViewShip";
 import usePartnerStore from "../../utils/store/usePartnerStore";
-import useShippingLineStore from "../../utils/store/useShippingLineStore";
+import useShipStore from "../../utils/store/useShipStore";
 
 const ShippingLines = () => {
     const navigate = useNavigate();
@@ -32,8 +32,8 @@ const ShippingLines = () => {
     } = usePartnerStore();
 
     const {
-        ships,
-        fetchShips,
+        ships: allShips,
+        fetchAllShips,
         loading: shipsLoading,
         error,
         addShip,
@@ -41,12 +41,12 @@ const ShippingLines = () => {
         updateShip,
         clearCurrentShip,
         removeShip
-    } = useShippingLineStore();
-
+    } = useShipStore();
+    const ships = allShips.filter(ship => ship.shipping_line_id === id);
     useEffect(() => {
         if (id) {
             fetchPartnerById(id, "shipping");
-            fetchShips(id);
+            fetchAllShips(); // Fetch all ships instead of filtered ones
         }
         return () => {
             clearCurrentPartner();
@@ -56,7 +56,7 @@ const ShippingLines = () => {
         id,
         fetchPartnerById,
         clearCurrentPartner,
-        fetchShips,
+        fetchAllShips, // Change this
         clearCurrentShip
     ]);
 

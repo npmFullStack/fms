@@ -1,15 +1,13 @@
 // src/components/modals/booking/BookingStep2.jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
 import Select from "react-select";
-import useShippingLineStore from "../../../utils/store/useShippingLineStore";
-import useTruckStore from "../../../utils/store/useTruckStore";
 import { PH_PORTS } from "../../../utils/helpers/shipRoutes";
 
 const containerTypes = [
     { value: "LCL", label: "LCL" },
     { value: "20FT", label: "1X20" },
-    { value: "40FT", label: "1X40" },
+    { value: "40FT", label: "1X40" }
 ];
 
 const bookingModes = [
@@ -17,30 +15,38 @@ const bookingModes = [
     { value: "PIER_TO_PIER", label: "Port to Port (P-P)" },
     { value: "CY_TO_DOOR", label: "CY to Door" },
     { value: "DOOR_TO_CY", label: "Door to CY" },
-    { value: "CY_TO_CY", label: "CY to CY" },
+    { value: "CY_TO_CY", label: "CY to CY" }
 ];
 
-const BookingStep2 = ({ control, register, errors }) => {
-    const { shippingLines, fetchShippingLines } = useShippingLineStore();
-    const { trucks, fetchTrucks } = useTruckStore();
-    const { ships, fetchShips } = useShippingLineStore();
-
+const BookingStep2 = ({ control, register, errors, partners }) => {
     const shippingLineId = useWatch({ control, name: "shipping_line_id" });
     const quantity = useWatch({ control, name: "quantity" });
     const containerType = useWatch({ control, name: "container_type" });
+    const [ships, setShips] = useState([]);
 
-    // Fetch shipping lines and trucks on component mount
-    useEffect(() => {
-        fetchShippingLines();
-        fetchTrucks();
-    }, [fetchShippingLines, fetchTrucks]);
+    // Filter partners by type
+    const shippingLines = partners.filter(
+        partner => partner.type === "shipping"
+    );
+    const truckingCompanies = partners.filter(
+        partner => partner.type === "trucking"
+    );
 
     // Fetch ships when shipping line changes
     useEffect(() => {
         if (shippingLineId) {
-            fetchShips(shippingLineId);
+            // In a real app, you would fetch ships for this shipping line
+            // For now, we'll simulate it with mock data
+            const mockShips = [
+                { id: 1, van_number: "VAN001", name: "Ship 1" },
+                { id: 2, van_number: "VAN002", name: "Ship 2" },
+                { id: 3, van_number: "VAN003", name: "Ship 3" }
+            ];
+            setShips(mockShips);
+        } else {
+            setShips([]);
         }
-    }, [shippingLineId, fetchShips]);
+    }, [shippingLineId]);
 
     return (
         <div className="space-y-4">
@@ -63,13 +69,15 @@ const BookingStep2 = ({ control, register, errors }) => {
                     )}
                 />
                 {errors.shipping_line_id && (
-                    <p className="error-message">{errors.shipping_line_id.message}</p>
+                    <p className="error-message">
+                        {errors.shipping_line_id.message}
+                    </p>
                 )}
             </div>
 
             {/* Ship */}
             <div>
-                <label className="input-label-modern">Ship</label>
+                <label className="input-label-modern">Ship (Van Number)</label>
                 <Controller
                     name="ship_id"
                     control={control}
@@ -77,9 +85,9 @@ const BookingStep2 = ({ control, register, errors }) => {
                     render={({ field }) => (
                         <Select
                             {...field}
-                            options={ships.map((ship) => ({
+                            options={ships.map(ship => ({
                                 value: ship.id,
-                                label: ship.vessel_number || ship.name,
+                                label: ship.van_number || ship.name
                             }))}
                             placeholder="Select ship"
                             isLoading={ships.length === 0}
@@ -99,11 +107,17 @@ const BookingStep2 = ({ control, register, errors }) => {
                     control={control}
                     rules={{ required: "Origin port is required" }}
                     render={({ field }) => (
-                        <Select {...field} options={PH_PORTS} placeholder="Select origin port" />
+                        <Select
+                            {...field}
+                            options={PH_PORTS}
+                            placeholder="Select origin port"
+                        />
                     )}
                 />
                 {errors.origin_port && (
-                    <p className="error-message">{errors.origin_port.message}</p>
+                    <p className="error-message">
+                        {errors.origin_port.message}
+                    </p>
                 )}
             </div>
 
@@ -114,11 +128,17 @@ const BookingStep2 = ({ control, register, errors }) => {
                     control={control}
                     rules={{ required: "Destination port is required" }}
                     render={({ field }) => (
-                        <Select {...field} options={PH_PORTS} placeholder="Select destination port" />
+                        <Select
+                            {...field}
+                            options={PH_PORTS}
+                            placeholder="Select destination port"
+                        />
                     )}
                 />
                 {errors.destination_port && (
-                    <p className="error-message">{errors.destination_port.message}</p>
+                    <p className="error-message">
+                        {errors.destination_port.message}
+                    </p>
                 )}
             </div>
 
@@ -129,7 +149,11 @@ const BookingStep2 = ({ control, register, errors }) => {
                     name="container_type"
                     control={control}
                     render={({ field }) => (
-                        <Select {...field} options={containerTypes} placeholder="Select container" />
+                        <Select
+                            {...field}
+                            options={containerTypes}
+                            placeholder="Select container"
+                        />
                     )}
                 />
                 <input
@@ -150,9 +174,13 @@ const BookingStep2 = ({ control, register, errors }) => {
             <div>
                 <label className="input-label-modern">Commodity</label>
                 <input
-                    {...register("commodity", { required: "Commodity is required" })}
+                    {...register("commodity", {
+                        required: "Commodity is required"
+                    })}
                     placeholder="Enter commodity type"
-                    className={`input-field-modern ${errors.commodity ? "input-error" : ""}`}
+                    className={`input-field-modern ${
+                        errors.commodity ? "input-error" : ""
+                    }`}
                 />
                 {errors.commodity && (
                     <p className="error-message">{errors.commodity.message}</p>
@@ -166,25 +194,53 @@ const BookingStep2 = ({ control, register, errors }) => {
                     name="booking_mode"
                     control={control}
                     render={({ field }) => (
-                        <Select {...field} options={bookingModes} placeholder="Select mode" />
+                        <Select
+                            {...field}
+                            options={bookingModes}
+                            placeholder="Select mode"
+                        />
                     )}
                 />
             </div>
 
-            {/* Trucker */}
+            {/* Pickup Trucking Company */}
             <div>
-                <label className="input-label-modern">Trucking Company</label>
+                <label className="input-label-modern">
+                    Pickup Trucking Company
+                </label>
                 <Controller
-                    name="trucker_id"
+                    name="pickup_trucker_id"
                     control={control}
                     render={({ field }) => (
                         <Select
                             {...field}
-                            options={trucks.map((t) => ({
+                            options={truckingCompanies.map(t => ({
                                 value: t.id,
-                                label: t.name,
+                                label: t.name
                             }))}
-                            placeholder="Select trucking company"
+                            placeholder="Select pickup trucking company"
+                            isClearable
+                        />
+                    )}
+                />
+            </div>
+
+            {/* Delivery Trucking Company */}
+            <div>
+                <label className="input-label-modern">
+                    Delivery Trucking Company
+                </label>
+                <Controller
+                    name="delivery_trucker_id"
+                    control={control}
+                    render={({ field }) => (
+                        <Select
+                            {...field}
+                            options={truckingCompanies.map(t => ({
+                                value: t.id,
+                                label: t.name
+                            }))}
+                            placeholder="Select delivery trucking company"
                             isClearable
                         />
                     )}

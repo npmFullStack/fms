@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bookingSchema } from "../../schemas/bookingSchema";
 import useBookingStore from "../../utils/store/useBookingStore";
+import usePartnerStore from "../../utils/store/usePartnerStore";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
 
@@ -13,7 +14,7 @@ import BookingStep2 from "./booking/BookingStep2";
 import BookingStep3 from "./booking/BookingStep3";
 import BookingStep4 from "./booking/BookingStep5";
 
-// --- Generators ---
+// -- Generators --
 const generateBookingNumber = () => {
     return "V000" + Math.floor(10000 + Math.random() * 90000);
 };
@@ -23,6 +24,7 @@ let hwbCounter = 1;
 const AddBooking = ({ isOpen, onClose }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const createBooking = useBookingStore(state => state.createBooking);
+    const { partners, fetchPartners } = usePartnerStore();
 
     const {
         message,
@@ -63,9 +65,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             origin: "",
             destination: "",
             origin_lat: "",
-            origin_lng: "",
+            origin_Ing: "",
             destination_lat: "",
-            destination_lng: "",
+            destination_Ing: "",
             pickup_stuffing_date: "",
             preferred_departure: "",
             preferred_delivery: "",
@@ -73,7 +75,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             van_number: "",
             seal_number: "",
             status: "PENDING",
-            trucker_id: ""
+            trucker_id: "",
+            pickup_trucker_id: "", // New field for pickup trucking
+            delivery_trucker_id: "" // New field for delivery trucking
         }
     });
 
@@ -83,8 +87,9 @@ const AddBooking = ({ isOpen, onClose }) => {
             setValue("hwb_number", newHwb);
             hwbCounter += 1;
             setValue("booking_number", generateBookingNumber());
+            fetchPartners(); // Fetch partners when modal opens
         }
-    }, [isOpen, setValue]);
+    }, [isOpen, setValue, fetchPartners]);
 
     const onSubmit = async data => {
         try {
@@ -116,6 +121,7 @@ const AddBooking = ({ isOpen, onClose }) => {
                 register={register}
                 control={control}
                 errors={errors}
+                partners={partners}
             />
         ),
         3: (
