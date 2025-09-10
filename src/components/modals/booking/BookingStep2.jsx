@@ -23,7 +23,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
   const { ships, fetchAllShips } = useShipStore();
   const [filteredShips, setFilteredShips] = useState([]);
 
-  // Filter partners by type
+  // Filter partners by shipping type
   const shippingLines = partners.filter((partner) => partner.type === "shipping");
 
   // Fetch ships when shipping line changes
@@ -75,9 +75,9 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         )}
       </div>
 
-      {/* Ship (Van Number) */}
+      {/* Ship */}
       <div>
-        <label className="input-label-modern">Ship (Van Number)</label>
+        <label className="input-label-modern">Ship</label>
         <Controller
           name="ship_id"
           control={control}
@@ -89,10 +89,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   ? filteredShips
                       .map((ship) => ({
                         value: ship.id,
-                        label:
-                          ship.van_number ||
-                          ship.vessel_number ||
-                          `Ship ${ship.id}`,
+                        label: ship.vessel_number || `Ship ${ship.id}`,
                       }))
                       .find((opt) => opt.value === field.value) || null
                   : null
@@ -100,10 +97,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
               onChange={(option) => field.onChange(option ? option.value : "")}
               options={filteredShips.map((ship) => ({
                 value: ship.id,
-                label:
-                  ship.van_number ||
-                  ship.vessel_number ||
-                  `Ship ${ship.id}`,
+                label: ship.vessel_number || `Ship ${ship.id}`,
               }))}
               placeholder={
                 shippingLineId ? "Select ship" : "Select shipping line first"
@@ -176,6 +170,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         <Controller
           name="container_type"
           control={control}
+          rules={{ required: "Container type is required" }}
           render={({ field }) => (
             <Select
               value={
@@ -193,10 +188,13 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         <input
           type="number"
           min="1"
-          {...register("quantity", { required: true })}
+          {...register("quantity", { required: "Quantity is required" })}
           className="input-field-modern mt-2"
           placeholder="Enter quantity"
         />
+        {errors.quantity && (
+          <p className="error-message">{errors.quantity.message}</p>
+        )}
       </div>
 
       {/* Commodity */}
@@ -220,6 +218,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         <Controller
           name="booking_mode"
           control={control}
+          rules={{ required: "Mode of service is required" }}
           render={({ field }) => (
             <Select
               value={
@@ -229,6 +228,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
               }
               onChange={(option) => {
                 field.onChange(option ? option.value : "");
+                // Skip trucking steps if PIER_TO_PIER
                 if (option?.value === "PIER_TO_PIER") {
                   setValue("skipTrucking", true);
                 } else {
@@ -241,6 +241,9 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
             />
           )}
         />
+        {errors.booking_mode && (
+          <p className="error-message">{errors.booking_mode.message}</p>
+        )}
       </div>
     </div>
   );

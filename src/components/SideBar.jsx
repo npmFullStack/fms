@@ -26,21 +26,9 @@ const menuByRole = {
         { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
         {
             name: "My Bookings",
-            isDropdown: true,
             path: "/booking",
             icon: ClipboardDocumentListIcon,
-            subLinks: [
-                {
-                    name: "Create Booking",
-                    path: "/booking/create",
-                    icon: PlusCircleIcon
-                },
-                {
-                    name: "Booking Logs",
-                    path: "/booking/logs",
-                    icon: DocumentTextIcon
-                }
-            ]
+            
         },
         { name: "Track Orders", path: "/track-order", icon: TruckIcon }
     ],

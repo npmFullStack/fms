@@ -9,7 +9,7 @@ const useTruckStore = create((set, get) => ({
     currentTruck: null,
 
     // Fetch all trucks
-    fetchAllTrucks: async () => {
+    fetchTrucks: async () => {
         set({ loading: true, error: null });
         try {
             const res = await api.get("/api/trucks");
@@ -23,7 +23,7 @@ const useTruckStore = create((set, get) => ({
     },
 
     // Fetch single truck by ID
-    fetchTruckById: async (id) => {
+    fetchTruckById: async id => {
         set({ loading: true, error: null });
         try {
             const res = await api.get(`/api/trucks/${id}`);
@@ -37,13 +37,13 @@ const useTruckStore = create((set, get) => ({
     },
 
     // Add truck
-    addTruck: async (truckData) => {
+    addTruck: async truckData => {
         set({ loading: true, error: null });
         try {
             const res = await api.post("/api/trucks", truckData);
 
             // Refresh trucks list
-            await get().fetchAllTrucks();
+            await get().fetchTrucks();
 
             set({ loading: false });
             return { success: true, data: res.data };
@@ -73,7 +73,7 @@ const useTruckStore = create((set, get) => ({
     },
 
     // Delete truck
-    removeTruck: async (id) => {
+    removeTruck: async id => {
         set({ loading: true, error: null });
         try {
             await api.delete(`/api/trucks/${id}`);
@@ -93,14 +93,15 @@ const useTruckStore = create((set, get) => ({
     // Helpers
     clearCurrentTruck: () => set({ currentTruck: null }),
     clearError: () => set({ error: null }),
-    setLoading: (loading) => set({ loading }),
+    setLoading: loading => set({ loading }),
     clearTrucks: () => set({ trucks: [], currentTruck: null, error: null }),
-    clearAll: () => set({ 
-        trucks: [], 
-        currentTruck: null, 
-        error: null,
-        loading: false 
-    })
+    clearAll: () =>
+        set({
+            trucks: [],
+            currentTruck: null,
+            error: null,
+            loading: false
+        })
 }));
 
 export default useTruckStore;

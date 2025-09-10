@@ -1,7 +1,7 @@
 // pages/booking/Bookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import { PlusIcon, TruckIcon, CubeIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, CubeIcon } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
 import BookingTable from "../../components/tables/BookingTable";
@@ -13,18 +13,20 @@ const Bookings = () => {
     loading,
     error,
     deleteBooking,
-    clearError
+    clearError,
   } = useBookingStore();
 
   const [isAddBookingModalOpen, setIsAddBookingModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
 
+  // Format bookings for table
   const formattedBookings = useMemo(() => {
-    return bookings.map(booking => ({
+    if (!Array.isArray(bookings)) return [];
+    return bookings.map((booking) => ({
       ...booking,
-      customer_name: `${booking.customer_first_name} ${booking.customer_last_name}`,
-      route: `${booking.origin} → ${booking.destination}`,
-      status: booking.status || 'BOOKED'
+      customer_name: `${booking.customer_first_name ?? ""} ${
+        booking.customer_last_name ?? ""
+      }`,
+      route: `${booking.origin ?? "-"} → ${booking.destination ?? "-"}`,
     }));
   }, [bookings]);
 
@@ -37,17 +39,19 @@ const Bookings = () => {
   };
 
   const handleViewBooking = (bookingId) => {
-    // Implement view booking functionality
     console.log("View booking:", bookingId);
   };
 
   const handleEditBooking = (bookingId) => {
-    // Implement edit booking functionality
     console.log("Edit booking:", bookingId);
   };
 
   const handleDeleteBooking = async (booking) => {
-    if (window.confirm(`Are you sure you want to delete booking #${booking.id.slice(0, 8)}?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete booking #${booking.id.slice(0, 8)}?`
+      )
+    ) {
       const result = await deleteBooking(booking.id);
       if (result.success) {
         console.log("Booking deleted successfully");
@@ -86,11 +90,8 @@ const Bookings = () => {
     );
   }
 
-  // Calculate statistics
-  const totalBookings = bookings.length;
-  const inTransitBookings = bookings.filter(b => b.status === 'IN_TRANSIT').length;
-  const deliveredBookings = bookings.filter(b => b.status === 'DELIVERED').length;
-  const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.total_amount || 0), 0);
+  // ✅ Only count total bookings (based on your backend)
+  const totalBookings = Array.isArray(bookings) ? bookings.length : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -107,34 +108,13 @@ const Bookings = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <StatCard
               title="Total Bookings"
               value={totalBookings}
               color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
               icon={CubeIcon}
               bgIcon={<CubeIcon className="h-24 w-24" />}
-            />
-            <StatCard
-              title="In Transit"
-              value={inTransitBookings}
-              color="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white"
-              icon={TruckIcon}
-              bgIcon={<TruckIcon className="h-24 w-24" />}
-            />
-            <StatCard
-              title="Delivered"
-              value={deliveredBookings}
-              color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-              icon={TruckIcon}
-              bgIcon={<TruckIcon className="h-24 w-24" />}
-            />
-            <StatCard
-              title="Total Revenue"
-              value={`₱${totalRevenue.toLocaleString()}`}
-              color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
-              icon={CurrencyDollarIcon}
-              bgIcon={<CurrencyDollarIcon className="h-24 w-24" />}
             />
           </div>
 
@@ -145,10 +125,7 @@ const Bookings = () => {
             onEdit={handleEditBooking}
             onDelete={handleDeleteBooking}
             rightAction={
-              <button
-                onClick={handleAddBooking}
-                className="btn-primary"
-              >
+              <button onClick={handleAddBooking} className="btn-primary">
                 <PlusIcon className="h-5 w-5" />
                 New Booking
               </button>

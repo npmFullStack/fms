@@ -4,21 +4,22 @@ import Select from "react-select";
 import useTruckStore from "../../../utils/store/useTruckStore";
 
 const BookingStep3 = ({ control, errors, partners }) => {
+  const skipTrucking = useWatch({ control, name: "skipTrucking" });
   const pickupTruckerId = useWatch({ control, name: "pickup_trucker_id" });
   const deliveryTruckerId = useWatch({ control, name: "delivery_trucker_id" });
 
-  const { trucks, fetchAllTrucks } = useTruckStore();
+  const { trucks, fetchTrucks } = useTruckStore();
   const [filteredPickupTrucks, setFilteredPickupTrucks] = useState([]);
   const [filteredDeliveryTrucks, setFilteredDeliveryTrucks] = useState([]);
 
-  // Separate trucking companies
+  // Trucking companies
   const truckingCompanies = partners.filter((partner) => partner.type === "trucking");
 
   useEffect(() => {
-    fetchAllTrucks();
-  }, [fetchAllTrucks]);
+    fetchTrucks();
+  }, [fetchTrucks]);
 
-  // Filter trucks for pickup company
+  // Filter trucks for pickup
   useEffect(() => {
     if (pickupTruckerId) {
       setFilteredPickupTrucks(
@@ -29,7 +30,7 @@ const BookingStep3 = ({ control, errors, partners }) => {
     }
   }, [pickupTruckerId, trucks]);
 
-  // Filter trucks for delivery company
+  // Filter trucks for delivery
   useEffect(() => {
     if (deliveryTruckerId) {
       setFilteredDeliveryTrucks(
@@ -39,6 +40,15 @@ const BookingStep3 = ({ control, errors, partners }) => {
       setFilteredDeliveryTrucks([]);
     }
   }, [deliveryTruckerId, trucks]);
+
+  // Skip trucking if mode is Port-to-Port
+  if (skipTrucking) {
+    return (
+      <div className="p-4 text-gray-500 italic">
+        Trucking is not required for Port-to-Port bookings.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -76,7 +86,6 @@ const BookingStep3 = ({ control, errors, partners }) => {
           <Controller
             name="pickup_truck_id"
             control={control}
-            rules={{ required: "Pickup truck is required" }}
             render={({ field }) => (
               <Select
                 value={
@@ -143,7 +152,6 @@ const BookingStep3 = ({ control, errors, partners }) => {
           <Controller
             name="delivery_truck_id"
             control={control}
-            rules={{ required: "Delivery truck is required" }}
             render={({ field }) => (
               <Select
                 value={

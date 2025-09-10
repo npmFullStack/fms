@@ -40,6 +40,8 @@ const FitBounds = ({ positions }) => {
 
 const BookingStep4 = ({ control, errors, setValue }) => {
   const bookingMode = useWatch({ control, name: "booking_mode" });
+  const skipTrucking = useWatch({ control, name: "skipTrucking" });
+
   const originPort = useWatch({ control, name: "origin_port" });
   const destinationPort = useWatch({ control, name: "destination_port" });
   const pickup = useWatch({ control, name: "pickup_location" });
@@ -48,7 +50,6 @@ const BookingStep4 = ({ control, errors, setValue }) => {
   const [pickupCoords, setPickupCoords] = useState(null);
   const [deliveryCoords, setDeliveryCoords] = useState(null);
 
-  // Suggestions
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [deliverySuggestions, setDeliverySuggestions] = useState([]);
 
@@ -72,21 +73,21 @@ const BookingStep4 = ({ control, errors, setValue }) => {
 
   // Pickup suggestions
   useEffect(() => {
-    if (debouncedPickup && bookingMode === "DOOR_TO_DOOR") {
+    if (debouncedPickup && !skipTrucking) {
       geocode(debouncedPickup).then((results) =>
         setPickupSuggestions(results.slice(0, 5))
       );
     } else setPickupSuggestions([]);
-  }, [debouncedPickup, bookingMode]);
+  }, [debouncedPickup, skipTrucking]);
 
   // Delivery suggestions
   useEffect(() => {
-    if (debouncedDelivery && bookingMode === "DOOR_TO_DOOR") {
+    if (debouncedDelivery && !skipTrucking) {
       geocode(debouncedDelivery).then((results) =>
         setDeliverySuggestions(results.slice(0, 5))
       );
     } else setDeliverySuggestions([]);
-  }, [debouncedDelivery, bookingMode]);
+  }, [debouncedDelivery, skipTrucking]);
 
   const selectPickup = (s) => {
     setValue("pickup_location", s.display_name);
@@ -104,7 +105,7 @@ const BookingStep4 = ({ control, errors, setValue }) => {
     setDeliverySuggestions([]);
   };
 
-  // Ports (now just strings, not objects)
+  // Ports
   const originPortObj = originPort ? getPortByValue(originPort) : null;
   const destinationPortObj = destinationPort
     ? getPortByValue(destinationPort)
@@ -113,19 +114,16 @@ const BookingStep4 = ({ control, errors, setValue }) => {
   // Marker positions
   const positions = useMemo(() => {
     const pts = [];
-    if (bookingMode === "DOOR_TO_DOOR" && pickupCoords)
-      pts.push([pickupCoords.lat, pickupCoords.lng]);
+    if (!skipTrucking && pickupCoords) pts.push([pickupCoords.lat, pickupCoords.lng]);
     if (originPortObj) pts.push([originPortObj.lat, originPortObj.lng]);
-    if (destinationPortObj)
-      pts.push([destinationPortObj.lat, destinationPortObj.lng]);
-    if (bookingMode === "DOOR_TO_DOOR" && deliveryCoords)
-      pts.push([deliveryCoords.lat, deliveryCoords.lng]);
+    if (destinationPortObj) pts.push([destinationPortObj.lat, destinationPortObj.lng]);
+    if (!skipTrucking && deliveryCoords) pts.push([deliveryCoords.lat, deliveryCoords.lng]);
     return pts;
-  }, [pickupCoords, originPortObj, destinationPortObj, deliveryCoords, bookingMode]);
+  }, [pickupCoords, originPortObj, destinationPortObj, deliveryCoords, skipTrucking]);
 
   return (
     <div className="space-y-4">
-      {bookingMode === "DOOR_TO_DOOR" ? (
+      {!skipTrucking && (
         <>
           {/* Pickup Input */}
           <div className="relative">
@@ -189,7 +187,7 @@ const BookingStep4 = ({ control, errors, setValue }) => {
             )}
           </div>
         </>
-      ) : null}
+      )}
 
       {/* Map */}
       <div className="h-96 w-full rounded-lg overflow-hidden border relative z-0">
@@ -206,7 +204,7 @@ const BookingStep4 = ({ control, errors, setValue }) => {
           <FitBounds positions={positions} />
 
           {/* Markers */}
-          {bookingMode === "DOOR_TO_DOOR" && pickupCoords && (
+          {!skipTrucking && pickupCoords && (
             <Marker position={pickupCoords} icon={markerIcon("green")}>
               <Popup>Pickup: {pickup}</Popup>
             </Marker>
@@ -230,14 +228,14 @@ const BookingStep4 = ({ control, errors, setValue }) => {
               <Popup>Destination Port: {destinationPortObj.label}</Popup>
             </Marker>
           )}
-          {bookingMode === "DOOR_TO_DOOR" && deliveryCoords && (
+          {!skipTrucking && deliveryCoords && (
             <Marker position={deliveryCoords} icon={markerIcon("red")}>
               <Popup>Delivery: {delivery}</Popup>
             </Marker>
           )}
 
           {/* Routes */}
-          {bookingMode === "DOOR_TO_DOOR" && pickupCoords && originPortObj && (
+          {!skipTrucking && pickupCoords && originPortObj && (
             <Polyline
               positions={[
                 [pickupCoords.lat, pickupCoords.lng],
@@ -255,29 +253,25 @@ const BookingStep4 = ({ control, errors, setValue }) => {
               pathOptions={{ color: "blue", weight: 4, dashArray: "10, 10" }}
             />
           )}
-          {bookingMode === "DOOR_TO_DOOR" &&
-            destinationPortObj &&
-            deliveryCoords && (
-              <Polyline
-                positions={[
-                  [destinationPortObj.lat, destinationPortObj.lng],
-                  [deliveryCoords.lat, deliveryCoords.lng],
-                ]}
-                pathOptions={{ color: "red", weight: 4 }}
-              />
-            )}
+          {!skipTrucking && destinationPortObj && deliveryCoords && (
+            <Polyline
+              positions={[
+                [destinationPortObj.lat, destinationPortObj.lng],
+                [deliveryCoords.lat, deliveryCoords.lng],
+              ]}
+              pathOptions={{ color: "red", weight: 4 }}
+            />
+          )}
         </MapContainer>
       </div>
 
       {/* Legend */}
       <div className="flex flex-wrap gap-6 text-sm mt-2">
-        {bookingMode === "DOOR_TO_DOOR" && (
-          <>
-            <div className="flex items-center gap-1">
-              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-              Pickup
-            </div>
-          </>
+        {!skipTrucking && (
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+            Pickup
+          </div>
         )}
         <div className="flex items-center gap-1">
           <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
@@ -287,7 +281,7 @@ const BookingStep4 = ({ control, errors, setValue }) => {
           <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
           Destination Port
         </div>
-        {bookingMode === "DOOR_TO_DOOR" && (
+        {!skipTrucking && (
           <>
             <div className="flex items-center gap-1">
               <span className="w-3 h-3 bg-red-500 rounded-full"></span>
@@ -303,7 +297,7 @@ const BookingStep4 = ({ control, errors, setValue }) => {
           <span className="w-6 h-0.5 border-t-2 border-blue-500 border-dashed"></span>
           Sea Route (Origin → Destination Port)
         </div>
-        {bookingMode === "DOOR_TO_DOOR" && (
+        {!skipTrucking && (
           <div className="flex items-center gap-1">
             <span className="w-6 h-0.5 bg-red-500"></span>
             Truck Out (Destination Port → Delivery)
