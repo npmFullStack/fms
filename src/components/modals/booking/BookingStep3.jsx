@@ -93,7 +93,7 @@ const BookingStep3 = ({ control, errors, partners }) => {
                     ? filteredPickupTrucks
                         .map((truck) => ({
                           value: truck.id,
-                          label: `${truck.plate_number} (${truck.model})`,
+label: `${truck.plate_number} (${truck.name})`,
                         }))
                         .find((opt) => opt.value === field.value) || null
                     : null
@@ -101,7 +101,7 @@ const BookingStep3 = ({ control, errors, partners }) => {
                 onChange={(option) => field.onChange(option ? option.value : "")}
                 options={filteredPickupTrucks.map((truck) => ({
                   value: truck.id,
-                  label: `${truck.plate_number} (${truck.model})`,
+label: `${truck.plate_number} (${truck.name})`,
                 }))}
                 placeholder={
                   filteredPickupTrucks.length > 0
@@ -159,7 +159,7 @@ const BookingStep3 = ({ control, errors, partners }) => {
                     ? filteredDeliveryTrucks
                         .map((truck) => ({
                           value: truck.id,
-                          label: `${truck.plate_number} (${truck.model})`,
+                          label: `${truck.plate_number} (${truck.name})`,
                         }))
                         .find((opt) => opt.value === field.value) || null
                     : null
@@ -167,7 +167,7 @@ const BookingStep3 = ({ control, errors, partners }) => {
                 onChange={(option) => field.onChange(option ? option.value : "")}
                 options={filteredDeliveryTrucks.map((truck) => ({
                   value: truck.id,
-                  label: `${truck.plate_number} (${truck.model})`,
+                  label: `${truck.plate_number} (${truck.name})`,
                 }))}
                 placeholder={
                   filteredDeliveryTrucks.length > 0
