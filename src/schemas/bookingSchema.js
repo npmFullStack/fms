@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Allowed values
-const containerTypes = ["LCL", "20FT", "40FT"];
+const containerTypes = ["LCL", "20FT", "40FT", "40FT_HC"];
 const bookingModes = [
   "DOOR_TO_DOOR",
   "PIER_TO_PIER",
@@ -20,7 +20,7 @@ const statusTypes = [
 
 /**
  * STEP 1: Shipper / Customer Info
- * Includes auto-generated numbers (optional, filled after backend insert)
+ * Auto-generated numbers come from backend
  */
 export const step1Schema = z.object({
   hwb_number: z.string().optional().nullable(),
@@ -37,7 +37,7 @@ export const step1Schema = z.object({
 });
 
 /**
- * STEP 2: Shipping Details (ship, ports, container, commodity, mode)
+ * STEP 2: Shipping Details
  */
 export const step2Schema = z.object({
   shipping_line_id: z.string().min(1, { message: "Shipping line is required" }),
@@ -56,7 +56,7 @@ export const step2Schema = z.object({
 });
 
 /**
- * STEP 3: Trucking (optional, depends on booking mode)
+ * STEP 3: Trucking
  */
 export const step3Schema = z.object({
   pickup_trucker_id: z.string().optional().or(z.literal("")),
@@ -67,15 +67,14 @@ export const step3Schema = z.object({
 
 /**
  * STEP 4: Locations & Map
- * Pickup/Delivery only required for DOOR_TO_DOOR mode.
  */
 export const step4Schema = z.object({
   pickup_location: z.string().optional(),
   delivery_location: z.string().optional(),
-  pickup_lat: z.number().optional(),
-  pickup_lng: z.number().optional(),
-  delivery_lat: z.number().optional(),
-  delivery_lng: z.number().optional(),
+  pickup_lat: z.number().optional().nullable(),
+  pickup_lng: z.number().optional().nullable(),
+  delivery_lat: z.number().optional().nullable(),
+  delivery_lng: z.number().optional().nullable(),
 });
 
 /**

@@ -1,7 +1,7 @@
 // pages/booking/Bookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import { PlusIcon, CubeIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, CubeIcon, TruckIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
 import BookingTable from "../../components/tables/BookingTable";
@@ -18,60 +18,45 @@ const Bookings = () => {
 
   const [isAddBookingModalOpen, setIsAddBookingModalOpen] = useState(false);
 
-  // Format bookings for table
-  const formattedBookings = useMemo(() => {
-    if (!Array.isArray(bookings)) return [];
-    return bookings.map((booking) => ({
-      ...booking,
-      customer_name: `${booking.customer_first_name ?? ""} ${
-        booking.customer_last_name ?? ""
-      }`,
-      route: `${booking.origin ?? "-"} → ${booking.destination ?? "-"}`,
-    }));
-  }, [bookings]);
-
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
 
-  const handleAddBooking = () => {
-    setIsAddBookingModalOpen(true);
-  };
+  // Always ensure bookings is an array
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
 
-  const handleViewBooking = (bookingId) => {
-    console.log("View booking:", bookingId);
-  };
+  // Format bookings for table
+  const formattedBookings = useMemo(() => {
+    return safeBookings.map((booking) => ({
+      ...booking,
+      customer_name: `${booking.first_name ?? ""} ${booking.last_name ?? ""}`,
+      route: `${booking.origin_port ?? "-"} → ${booking.destination_port ?? "-"}`,
+    }));
+  }, [safeBookings]);
 
-  const handleEditBooking = (bookingId) => {
-    console.log("Edit booking:", bookingId);
-  };
+  // Count bookings by status safely
+  const countByStatus = (status) =>
+    safeBookings.filter((b) => b.status === status).length;
 
+  const totalBookings = safeBookings.length;
+
+  const handleAddBooking = () => setIsAddBookingModalOpen(true);
+  const handleViewBooking = (id) => console.log("View booking:", id);
+  const handleEditBooking = (id) => console.log("Edit booking:", id);
   const handleDeleteBooking = async (booking) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete booking #${booking.id.slice(0, 8)}?`
-      )
-    ) {
-      const result = await deleteBooking(booking.id);
-      if (result.success) {
-        console.log("Booking deleted successfully");
-      }
+    if (window.confirm(`Delete booking #${booking.id.slice(0, 8)}?`)) {
+      await deleteBooking(booking.id);
     }
   };
 
-  const StatCard = ({ title, value, color, icon: Icon, bgIcon }) => (
-    <div className={`stat-card ${color}`}>
-      <div className="stat-icon-bg">{bgIcon}</div>
-      <div className="stat-content">
-        <div>
-          <p className="stat-title">{title}</p>
-          <p className="stat-value">{value}</p>
-        </div>
-        <div className="flex-shrink-0">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <Icon className="h-6 w-6" />
-          </div>
-        </div>
+  const StatCard = ({ title, value, icon: Icon, color }) => (
+    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-md">
+      <div>
+        <p className="text-sm text-gray-500">{title}</p>
+        <p className="text-2xl font-bold">{value}</p>
+      </div>
+      <div className={`p-3 rounded-full ${color}`}>
+        <Icon className="h-6 w-6 text-white" />
       </div>
     </div>
   );
@@ -90,31 +75,26 @@ const Bookings = () => {
     );
   }
 
-  // ✅ Only count total bookings (based on your backend)
-  const totalBookings = Array.isArray(bookings) ? bookings.length : 0;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="relative z-10 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
-              Booking Management
-            </h1>
-            <p className="text-slate-600 text-lg">
-              Manage and track all your freight bookings in one place
-            </p>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800 mb-1">Booking Management</h1>
+            <p className="text-slate-600">Manage and track all freight bookings</p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Stat Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <StatCard title="Total" value={totalBookings} icon={CubeIcon} color="bg-blue-500" />
+            <StatCard title="Pending" value={countByStatus("PENDING")} icon={TruckIcon} color="bg-yellow-500" />
+            <StatCard title="In Transit" value={countByStatus("IN_TRANSIT")} icon={TruckIcon} color="bg-purple-500" />
             <StatCard
-              title="Total Bookings"
-              value={totalBookings}
-              color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-              icon={CubeIcon}
-              bgIcon={<CubeIcon className="h-24 w-24" />}
+              title="Completed"
+              value={countByStatus("DELIVERED") + countByStatus("COMPLETED")}
+              icon={CheckCircleIcon}
+              color="bg-green-600"
             />
           </div>
 
@@ -125,7 +105,7 @@ const Bookings = () => {
             onEdit={handleEditBooking}
             onDelete={handleDeleteBooking}
             rightAction={
-              <button onClick={handleAddBooking} className="btn-primary">
+              <button onClick={handleAddBooking} className="btn-primary flex items-center gap-2">
                 <PlusIcon className="h-5 w-5" />
                 New Booking
               </button>

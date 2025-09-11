@@ -1,3 +1,4 @@
+// components/modals/AddBooking.jsx
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,13 +14,6 @@ import BookingStep2 from "./booking/BookingStep2";
 import BookingStep3 from "./booking/BookingStep3";
 import BookingStep4 from "./booking/BookingStep4";
 import BookingStep5 from "./booking/BookingStep5";
-
-// -- Generators --
-const generateBookingNumber = () => {
-  return "V000" + Math.floor(10000 + Math.random() * 90000);
-};
-
-let hwbCounter = 1;
 
 const AddBooking = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -51,12 +45,16 @@ const AddBooking = ({ isOpen, onClose }) => {
     resolver: zodResolver(bookingSchema),
     mode: "onChange",
     defaultValues: {
-      hwb_number: "",
-      booking_number: "",
+      // Step 1
+      hwb_number: "", // backend will generate
+      booking_number: "", // backend will generate
       shipper: "",
       first_name: "",
       last_name: "",
+      email: "",
       phone: "",
+
+      // Step 2
       shipping_line_id: "",
       ship_id: "",
       container_type: "20FT",
@@ -64,23 +62,31 @@ const AddBooking = ({ isOpen, onClose }) => {
       booking_mode: "DOOR_TO_DOOR",
       origin_port: "",
       destination_port: "",
-      origin_lat: "",
-      origin_lng: "",
-      destination_lat: "",
-      destination_lng: "",
-      pickup_stuffing_date: "",
+      commodity: "",
+
+      // Step 3
+      pickup_trucker_id: "",
+      pickup_truck_id: "",
+      delivery_trucker_id: "",
+      delivery_truck_id: "",
+
+      // Step 4
+      pickup_location: "",
+      delivery_location: "",
+      pickup_lat: undefined,
+      pickup_lng: undefined,
+      delivery_lat: undefined,
+      delivery_lng: undefined,
+
+      // Step 5
       preferred_departure: "",
       preferred_delivery: "",
-      commodity: "",
       van_number: "",
       seal_number: "",
       status: "PENDING",
-      trucker_id: "",
-      pickup_trucker_id: "",
-      delivery_trucker_id: "",
-      pickup_location: "",
-      delivery_location: "",
-      skipTrucking: false, // 👈 new field
+
+      // Helpers
+      skipTrucking: false,
     },
   });
 
@@ -89,18 +95,26 @@ const AddBooking = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      const newHwb = String(hwbCounter).padStart(4, "0");
-      setValue("hwb_number", newHwb);
-      hwbCounter += 1;
-      setValue("booking_number", generateBookingNumber());
       fetchPartners();
     }
-  }, [isOpen, setValue, fetchPartners]);
+  }, [isOpen, fetchPartners]);
 
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
-      const result = await createBooking(data);
+
+      const cleanedData = {
+        ...data,
+        pickup_trucker_id: data.pickup_trucker_id || null,
+        pickup_truck_id: data.pickup_truck_id || null,
+        delivery_trucker_id: data.delivery_trucker_id || null,
+        delivery_truck_id: data.delivery_truck_id || null,
+        preferred_delivery: data.preferred_delivery || null,
+        van_number: data.van_number || null,
+        seal_number: data.seal_number || null,
+      };
+
+      const result = await createBooking(cleanedData);
       if (result.success) {
         setSuccessMessage("Booking created successfully");
         setTimeout(() => handleClose(), 1500);
@@ -142,7 +156,7 @@ const AddBooking = ({ isOpen, onClose }) => {
         getValues={getValues}
       />
     ),
-    5: <BookingStep5 control={control} />,
+    5: <BookingStep5 control={control} partners={partners} />,
   };
 
   const tooltips = {
@@ -155,7 +169,7 @@ const AddBooking = ({ isOpen, onClose }) => {
 
   const handleNext = () => {
     if (currentStep === 2 && skipTrucking) {
-      setCurrentStep(4); // 👈 skip step 3 if PIER_TO_PIER
+      setCurrentStep(4);
     } else {
       setCurrentStep((s) => s + 1);
     }
@@ -163,7 +177,7 @@ const AddBooking = ({ isOpen, onClose }) => {
 
   const handlePrev = () => {
     if (currentStep === 4 && skipTrucking) {
-      setCurrentStep(2); // 👈 go back directly to step 2
+      setCurrentStep(2);
     } else {
       setCurrentStep((s) => s - 1);
     }
