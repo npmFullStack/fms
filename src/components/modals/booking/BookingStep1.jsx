@@ -1,35 +1,42 @@
 // src/components/modals/booking/BookingStep1.jsx
 import { Controller } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
+import Datetime from "react-datetime";
 import "react-phone-number-input/style.css";
+import "react-datetime/css/react-datetime.css";
+import moment from "moment";
 
 const BookingStep1 = ({ register, control, errors }) => {
   return (
     <div className="space-y-4">
-      {/* HWB Number (backend generated, readonly) */}
+      {/* Booking Date */}
       <div>
-        <label className="input-label-modern">HWB Number</label>
-        <input
-          {...register("hwb_number")}
-          className="input-field-modern bg-gray-100"
-          readOnly
+        <label className="input-label-modern">Booking Date</label>
+        <Controller
+          name="booking_date"
+          control={control}
+          rules={{ required: "Booking date is required" }}
+          render={({ field }) => (
+            <Datetime
+              {...field}
+              value={field.value ? moment(field.value) : ""}
+              onChange={(date) =>
+                field.onChange(moment(date).format("YYYY-MM-DD"))
+              }
+              timeFormat={false}
+              closeOnSelect={true}
+              inputProps={{
+                placeholder: "Select booking date",
+                className: `input-field-modern ${
+                  errors.booking_date ? "input-error" : ""
+                }`,
+              }}
+            />
+          )}
         />
-        <p className="text-xs text-gray-500">
-          Will be auto-generated after booking is created by backend
-        </p>
-      </div>
-
-      {/* Booking Number (backend generated, readonly) */}
-      <div>
-        <label className="input-label-modern">Booking Number</label>
-        <input
-          {...register("booking_number")}
-          className="input-field-modern bg-gray-100"
-          readOnly
-        />
-        <p className="text-xs text-gray-500">
-          Will be auto-generated after booking is created by backend
-        </p>
+        {errors.booking_date && (
+          <p className="error-message">{errors.booking_date.message}</p>
+        )}
       </div>
 
       {/* Shipper */}
@@ -54,9 +61,7 @@ const BookingStep1 = ({ register, control, errors }) => {
         <div>
           <label className="input-label-modern">First Name</label>
           <input
-            {...register("first_name", {
-              required: "First name is required",
-            })}
+            {...register("first_name")}
             placeholder="e.g. Juan"
             className={`input-field-modern ${
               errors.first_name ? "input-error" : ""
@@ -69,9 +74,7 @@ const BookingStep1 = ({ register, control, errors }) => {
         <div>
           <label className="input-label-modern">Last Name</label>
           <input
-            {...register("last_name", {
-              required: "Last name is required",
-            })}
+            {...register("last_name")}
             placeholder="e.g. Dela Cruz"
             className={`input-field-modern ${
               errors.last_name ? "input-error" : ""
@@ -89,14 +92,6 @@ const BookingStep1 = ({ register, control, errors }) => {
         <Controller
           name="phone"
           control={control}
-          rules={{
-            required: "Phone number is required",
-            validate: (value) =>
-              value &&
-              (value.startsWith("+63") || value.startsWith("63"))
-                ? true
-                : "Philippine numbers should start with +63 or 63",
-          }}
           render={({ field }) => (
             <PhoneInput
               {...field}

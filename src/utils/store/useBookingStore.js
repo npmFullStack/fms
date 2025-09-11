@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import api from "../../config/axios";
 
-const useBookingStore = create(set => ({
+const useBookingStore = create((set, get) => ({
     bookings: [],
     currentBooking: null,
     loading: false,
@@ -36,18 +36,18 @@ const useBookingStore = create(set => ({
         }
     },
 
-    // Create booking
-    createBooking: async (data) => {
+// Create booking
+createBooking: async (data) => {
   try {
     set({ loading: true, error: null });
 
-    const { hwb_number, booking_number, ...rest } = data; // remove read-only fields
+    // Normalize empty strings → null
     const payload = Object.fromEntries(
-      Object.entries(rest).map(([k, v]) => [k, v === "" ? null : v])
+      Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
     );
 
     const res = await api.post("/api/bookings", payload);
-    await set.getState().fetchBookings();
+    await get().fetchBookings();
     set({ loading: false });
     return { success: true, booking: res.data };
   } catch (err) {
@@ -57,32 +57,33 @@ const useBookingStore = create(set => ({
   }
 },
 
+// Update booking
+updateBooking: async (id, data) => {
+  try {
+    set({ loading: true, error: null });
 
-    // Update booking
-    updateBooking: async (id, data) => {
-        try {
-            set({ loading: true, error: null });
-            const payload = Object.fromEntries(
-                Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
-            );
-            const res = await api.put(`/api/bookings/${id}`, payload);
-            await set.getState().fetchBookings();
-            set({ loading: false });
-            return { success: true, booking: res.data };
-        } catch (err) {
-            const error =
-                err.response?.data?.error || "Failed to update booking";
-            set({ error, loading: false });
-            return { success: false, error };
-        }
-    },
+    const payload = Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
+    );
+
+    const res = await api.put(`/api/bookings/${id}`, payload);
+    await get().fetchBookings();
+    set({ loading: false });
+    return { success: true, booking: res.data };
+  } catch (err) {
+    const error = err.response?.data?.error || "Failed to update booking";
+    set({ error, loading: false });
+    return { success: false, error };
+  }
+},
+
 
     // Delete booking
     deleteBooking: async id => {
         try {
             set({ loading: true, error: null });
             await api.delete(`/api/bookings/${id}`);
-            await set.getState().fetchBookings();
+            await get().fetchBookings();
             set({ loading: false });
             return { success: true };
         } catch (err) {
@@ -100,7 +101,7 @@ const useBookingStore = create(set => ({
             const res = await api.patch(`/api/bookings/${id}/status`, {
                 status
             });
-            await set.getState().fetchBookings();
+            await get().fetchBookings();
             set({ loading: false });
             return { success: true, booking: res.data };
         } catch (err) {

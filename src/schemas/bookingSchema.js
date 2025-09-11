@@ -1,63 +1,29 @@
+// frontend/schemas/bookingSchema.js
 import { z } from "zod";
 
-// Allowed values
 const containerTypes = ["LCL", "20FT", "40FT", "40FT_HC"];
-const bookingModes = [
-  "DOOR_TO_DOOR",
-  "PIER_TO_PIER",
-  "CY_TO_DOOR",
-  "DOOR_TO_CY",
-  "CY_TO_CY",
-];
-const statusTypes = [
-  "PENDING",
-  "CONFIRMED",
-  "IN_TRANSIT",
-  "ARRIVED",
-  "DELIVERED",
-  "COMPLETED",
-];
+const bookingModes = ["DOOR_TO_DOOR","PIER_TO_PIER","CY_TO_DOOR","DOOR_TO_CY","CY_TO_CY"];
+const statusTypes = ["PENDING","PICKUP","IN_PORT","IN_TRANSIT","DELIVERED"];
 
-/**
- * STEP 1: Shipper / Customer Info
- * Auto-generated numbers come from backend
- */
 export const step1Schema = z.object({
-  hwb_number: z.string().optional().nullable(),
-  booking_number: z.string().optional().nullable(),
-  shipper: z.string().min(1, { message: "Shipper is required" }),
-  first_name: z.string().min(1, { message: "First name is required" }),
-  last_name: z.string().min(1, { message: "Last name is required" }),
-  email: z
-    .string()
-    .email({ message: "Invalid email" })
-    .optional()
-    .or(z.literal("")),
-  phone: z.string().min(1, { message: "Phone is required" }),
+  booking_date: z.string().min(1, "Booking date is required"),
+  shipper: z.string().min(1, "Shipper is required"),
+  first_name: z.string().optional().or(z.literal("")),
+  last_name: z.string().optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
 });
 
-/**
- * STEP 2: Shipping Details
- */
 export const step2Schema = z.object({
-  shipping_line_id: z.string().min(1, { message: "Shipping line is required" }),
-  ship_id: z.string().min(1, { message: "Ship is required" }),
-  container_type: z.enum(containerTypes, { message: "Invalid container type" }),
-  quantity: z
-    .coerce.number()
-    .int()
-    .min(1, { message: "Quantity must be at least 1" }),
-  booking_mode: z.enum(bookingModes, { message: "Invalid booking mode" }),
-  commodity: z.string().min(1, { message: "Commodity is required" }),
-  origin_port: z.string().min(1, { message: "Origin port is required" }),
-  destination_port: z
-    .string()
-    .min(1, { message: "Destination port is required" }),
+  shipping_line_id: z.string().min(1, "Shipping line is required"),
+  ship_id: z.string().min(1, "Ship is required"),
+  container_type: z.enum(containerTypes),
+  quantity: z.coerce.number().int().min(1),
+  booking_mode: z.enum(bookingModes),
+  commodity: z.string().min(1),
+  origin_port: z.string().min(1),
+  destination_port: z.string().min(1),
 });
 
-/**
- * STEP 3: Trucking
- */
 export const step3Schema = z.object({
   pickup_trucker_id: z.string().optional().or(z.literal("")),
   pickup_truck_id: z.string().optional().or(z.literal("")),
@@ -65,9 +31,6 @@ export const step3Schema = z.object({
   delivery_truck_id: z.string().optional().or(z.literal("")),
 });
 
-/**
- * STEP 4: Locations & Map
- */
 export const step4Schema = z.object({
   pickup_location: z.string().optional(),
   delivery_location: z.string().optional(),
@@ -77,35 +40,16 @@ export const step4Schema = z.object({
   delivery_lng: z.number().optional().nullable(),
 });
 
-/**
- * STEP 5: Dates & Other Info
- */
 export const step5Schema = z.object({
-  preferred_departure: z
-    .string()
-    .min(1, { message: "Preferred departure is required" }),
+  preferred_departure: z.string().min(1, "Preferred departure is required"),
   preferred_delivery: z.string().optional().or(z.literal("")),
-  van_number: z.string().optional().or(z.literal("")),
-  seal_number: z.string().optional().or(z.literal("")),
-  status: z.enum(statusTypes, { message: "Invalid status" }).default("PENDING"),
+  status: z.enum(statusTypes).default("PENDING"),
 });
 
-/**
- * Full schema for submission
- */
 export const bookingSchema = step1Schema
   .merge(step2Schema)
   .merge(step3Schema)
   .merge(step4Schema)
   .merge(step5Schema);
 
-/**
- * Step schemas for wizard validation
- */
-export const stepSchemas = [
-  step1Schema,
-  step2Schema,
-  step3Schema,
-  step4Schema,
-  step5Schema,
-];
+export const stepSchemas = [step1Schema, step2Schema, step3Schema, step4Schema, step5Schema];

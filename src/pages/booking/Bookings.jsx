@@ -1,7 +1,7 @@
 // pages/booking/Bookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import { PlusIcon, CubeIcon, TruckIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, CubeIcon, TruckIcon, CheckCircleIcon, BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
 import BookingTable from "../../components/tables/BookingTable";
@@ -22,7 +22,7 @@ const Bookings = () => {
     fetchBookings();
   }, [fetchBookings]);
 
-  // Always ensure bookings is an array - wrapped in useMemo
+  // Safe array
   const safeBookings = useMemo(() => 
     Array.isArray(bookings) ? bookings : [], 
     [bookings]
@@ -37,7 +37,7 @@ const Bookings = () => {
     }));
   }, [safeBookings]);
 
-  // Count bookings by status safely
+  // Count by status (enum-based)
   const countByStatus = (status) =>
     safeBookings.filter((b) => b.status === status).length;
 
@@ -98,7 +98,7 @@ const Bookings = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <StatCard
               title="Total Bookings"
               value={totalBookings}
@@ -116,16 +116,24 @@ const Bookings = () => {
             />
 
             <StatCard
-              title="In Transit"
-              value={countByStatus("IN_TRANSIT")}
-              color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
+              title="Pickup"
+              value={countByStatus("PICKUP")}
+              color="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
               icon={TruckIcon}
               bgIcon={<TruckIcon className="h-24 w-24" />}
             />
 
             <StatCard
-              title="Completed"
-              value={countByStatus("DELIVERED") + countByStatus("COMPLETED")}
+              title="In Transit"
+              value={countByStatus("IN_TRANSIT")}
+              color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
+              icon={BuildingLibraryIcon}
+              bgIcon={<BuildingLibraryIcon className="h-24 w-24" />}
+            />
+
+            <StatCard
+              title="Delivered"
+              value={countByStatus("DELIVERED")}
               color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
               icon={CheckCircleIcon}
               bgIcon={<CheckCircleIcon className="h-24 w-24" />}

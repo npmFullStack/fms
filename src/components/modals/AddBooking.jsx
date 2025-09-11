@@ -46,12 +46,10 @@ const AddBooking = ({ isOpen, onClose }) => {
     mode: "onChange",
     defaultValues: {
       // Step 1
-      hwb_number: "", // backend will generate
-      booking_number: "", // backend will generate
+      booking_date: "",
       shipper: "",
       first_name: "",
       last_name: "",
-      email: "",
       phone: "",
 
       // Step 2
@@ -160,7 +158,7 @@ const AddBooking = ({ isOpen, onClose }) => {
   };
 
   const tooltips = {
-    1: "Enter shipper and contact details",
+    1: "Enter booking date, shipper and contact details",
     2: "Select shipping line, ship, ports, container, and service mode",
     3: "Choose trucking company and truck (if applicable)",
     4: "Set pickup and delivery locations with map",

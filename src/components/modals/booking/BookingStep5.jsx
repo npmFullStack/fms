@@ -2,7 +2,6 @@
 import { useWatch } from "react-hook-form";
 import { getPortByValue } from "../../../utils/helpers/shipRoutes";
 import useTruckStore from "../../../utils/store/useTruckStore";
-import usePartnerStore from "../../../utils/store/usePartnerStore";
 
 const containerTypes = {
   LCL: "LCL",
@@ -27,25 +26,25 @@ const BookingStep5 = ({ control, partners = [], ships = [] }) => {
   const originPort = data.origin_port ? getPortByValue(data.origin_port) : null;
   const destinationPort = data.destination_port ? getPortByValue(data.destination_port) : null;
 
-  // Find ship vessel/van number
+  // Ship
   const getShipLabel = (id) => {
     if (!id) return "—";
     const ship = ships.find((s) => String(s.id) === String(id));
-    return ship ? ship.vessel_number || ship.van_number : `Ship #${id}`;
+    return ship ? ship.vessel_number : "—";
   };
 
-  // Find trucking company names
+  // Trucking company
   const getCompanyName = (id) => {
-    if (!id || !Array.isArray(partners)) return "N/A";
+    if (!id || !Array.isArray(partners)) return "—";
     const company = partners.find((p) => String(p.id) === String(id));
-    return company ? company.name : `Company #${id}`;
+    return company ? company.name : "—";
   };
 
-  // Find truck details
+  // Truck
   const getTruckLabel = (id) => {
     if (!id) return "";
     const truck = trucks.find((t) => String(t.id) === String(id));
-    return truck ? `${truck.plate_number} (${truck.model})` : `Truck #${id}`;
+    return truck ? `${truck.plate_number} (${truck.name || "Truck"})` : "";
   };
 
   return (
@@ -56,9 +55,9 @@ const BookingStep5 = ({ control, partners = [], ships = [] }) => {
       <div>
         <h4 className="font-medium mb-2">Shipper Info</h4>
         <ul className="list-disc list-inside space-y-1">
-          <li>Company/Shipper: {data.shipper}</li>
+          <li>Company/Shipper: {data.shipper || "—"}</li>
           <li>Contact: {data.first_name} {data.last_name}</li>
-          <li>Phone: {data.phone}</li>
+          <li>Phone: {data.phone || "—"}</li>
         </ul>
       </div>
 
@@ -66,18 +65,17 @@ const BookingStep5 = ({ control, partners = [], ships = [] }) => {
       <div>
         <h4 className="font-medium mb-2">Shipment</h4>
         <ul className="list-disc list-inside space-y-1">
-          <li>Booking #: {data.booking_number || "—"}</li>
-          <li>HWB #: {data.hwb_number || "—"}</li>
           <li>
-            Container: {data.quantity} × {containerTypes[data.container_type] || data.container_type}
+            Container: {data.quantity} × {containerTypes[data.container_type] || data.container_type || "—"}
           </li>
           <li>
-            Mode: {bookingModes[data.booking_mode] || data.booking_mode}
+            Mode: {bookingModes[data.booking_mode] || data.booking_mode || "—"}
           </li>
           <li>
-            Route: {originPort?.label || data.origin_port} → {destinationPort?.label || data.destination_port}
+            Route: {originPort?.label || data.origin_port || "—"} →{" "}
+            {destinationPort?.label || data.destination_port || "—"}
           </li>
-          <li>Commodity: {data.commodity}</li>
+          <li>Commodity: {data.commodity || "—"}</li>
           <li>Ship: {getShipLabel(data.ship_id)}</li>
         </ul>
       </div>
