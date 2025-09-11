@@ -22,8 +22,11 @@ const Bookings = () => {
     fetchBookings();
   }, [fetchBookings]);
 
-  // Always ensure bookings is an array
-  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  // Always ensure bookings is an array - wrapped in useMemo
+  const safeBookings = useMemo(() => 
+    Array.isArray(bookings) ? bookings : [], 
+    [bookings]
+  );
 
   // Format bookings for table
   const formattedBookings = useMemo(() => {
@@ -49,14 +52,19 @@ const Bookings = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-md">
-      <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
-      </div>
-      <div className={`p-3 rounded-full ${color}`}>
-        <Icon className="h-6 w-6 text-white" />
+  const StatCard = ({ title, value, color, icon: Icon, bgIcon }) => (
+    <div className={`stat-card ${color}`}>
+      <div className="stat-icon-bg">{bgIcon}</div>
+      <div className="stat-content">
+        <div>
+          <p className="stat-title">{title}</p>
+          <p className="stat-value">{value}</p>
+        </div>
+        <div className="flex-shrink-0">
+          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+            <Icon className="h-6 w-6" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -78,23 +86,49 @@ const Bookings = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="relative z-10 p-6">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-1">Booking Management</h1>
-            <p className="text-slate-600">Manage and track all freight bookings</p>
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
+              Booking Management
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Manage and track all freight bookings
+            </p>
           </div>
 
-          {/* Stat Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <StatCard title="Total" value={totalBookings} icon={CubeIcon} color="bg-blue-500" />
-            <StatCard title="Pending" value={countByStatus("PENDING")} icon={TruckIcon} color="bg-yellow-500" />
-            <StatCard title="In Transit" value={countByStatus("IN_TRANSIT")} icon={TruckIcon} color="bg-purple-500" />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              title="Total Bookings"
+              value={totalBookings}
+              color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+              icon={CubeIcon}
+              bgIcon={<CubeIcon className="h-24 w-24" />}
+            />
+
+            <StatCard
+              title="Pending"
+              value={countByStatus("PENDING")}
+              color="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white"
+              icon={TruckIcon}
+              bgIcon={<TruckIcon className="h-24 w-24" />}
+            />
+
+            <StatCard
+              title="In Transit"
+              value={countByStatus("IN_TRANSIT")}
+              color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
+              icon={TruckIcon}
+              bgIcon={<TruckIcon className="h-24 w-24" />}
+            />
+
             <StatCard
               title="Completed"
               value={countByStatus("DELIVERED") + countByStatus("COMPLETED")}
+              color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
               icon={CheckCircleIcon}
-              color="bg-green-600"
+              bgIcon={<CheckCircleIcon className="h-24 w-24" />}
             />
           </div>
 

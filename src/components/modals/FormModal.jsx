@@ -18,7 +18,7 @@ const FormModal = ({
   infoBox,
   buttonText = "Add",
   children,
-  footer, // 👈 NEW optional override
+  footer,
 }) => {
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
