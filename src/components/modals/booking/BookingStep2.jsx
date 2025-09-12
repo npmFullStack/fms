@@ -4,12 +4,6 @@ import Select from "react-select";
 import { PH_PORTS } from "../../../utils/helpers/shipRoutes";
 import useShipStore from "../../../utils/store/useShipStore";
 
-const containerTypes = [
-  { value: "LCL", label: "LCL" },
-  { value: "20FT", label: "1X20" },
-  { value: "40FT", label: "1X40" },
-];
-
 const bookingModes = [
   { value: "DOOR_TO_DOOR", label: "Door to Door (D-D)" },
   { value: "PIER_TO_PIER", label: "Port to Port (P-P)" },
@@ -20,7 +14,10 @@ const bookingModes = [
 
 const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
   const shippingLineId = useWatch({ control, name: "shipping_line_id" });
-  const { ships, fetchAllShips } = useShipStore();
+  const selectedShipId = useWatch({ control, name: "ship_id" });
+
+  const { ships, fetchAllShips, currentShip, fetchShipById, clearCurrentShip } =
+    useShipStore();
   const [filteredShips, setFilteredShips] = useState([]);
 
   // Filter partners by shipping type
@@ -38,6 +35,15 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
       setFilteredShips([]);
     }
   }, [shippingLineId, fetchAllShips, ships]);
+
+  // Fetch containers when ship changes
+  useEffect(() => {
+    if (selectedShipId) {
+      fetchShipById(selectedShipId);
+    } else {
+      clearCurrentShip();
+    }
+  }, [selectedShipId, fetchShipById, clearCurrentShip]);
 
   return (
     <div className="space-y-4">
@@ -60,6 +66,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
               onChange={(option) => {
                 field.onChange(option ? option.value : "");
                 setValue("ship_id", ""); // reset ship when line changes
+                setValue("container_id", ""); // reset container too
               }}
               options={shippingLines.map((line) => ({
                 value: line.id,
@@ -94,7 +101,10 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                       .find((opt) => opt.value === field.value) || null
                   : null
               }
-              onChange={(option) => field.onChange(option ? option.value : "")}
+              onChange={(option) => {
+                field.onChange(option ? option.value : "");
+                setValue("container_id", ""); // reset container if ship changes
+              }}
               options={filteredShips.map((ship) => ({
                 value: ship.id,
                 label: ship.vessel_number || `Ship ${ship.id}`,
@@ -164,36 +174,46 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         )}
       </div>
 
-      {/* Container Type + Quantity */}
+      {/* Container (Dynamic) */}
       <div>
         <label className="input-label-modern">Container</label>
         <Controller
-          name="container_type"
+          name="container_id"
           control={control}
-          rules={{ required: "Container type is required" }}
+          rules={{ required: "Container is required" }}
           render={({ field }) => (
             <Select
               value={
                 field.value
-                  ? containerTypes.find((c) => c.value === field.value) || null
+                  ? currentShip?.containers
+                      ?.map((c) => ({
+                        value: c.id,
+                        label: `${c.size} - ${c.van_number}`,
+                      }))
+                      .find((opt) => opt.value === field.value) || null
                   : null
               }
               onChange={(option) => field.onChange(option ? option.value : "")}
-              options={containerTypes}
-              placeholder="Select container"
+              options={
+                currentShip?.containers?.map((c) => ({
+                  value: c.id,
+                  label: `${c.size} - ${c.van_number}`,
+                })) || []
+              }
+              placeholder={
+                selectedShipId
+                  ? currentShip?.containers?.length > 0
+                    ? "Select container"
+                    : "No containers available"
+                  : "Select ship first"
+              }
+              isDisabled={!selectedShipId}
               isClearable
             />
           )}
         />
-        <input
-          type="number"
-          min="1"
-          {...register("quantity", { required: "Quantity is required" })}
-          className="input-field-modern mt-2"
-          placeholder="Enter quantity"
-        />
-        {errors.quantity && (
-          <p className="error-message">{errors.quantity.message}</p>
+        {errors.container_id && (
+          <p className="error-message">{errors.container_id.message}</p>
         )}
       </div>
 
