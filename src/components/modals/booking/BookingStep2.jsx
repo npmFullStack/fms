@@ -21,14 +21,18 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
   const [filteredShips, setFilteredShips] = useState([]);
 
   // Filter partners by shipping type
-  const shippingLines = partners.filter((partner) => partner.type === "shipping");
+  const shippingLines = partners.filter(
+    (partner) => partner.type === "shipping"
+  );
 
   // Fetch ships when shipping line changes
   useEffect(() => {
     if (shippingLineId) {
       fetchAllShips().then(() => {
         setFilteredShips(
-          ships.filter((s) => String(s.shipping_line_id) === String(shippingLineId))
+          ships.filter(
+            (s) => String(s.shipping_line_id) === String(shippingLineId)
+          )
         );
       });
     } else {
@@ -64,9 +68,10 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   : null
               }
               onChange={(option) => {
-                field.onChange(option ? option.value : "");
-                setValue("ship_id", ""); // reset ship when line changes
-                setValue("container_id", ""); // reset container too
+                field.onChange(option ? option.value : null);
+                setValue("ship_id", null); // reset ship when line changes
+                setValue("container_id", null); // reset container too
+                setValue("van_number", null); // reset van number
               }}
               options={shippingLines.map((line) => ({
                 value: line.id,
@@ -102,8 +107,9 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   : null
               }
               onChange={(option) => {
-                field.onChange(option ? option.value : "");
-                setValue("container_id", ""); // reset container if ship changes
+                field.onChange(option ? option.value : null);
+                setValue("container_id", null); // reset container if ship changes
+                setValue("van_number", null);
               }}
               options={filteredShips.map((ship) => ({
                 value: ship.id,
@@ -136,7 +142,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   ? PH_PORTS.find((p) => p.value === field.value) || null
                   : null
               }
-              onChange={(option) => field.onChange(option ? option.value : "")}
+              onChange={(option) => field.onChange(option ? option.value : null)}
               options={PH_PORTS}
               placeholder="Select origin port"
               isClearable
@@ -162,7 +168,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   ? PH_PORTS.find((p) => p.value === field.value) || null
                   : null
               }
-              onChange={(option) => field.onChange(option ? option.value : "")}
+              onChange={(option) => field.onChange(option ? option.value : null)}
               options={PH_PORTS}
               placeholder="Select destination port"
               isClearable
@@ -193,7 +199,21 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                       .find((opt) => opt.value === field.value) || null
                   : null
               }
-              onChange={(option) => field.onChange(option ? option.value : "")}
+              onChange={(option) => {
+                const id = option ? option.value : null;
+                field.onChange(id);
+
+                if (id) {
+                  const selected = currentShip?.containers?.find(
+                    (c) => String(c.id) === String(id)
+                  );
+                  if (selected) {
+                    setValue("van_number", selected.van_number); // ✅ only keep van_number for Step5 display
+                  }
+                } else {
+                  setValue("van_number", null);
+                }
+              }}
               options={
                 currentShip?.containers?.map((c) => ({
                   value: c.id,
@@ -247,13 +267,8 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
                   : null
               }
               onChange={(option) => {
-                field.onChange(option ? option.value : "");
-                // Skip trucking steps if PIER_TO_PIER
-                if (option?.value === "PIER_TO_PIER") {
-                  setValue("skipTrucking", true);
-                } else {
-                  setValue("skipTrucking", false);
-                }
+                field.onChange(option ? option.value : null);
+                setValue("skipTrucking", option?.value === "PIER_TO_PIER");
               }}
               options={bookingModes}
               placeholder="Select mode"

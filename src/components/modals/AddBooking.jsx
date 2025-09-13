@@ -55,7 +55,7 @@ const AddBooking = ({ isOpen, onClose }) => {
       // Step 2
       shipping_line_id: "",
       ship_id: "",
-      container_type: "20FT",
+      container_id: "",   // ✅ now required instead of container_type
       quantity: 1,
       booking_mode: "DOOR_TO_DOOR",
       origin_port: "",
@@ -79,8 +79,6 @@ const AddBooking = ({ isOpen, onClose }) => {
       // Step 5
       preferred_departure: "",
       preferred_delivery: "",
-      van_number: "",
-      seal_number: "",
       status: "PENDING",
 
       // Helpers
@@ -101,15 +99,21 @@ const AddBooking = ({ isOpen, onClose }) => {
     try {
       setIsLoading(true);
 
+      // normalize empty strings → null
+      const normalize = (val) =>
+        val === "" || val === undefined ? null : val;
+
       const cleanedData = {
         ...data,
-        pickup_trucker_id: data.pickup_trucker_id || null,
-        pickup_truck_id: data.pickup_truck_id || null,
-        delivery_trucker_id: data.delivery_trucker_id || null,
-        delivery_truck_id: data.delivery_truck_id || null,
-        preferred_delivery: data.preferred_delivery || null,
-        van_number: data.van_number || null,
-        seal_number: data.seal_number || null,
+        shipping_line_id: normalize(data.shipping_line_id),
+        ship_id: normalize(data.ship_id),
+        container_id: normalize(data.container_id),
+        pickup_trucker_id: normalize(data.pickup_trucker_id),
+        pickup_truck_id: normalize(data.pickup_truck_id),
+        delivery_trucker_id: normalize(data.delivery_trucker_id),
+        delivery_truck_id: normalize(data.delivery_truck_id),
+        preferred_departure: normalize(data.preferred_departure),
+        preferred_delivery: normalize(data.preferred_delivery),
       };
 
       const result = await createBooking(cleanedData);

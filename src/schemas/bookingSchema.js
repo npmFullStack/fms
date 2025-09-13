@@ -1,9 +1,21 @@
 // frontend/schemas/bookingSchema.js
 import { z } from "zod";
 
-const containerTypes = ["LCL", "20FT", "40FT"];
-const bookingModes = ["DOOR_TO_DOOR","PIER_TO_PIER","CY_TO_DOOR","DOOR_TO_CY","CY_TO_CY"];
-const statusTypes = ["PENDING","PICKUP","IN_PORT","IN_TRANSIT","DELIVERED"];
+const bookingModes = [
+  "DOOR_TO_DOOR",
+  "PIER_TO_PIER",
+  "CY_TO_DOOR",
+  "DOOR_TO_CY",
+  "CY_TO_CY",
+];
+
+const statusTypes = [
+  "PENDING",
+  "PICKUP",
+  "IN_PORT",
+  "IN_TRANSIT",
+  "DELIVERED",
+];
 
 export const step1Schema = z.object({
   booking_date: z.string().min(1, "Booking date is required"),
@@ -16,7 +28,7 @@ export const step1Schema = z.object({
 export const step2Schema = z.object({
   shipping_line_id: z.string().min(1, "Shipping line is required"),
   ship_id: z.string().min(1, "Ship is required"),
-  container_type: z.enum(containerTypes),
+  container_id: z.string().min(1, "Container is required"), // ✅ now required
   quantity: z.coerce.number().int().min(1),
   booking_mode: z.enum(bookingModes),
   commodity: z.string().min(1),
@@ -52,4 +64,10 @@ export const bookingSchema = step1Schema
   .merge(step4Schema)
   .merge(step5Schema);
 
-export const stepSchemas = [step1Schema, step2Schema, step3Schema, step4Schema, step5Schema];
+export const stepSchemas = [
+  step1Schema,
+  step2Schema,
+  step3Schema,
+  step4Schema,
+  step5Schema,
+];
