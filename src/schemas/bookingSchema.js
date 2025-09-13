@@ -1,7 +1,7 @@
 // frontend/schemas/bookingSchema.js
 import { z } from "zod";
 
-const containerTypes = ["LCL", "20FT", "40FT", "40FT_HC"];
+const containerTypes = ["LCL", "20FT", "40FT"];
 const bookingModes = ["DOOR_TO_DOOR","PIER_TO_PIER","CY_TO_DOOR","DOOR_TO_CY","CY_TO_CY"];
 const statusTypes = ["PENDING","PICKUP","IN_PORT","IN_TRANSIT","DELIVERED"];
 
