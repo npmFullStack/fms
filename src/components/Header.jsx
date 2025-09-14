@@ -20,7 +20,10 @@ const Header = () => {
                     const offsetTop = element.offsetTop;
                     const offsetHeight = element.offsetHeight;
 
-                    if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                    if (
+                        scrollPosition >= offsetTop &&
+                        scrollPosition < offsetTop + offsetHeight
+                    ) {
                         setActiveSection(section);
                         return;
                     }
@@ -48,7 +51,10 @@ const Header = () => {
                         const offsetTop = element.offsetTop;
                         const offsetHeight = element.offsetHeight;
 
-                        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                        if (
+                            scrollPosition >= offsetTop &&
+                            scrollPosition < offsetTop + offsetHeight
+                        ) {
                             setActiveSection(section);
                             return;
                         }
@@ -59,7 +65,7 @@ const Header = () => {
         }
     }, [location.pathname]);
 
-    const handleClick = (sectionId) => {
+    const handleClick = sectionId => {
         if (location.pathname !== "/") {
             // If not on home page, navigate to home page first
             window.location.href = `/#${sectionId}`;
@@ -76,7 +82,10 @@ const Header = () => {
     return (
         <>
             {/* Mobile Header - shown only on mobile */}
-            <MobileHeader activeSection={activeSection} handleClick={handleClick} />
+            <MobileHeader
+                activeSection={activeSection}
+                handleClick={handleClick}
+            />
 
             {/* Desktop Header - shown only on desktop */}
             <header className="w-full bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 hidden md:block">
@@ -84,7 +93,7 @@ const Header = () => {
                     {/* Logo */}
                     <div className="flex flex-col text-left">
                         <p className="gradient font-bold text-sm md:text-lg">
-                            XTRA-MILE NORWAY POGI FREIGHT FORWARDING-INC
+                            XTRA-MILE FREIGHT FORWARDING-INC
                         </p>
                         <p className="text-gray-800 font-semibold text-xs md:text-sm">
                             FREIGHT MONITORING SYSTEM
@@ -96,7 +105,8 @@ const Header = () => {
                         <button
                             onClick={() => handleClick("home")}
                             className={`pb-1 ${
-                                activeSection === "home" && location.pathname === "/"
+                                activeSection === "home" &&
+                                location.pathname === "/"
                                     ? "text-blue-600 font-semibold border-b-2 border-blue-600"
                                     : "text-gray-700 hover:text-blue-600"
                             }`}
@@ -107,7 +117,8 @@ const Header = () => {
                         <button
                             onClick={() => handleClick("how-it-works")}
                             className={`pb-1 ${
-                                activeSection === "how-it-works" && location.pathname === "/"
+                                activeSection === "how-it-works" &&
+                                location.pathname === "/"
                                     ? "text-blue-600 font-semibold border-b-2 border-blue-600"
                                     : "text-gray-700 hover:text-blue-600"
                             }`}
@@ -118,7 +129,8 @@ const Header = () => {
                         <button
                             onClick={() => handleClick("why-choose-us")}
                             className={`pb-1 ${
-                                activeSection === "why-choose-us" && location.pathname === "/"
+                                activeSection === "why-choose-us" &&
+                                location.pathname === "/"
                                     ? "text-blue-600 font-semibold border-b-2 border-blue-600"
                                     : "text-gray-700 hover:text-blue-600"
                             }`}
