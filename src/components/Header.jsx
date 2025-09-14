@@ -84,7 +84,7 @@ const Header = () => {
                     {/* Logo */}
                     <div className="flex flex-col text-left">
                         <p className="gradient font-bold text-sm md:text-lg">
-                            XTRA-MILE FREIGHT FORWARDING-INC
+                            XTRA-MILE NORWAY POGI FREIGHT FORWARDING-INC
                         </p>
                         <p className="text-gray-800 font-semibold text-xs md:text-sm">
                             FREIGHT MONITORING SYSTEM
