@@ -1,10 +1,20 @@
 // pages/booking/Bookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import { PlusIcon, CubeIcon, TruckIcon, CheckCircleIcon, BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  CubeIcon,
+  TruckIcon,
+  CheckCircleIcon,
+  BuildingLibraryIcon,
+} from "@heroicons/react/24/outline";
+
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
+import UpdateBooking from "../../components/modals/UpdateBooking";
+import DeleteBooking from "../../components/modals/DeleteBooking";
 import BookingTable from "../../components/tables/BookingTable";
+import BulkActionBar from "../../components/BulkActionBar";
 
 const Bookings = () => {
   const {
@@ -17,14 +27,21 @@ const Bookings = () => {
   } = useBookingStore();
 
   const [isAddBookingModalOpen, setIsAddBookingModalOpen] = useState(false);
+  const [isUpdateBookingModalOpen, setIsUpdateBookingModalOpen] =
+    useState(false);
+  const [isDeleteBookingModalOpen, setIsDeleteBookingModalOpen] =
+    useState(false);
+
+  const [selectedBookings, setSelectedBookings] = useState([]);
+  const [activeBookingId, setActiveBookingId] = useState(null);
 
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
 
   // Safe array
-  const safeBookings = useMemo(() => 
-    Array.isArray(bookings) ? bookings : [], 
+  const safeBookings = useMemo(
+    () => (Array.isArray(bookings) ? bookings : []),
     [bookings]
   );
 
@@ -32,8 +49,12 @@ const Bookings = () => {
   const formattedBookings = useMemo(() => {
     return safeBookings.map((booking) => ({
       ...booking,
-      customer_name: `${booking.first_name ?? ""} ${booking.last_name ?? ""}`,
-      route: `${booking.origin_port ?? "-"} → ${booking.destination_port ?? "-"}`,
+      customer_name: `${booking.first_name ?? ""} ${
+        booking.last_name ?? ""
+      }`.trim(),
+      route: `${booking.origin_port ?? "-"} → ${
+        booking.destination_port ?? "-"
+      }`,
     }));
   }, [safeBookings]);
 
@@ -43,13 +64,23 @@ const Bookings = () => {
 
   const totalBookings = safeBookings.length;
 
+  // Handlers
   const handleAddBooking = () => setIsAddBookingModalOpen(true);
-  const handleViewBooking = (id) => console.log("View booking:", id);
-  const handleEditBooking = (id) => console.log("Edit booking:", id);
+
+  const handleEditBooking = (id) => {
+    setActiveBookingId(id);
+    setIsUpdateBookingModalOpen(true);
+  };
+
   const handleDeleteBooking = async (booking) => {
     if (window.confirm(`Delete booking #${booking.id.slice(0, 8)}?`)) {
       await deleteBooking(booking.id);
     }
+  };
+
+  const handleBulkDelete = (ids) => {
+    setActiveBookingId(ids); // pass array of ids
+    setIsDeleteBookingModalOpen(true);
   };
 
   const StatCard = ({ title, value, color, icon: Icon, bgIcon }) => (
@@ -70,6 +101,7 @@ const Bookings = () => {
   );
 
   if (loading) return <Loading />;
+
   if (error) {
     return (
       <div className="page-container">
@@ -140,18 +172,29 @@ const Bookings = () => {
             />
           </div>
 
-          {/* Bookings Table */}
+          {/* Table */}
           <BookingTable
             data={formattedBookings}
-            onView={handleViewBooking}
             onEdit={handleEditBooking}
             onDelete={handleDeleteBooking}
+            onSelectionChange={setSelectedBookings}
             rightAction={
-              <button onClick={handleAddBooking} className="btn-primary flex items-center gap-2">
+              <button
+                onClick={handleAddBooking}
+                className="btn-primary flex items-center gap-2"
+              >
                 <PlusIcon className="h-5 w-5" />
                 New Booking
               </button>
             }
+          />
+
+          {/* Bulk Actions */}
+          <BulkActionBar
+            selected={selectedBookings}
+            onEdit={(id) => handleEditBooking(id)}
+            onPrint={(ids) => console.log("Print:", ids)}
+            onDelete={handleBulkDelete}
           />
         </div>
       </div>
@@ -160,6 +203,20 @@ const Bookings = () => {
       <AddBooking
         isOpen={isAddBookingModalOpen}
         onClose={() => setIsAddBookingModalOpen(false)}
+      />
+
+      {/* Update Booking Modal */}
+      <UpdateBooking
+        isOpen={isUpdateBookingModalOpen}
+        onClose={() => setIsUpdateBookingModalOpen(false)}
+        bookingId={activeBookingId}
+      />
+
+      {/* Delete Booking Modal */}
+      <DeleteBooking
+        isOpen={isDeleteBookingModalOpen}
+        onClose={() => setIsDeleteBookingModalOpen(false)}
+        bookingIds={activeBookingId}
       />
     </div>
   );

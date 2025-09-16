@@ -18,7 +18,6 @@ const statusTypes = [
 ];
 
 export const step1Schema = z.object({
-  booking_date: z.string().min(1, "Booking date is required"),
   shipper: z.string().min(1, "Shipper is required"),
   first_name: z.string().optional().or(z.literal("")),
   last_name: z.string().optional().or(z.literal("")),

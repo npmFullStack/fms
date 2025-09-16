@@ -17,8 +17,6 @@ const BookingStep5 = ({ control, partners = [] }) => {
   const { trucks } = useTruckStore();
   const { ships } = useShipStore();
 
-  // DEBUG: Log form data
-  console.log("Form data in Step5:", data);
 
   // Ports
   const originPort = data.origin_port

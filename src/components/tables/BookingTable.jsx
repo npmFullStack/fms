@@ -1,10 +1,7 @@
 // components/tables/BookingTable.jsx
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
-    EyeIcon,
-    PencilIcon,
-    TrashIcon,
     ChevronUpIcon,
     ChevronDownIcon,
     CubeIcon
@@ -12,9 +9,30 @@ import {
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 
-const BookingTable = ({ data, onView, onEdit, onDelete, rightAction }) => {
+const BookingTable = ({ data, rightAction, onSelectionChange }) => {
     const columns = useMemo(
         () => [
+            {
+                id: "select",
+                header: ({ table }) => (
+                    <input
+                        type="checkbox"
+                        checked={table.getIsAllRowsSelected?.()}
+                        onChange={e =>
+                            table.toggleAllRowsSelected?.(e.target.checked)
+                        }
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <input
+                        type="checkbox"
+                        checked={row.getIsSelected?.()}
+                        onChange={row.getToggleSelectedHandler?.()}
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                )
+            },
             {
                 accessorKey: "hwb_number",
                 header: "HWB #",
@@ -52,68 +70,69 @@ const BookingTable = ({ data, onView, onEdit, onDelete, rightAction }) => {
             {
                 accessorKey: "booking_mode",
                 header: "Mode of Service",
-                cell: ({ row }) => (
-                    <span className="capitalize">
-                        {row.original.booking_mode
-                            ?.toLowerCase()
-                            .replace(/_/g, " ") || "—"}
-                    </span>
-                )
+                cell: ({ row }) => {
+                    const mode = row.original.booking_mode;
+                    const modeMap = {
+                        DOOR_TO_DOOR: {
+                            label: "DOOR-DOOR",
+                            color: "bg-orange-600 text-white"
+                        },
+                        PIER_TO_PIER: {
+                            label: "PORT-PORT",
+                            color: "bg-blue-600 text-white"
+                        },
+                        CY_TO_DOOR: {
+                            label: "CUSTOMER YARD-DOOR",
+                            color: "bg-purple-600 text-white"
+                        },
+                        DOOR_TO_CY: {
+                            label: "DOOR-CUSTOMER YARD",
+                            color: "bg-pink-600 text-white"
+                        },
+                        CY_TO_CY: {
+                            label: "CUSTOMER YARD-CUSTOMER YARD",
+                            color: "bg-green-600 text-white"
+                        }
+                    };
+                    const { label, color } = modeMap[mode] || {
+                        label: mode,
+                        color: "bg-gray-600 text-white"
+                    };
+
+                    return (
+                        <span
+                            className={`px-3 py-1 text-xs rounded-full font-semibold ${color}`}
+                        >
+                            {label}
+                        </span>
+                    );
+                }
             },
             {
                 accessorKey: "status",
                 header: "Status",
                 cell: ({ row }) => {
                     const statusColors = {
-                        pending: "bg-yellow-100 text-yellow-800",
-                        in_transit: "bg-blue-100 text-blue-800",
-                        delivered: "bg-green-100 text-green-800"
+                        pending: "bg-yellow-100 text-yellow-900",
+                        in_transit: "bg-blue-100 text-blue-900",
+                        delivered: "bg-green-100 text-green-900"
                     };
                     const status =
                         row.original.status?.toLowerCase() || "pending";
                     return (
                         <span
-                            className={`px-2 py-1 text-xs rounded-lg ${
-                                statusColors[status] ||
-                                "bg-gray-100 text-gray-800"
+                            className={`px-2 py-1 text-xs rounded-2xl
+                            font-medium ${
+                                statusColors[status] || "bg-gray-600 text-white"
                             }`}
                         >
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                         </span>
                     );
                 }
-            },
-            {
-                id: "actions",
-                header: "Actions",
-                cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onView(row.original.id)}
-                            className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
-                            title="View Booking"
-                        >
-                            <EyeIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => onEdit(row.original.id)}
-                            className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                            title="Edit Booking"
-                        >
-                            <PencilIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => onDelete(row.original)}
-                            className="action-btn bg-red-50 text-red-600 hover:bg-red-100"
-                            title="Delete Booking"
-                        >
-                            <TrashIcon className="w-4 h-4" />
-                        </button>
-                    </div>
-                )
             }
         ],
-        [onView, onEdit, onDelete]
+        []
     );
 
     const { table, globalFilter, setGlobalFilter } = useTable({
@@ -121,6 +140,15 @@ const BookingTable = ({ data, onView, onEdit, onDelete, rightAction }) => {
         columns
     });
     const { paginationInfo, actions } = usePagination(table, data?.length);
+
+    // 🔥 Fix ESLint warning by extracting rows first
+    const selectedRows = table.getSelectedRowModel().rows;
+    useEffect(() => {
+        if (onSelectionChange) {
+            const selectedIds = selectedRows.map(r => r.original.id);
+            onSelectionChange(selectedIds);
+        }
+    }, [selectedRows, onSelectionChange]);
 
     return (
         <div className="table-wrapper">
