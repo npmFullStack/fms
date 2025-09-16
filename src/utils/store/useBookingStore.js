@@ -12,7 +12,7 @@ const useBookingStore = create((set, get) => ({
     fetchBookings: async () => {
         try {
             set({ loading: true, error: null });
-            const res = await api.get("/api/bookings");
+            const res = await api.get("/bookings");
             set({ bookings: res.data.bookings || [], loading: false });
         } catch (err) {
             set({
@@ -26,7 +26,7 @@ const useBookingStore = create((set, get) => ({
     fetchBookingById: async id => {
         try {
             set({ loading: true, error: null });
-            const res = await api.get(`/api/bookings/${id}`);
+            const res = await api.get(`/bookings/${id}`);
             set({
                 currentBooking: res.data.booking || res.data,
                 loading: false
@@ -40,28 +40,28 @@ const useBookingStore = create((set, get) => ({
     },
 
     // Create booking
-    createBooking: async (data) => {
-  try {
-    set({ loading: true, error: null });
+    createBooking: async data => {
+        try {
+            set({ loading: true, error: null });
 
-    const payload = Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
-    );
+            const payload = Object.fromEntries(
+                Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
+            );
 
-    const res = await api.post("/api/bookings", payload);
+            const res = await api.post("/bookings", payload);
 
-    await get().fetchBookings();
+            await get().fetchBookings();
 
-    set({ loading: false });
+            set({ loading: false });
 
-    return { success: true, booking: res.data.booking }; // ✅ unwrap booking
-  } catch (err) {
-    const error = err.response?.data?.error || "Failed to create booking";
-    set({ error, loading: false });
-    return { success: false, error };
-  }
-},
-
+            return { success: true, booking: res.data.booking }; // ✅ unwrap booking
+        } catch (err) {
+            const error =
+                err.response?.data?.error || "Failed to create booking";
+            set({ error, loading: false });
+            return { success: false, error };
+        }
+    },
 
     // Update booking
     updateBooking: async (id, data) => {
@@ -72,7 +72,7 @@ const useBookingStore = create((set, get) => ({
                 Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
             );
 
-            const res = await api.put(`/api/bookings/${id}`, payload);
+            const res = await api.put(`/bookings/${id}`, payload);
             await get().fetchBookings();
             set({ loading: false });
             return { success: true, booking: res.data };
@@ -88,7 +88,7 @@ const useBookingStore = create((set, get) => ({
     deleteBooking: async id => {
         try {
             set({ loading: true, error: null });
-            await api.delete(`/api/bookings/${id}`);
+            await api.delete(`/bookings/${id}`);
             await get().fetchBookings();
             set({ loading: false });
             return { success: true };
@@ -104,7 +104,7 @@ const useBookingStore = create((set, get) => ({
     updateBookingStatus: async (id, status) => {
         try {
             set({ loading: true, error: null });
-            const res = await api.patch(`/api/bookings/${id}/status`, {
+            const res = await api.put(`/bookings/${id}/status`, {
                 status
             });
             await get().fetchBookings();

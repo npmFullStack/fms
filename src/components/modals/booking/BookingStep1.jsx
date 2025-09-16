@@ -9,39 +9,9 @@ import moment from "moment";
 const BookingStep1 = ({ register, control, errors }) => {
   return (
     <div className="space-y-4">
-      {/* Booking Date */}
-      <div>
-        <label className="input-label-modern">Booking Date</label>
-        <Controller
-          name="booking_date"
-          control={control}
-          rules={{ required: "Booking date is required" }}
-          render={({ field }) => (
-            <Datetime
-              {...field}
-              value={field.value ? moment(field.value) : ""}
-              onChange={(date) =>
-                field.onChange(moment(date).format("YYYY-MM-DD"))
-              }
-              timeFormat={false}
-              closeOnSelect={true}
-              inputProps={{
-                placeholder: "Select booking date",
-                className: `input-field-modern ${
-                  errors.booking_date ? "input-error" : ""
-                }`,
-              }}
-            />
-          )}
-        />
-        {errors.booking_date && (
-          <p className="error-message">{errors.booking_date.message}</p>
-        )}
-      </div>
-
       {/* Shipper */}
       <div>
-        <label className="input-label-modern">Shipper</label>
+        <label className="input-label-modern">Shipper *</label>
         <input
           {...register("shipper", {
             required: "Shipper is required",
@@ -106,6 +76,72 @@ const BookingStep1 = ({ register, control, errors }) => {
         {errors.phone && (
           <p className="error-message">{errors.phone.message}</p>
         )}
+      </div>
+
+      {/* Preferred Dates */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="input-label-modern">Preferred Departure Date *</label>
+          <Controller
+            name="preferred_departure"
+            control={control}
+            rules={{ required: "Preferred departure date is required" }}
+            render={({ field }) => (
+              <Datetime
+                {...field}
+                value={field.value ? moment(field.value) : ""}
+                onChange={(date) =>
+                  field.onChange(moment(date).format("YYYY-MM-DD"))
+                }
+                timeFormat={false}
+                closeOnSelect={true}
+                inputProps={{
+                  placeholder: "Select departure date",
+                  className: `input-field-modern ${
+                    errors.preferred_departure ? "input-error" : ""
+                  }`,
+                }}
+                isValidDate={(currentDate) => {
+                  // Only allow future dates
+                  return currentDate.isAfter(moment().subtract(1, 'day'));
+                }}
+              />
+            )}
+          />
+          {errors.preferred_departure && (
+            <p className="error-message">{errors.preferred_departure.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="input-label-modern">Preferred Delivery Date</label>
+          <Controller
+            name="preferred_delivery"
+            control={control}
+            render={({ field }) => (
+              <Datetime
+                {...field}
+                value={field.value ? moment(field.value) : ""}
+                onChange={(date) =>
+                  field.onChange(date ? moment(date).format("YYYY-MM-DD") : "")
+                }
+                timeFormat={false}
+                closeOnSelect={true}
+                inputProps={{
+                  placeholder: "Select delivery date (optional)",
+                  className: "input-field-modern",
+                }}
+                isValidDate={(currentDate) => {
+                  // Only allow future dates
+                  return currentDate.isAfter(moment().subtract(1, 'day'));
+                }}
+              />
+            )}
+          />
+          {errors.preferred_delivery && (
+            <p className="error-message">{errors.preferred_delivery.message}</p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ const useTruckStore = create((set, get) => ({
     fetchTrucks: async () => {
         set({ loading: true, error: null });
         try {
-            const res = await api.get("/api/trucks");
+            const res = await api.get("/trucks");
             set({ trucks: res.data, loading: false });
             return { success: true, data: res.data };
         } catch (err) {
@@ -26,7 +26,7 @@ const useTruckStore = create((set, get) => ({
     fetchTruckById: async id => {
         set({ loading: true, error: null });
         try {
-            const res = await api.get(`/api/trucks/${id}`);
+            const res = await api.get(`/trucks/${id}`);
             set({ currentTruck: res.data, loading: false });
             return { success: true, truck: res.data };
         } catch (err) {
@@ -40,7 +40,7 @@ const useTruckStore = create((set, get) => ({
     addTruck: async truckData => {
         set({ loading: true, error: null });
         try {
-            const res = await api.post("/api/trucks", truckData);
+            const res = await api.post("/trucks", truckData);
 
             // Refresh trucks list
             await get().fetchTrucks();
@@ -58,7 +58,7 @@ const useTruckStore = create((set, get) => ({
     updateTruck: async (id, updatedData) => {
         set({ loading: true, error: null });
         try {
-            const res = await api.put(`/api/trucks/${id}`, updatedData);
+            const res = await api.put(`/trucks/${id}`, updatedData);
 
             // Refresh trucks list
             await get().fetchAllTrucks();
@@ -76,7 +76,7 @@ const useTruckStore = create((set, get) => ({
     removeTruck: async id => {
         set({ loading: true, error: null });
         try {
-            await api.delete(`/api/trucks/${id}`);
+            await api.delete(`/trucks/${id}`);
 
             // Refresh trucks list
             await get().fetchAllTrucks();

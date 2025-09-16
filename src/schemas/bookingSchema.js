@@ -23,12 +23,14 @@ export const step1Schema = z.object({
   first_name: z.string().optional().or(z.literal("")),
   last_name: z.string().optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  preferred_departure: z.string().min(1, "Preferred departure is required"),
+  preferred_delivery: z.string().optional().or(z.literal("")),
 });
 
 export const step2Schema = z.object({
   shipping_line_id: z.string().min(1, "Shipping line is required"),
   ship_id: z.string().min(1, "Ship is required"),
-  container_id: z.string().min(1, "Container is required"), // ✅ now required
+  container_id: z.string().min(1, "Container is required"), 
   quantity: z.coerce.number().int().min(1),
   booking_mode: z.enum(bookingModes),
   commodity: z.string().min(1),
@@ -53,8 +55,7 @@ export const step4Schema = z.object({
 });
 
 export const step5Schema = z.object({
-  preferred_departure: z.string().min(1, "Preferred departure is required"),
-  preferred_delivery: z.string().optional().or(z.literal("")),
+  
   status: z.enum(statusTypes).default("PENDING"),
 });
 

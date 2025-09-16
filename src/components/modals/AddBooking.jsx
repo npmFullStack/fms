@@ -7,7 +7,6 @@ import useBookingStore from "../../utils/store/useBookingStore";
 import usePartnerStore from "../../utils/store/usePartnerStore";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
-
 // Steps
 import BookingStep1 from "./booking/BookingStep1";
 import BookingStep2 from "./booking/BookingStep2";
@@ -40,34 +39,36 @@ const AddBooking = ({ isOpen, onClose }) => {
     setValue,
     watch,
     getValues,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(bookingSchema),
     mode: "onChange",
     defaultValues: {
-      // Step 1
-      booking_date: "",
+      // Step 1 - removed booking_date, moved preferred dates here
       shipper: "",
       first_name: "",
       last_name: "",
       phone: "",
-
+      preferred_departure: "",
+      preferred_delivery: "",
+      
       // Step 2
       shipping_line_id: "",
       ship_id: "",
-      container_id: "",   // ✅ now required instead of container_type
+      container_id: "",
       quantity: 1,
       booking_mode: "DOOR_TO_DOOR",
       origin_port: "",
       destination_port: "",
       commodity: "",
-
+      
       // Step 3
       pickup_trucker_id: "",
       pickup_truck_id: "",
       delivery_trucker_id: "",
       delivery_truck_id: "",
-
+      
       // Step 4
       pickup_location: "",
       delivery_location: "",
@@ -75,12 +76,10 @@ const AddBooking = ({ isOpen, onClose }) => {
       pickup_lng: undefined,
       delivery_lat: undefined,
       delivery_lng: undefined,
-
+      
       // Step 5
-      preferred_departure: "",
-      preferred_delivery: "",
       status: "PENDING",
-
+      
       // Helpers
       skipTrucking: false,
     },
@@ -98,11 +97,11 @@ const AddBooking = ({ isOpen, onClose }) => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
-
+      
       // normalize empty strings → null
       const normalize = (val) =>
         val === "" || val === undefined ? null : val;
-
+        
       const cleanedData = {
         ...data,
         shipping_line_id: normalize(data.shipping_line_id),
@@ -116,6 +115,8 @@ const AddBooking = ({ isOpen, onClose }) => {
         preferred_delivery: normalize(data.preferred_delivery),
       };
 
+      console.log("Submitting booking data:", cleanedData); // Debug log
+
       const result = await createBooking(cleanedData);
       if (result.success) {
         setSuccessMessage("Booking created successfully");
@@ -124,9 +125,45 @@ const AddBooking = ({ isOpen, onClose }) => {
         setErrorMessage(result.error || "Failed to create booking");
       }
     } catch (err) {
+      console.error("Submit error:", err);
       setErrorMessage(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Step validation mapping
+  const stepValidationFields = {
+    1: ["shipper", "preferred_departure"],
+    2: ["shipping_line_id", "ship_id", "container_id", "commodity", "origin_port", "destination_port"],
+    3: [], // Optional fields
+    4: [], // Optional fields  
+    5: [], // Review only
+  };
+
+  const handleNext = async () => {
+    // Validate current step fields
+    const fieldsToValidate = stepValidationFields[currentStep];
+    if (fieldsToValidate && fieldsToValidate.length > 0) {
+      const isValid = await trigger(fieldsToValidate);
+      if (!isValid) {
+        console.log("Validation failed for step", currentStep, "Fields:", fieldsToValidate);
+        return; // Don't proceed if validation fails
+      }
+    }
+
+    if (currentStep === 2 && skipTrucking) {
+      setCurrentStep(4);
+    } else {
+      setCurrentStep((s) => s + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStep === 4 && skipTrucking) {
+      setCurrentStep(2);
+    } else {
+      setCurrentStep((s) => s - 1);
     }
   };
 
@@ -162,27 +199,11 @@ const AddBooking = ({ isOpen, onClose }) => {
   };
 
   const tooltips = {
-    1: "Enter booking date, shipper and contact details",
+    1: "Enter shipper details and preferred dates",
     2: "Select shipping line, ship, ports, container, and service mode",
     3: "Choose trucking company and truck (if applicable)",
     4: "Set pickup and delivery locations with map",
     5: "Review all booking details before submission",
-  };
-
-  const handleNext = () => {
-    if (currentStep === 2 && skipTrucking) {
-      setCurrentStep(4);
-    } else {
-      setCurrentStep((s) => s + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStep === 4 && skipTrucking) {
-      setCurrentStep(2);
-    } else {
-      setCurrentStep((s) => s - 1);
-    }
   };
 
   const footerButtons = (
@@ -213,6 +234,11 @@ const AddBooking = ({ isOpen, onClose }) => {
       </button>
     </div>
   );
+
+  // Debug current errors
+  console.log("Current step:", currentStep);
+  console.log("Form errors:", errors);
+  console.log("Form values:", getValues());
 
   return (
     <FormModal
