@@ -2,6 +2,10 @@ import { z } from "zod";
 
 export const shipSchema = z.object({
   shippingLineId: z.string().uuid("Invalid Shipping Line ID"),
+shipName: z
+  .string()
+  .min(1, { message: "Ship name is required" })
+  .max(100, { message: "Ship name cannot exceed 100 characters" }),
 
   vesselNumber: z
     .string()
