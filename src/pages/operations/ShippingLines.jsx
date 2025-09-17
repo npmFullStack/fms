@@ -225,13 +225,15 @@ const ShippingLines = () => {
         </div>
       </div>
 
-      {/* Add Ship Modal */}
-      <AddShip
-        isOpen={isAddShipOpen}
-        onClose={() => setIsAddShipOpen(false)}
-        onSubmit={handleAddShip}
-        shippingLineId={id}
-      />
+{/* Add Ship Modal */}
+<AddShip
+  isOpen={isAddShipOpen}
+  onClose={() => setIsAddShipOpen(false)}
+  onSubmit={handleAddShip}    
+  shippingLineId={id}
+/>
+
+
 
       {/* View Ship Modal */}
       <ViewShip
