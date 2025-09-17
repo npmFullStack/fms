@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XMFFI Waybill</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background: #f3f3f3; padding: 20px; margin: 0;">
+    <!-- Main Container -->
+    <div style="background: #fff; max-width: 700px; margin: auto; border: 2px solid #000; padding: 15px; box-sizing: border-box;">
+      
+      <!-- Header Section -->
+      <div style="display: flex; align-items: flex-end; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+        <!-- Logo -->
+        <div style="margin-right: 15px">
+          <!-- Globe with arrow -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="width: 60px; height: 60px">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="black" stroke-width="2" />
+            <path d="M2 32h60M32 2c8 10 8 50 0 60M2 20h60M2 44h60" stroke="black" stroke-width="2" />
+            <path d="M40 16l12 12-12 12" stroke="black" stroke-width="3" />
+          </svg>
+        </div>
+
+        <!-- XMFFI Text -->
+        <div style="margin-right: 20px">
+          <div style="font-size: 32px; font-weight: bold; line-height: 1;">XMFFI</div>
+          <div style="font-size: 8px; line-height: 1.2; margin-top: 5px;">
+            X-TRA MILE FREIGHT FORWARDING INC.
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div style="font-size: 9px; line-height: 1; flex-grow: 1">
+          {{COMPANY_ADDRESS}}<br />
+          NON VAT REG. TIN: {{TIN}}
+        </div>
+
+        <!-- Waybill Number -->
+        <div style="font-size: 14px; font-weight: bold; white-space: nowrap;">
+          <span>WAYBILL</span>
+          <span style="color: red; margin-left: 5px">N⁰</span>
+          <span style="color: red">{{HWB_NUMBER}}</span>
+        </div>
+      </div>
+
+      <!-- Body Section -->
+      <div style="display: flex;">
+        
+        <!-- Column 1: Shipper -->
+        <div style="flex: 1; border: 1px solid #000; border-right: none">
+          <!-- A & B Rectangles -->
+          <div style="display: flex; height: 40px; border-bottom: 1px solid #000;">
+            <div style="flex: 1; border-right: 1px solid #000; padding: 5px;">
+              <div style="text-transform: uppercase; font-size: 8px; font-weight: bold;">ACCOUNT NO.</div>
+              <div>{{ACCOUNT_NO}}</div>
+            </div>
+            <div style="flex: 1; padding: 5px">
+              <div style="text-transform: uppercase; font-size: 8px; font-weight: bold;">SHIPPER'S<br />REFERENCE:</div>
+              <div>{{SHIPPER_REF}}</div>
+            </div>
+          </div>
+
+          <!-- FROM/SHIPPER -->
+          <div style="display: flex; justify-content: space-between; font-size: 8px; padding: 5px; border-bottom: 1px solid #000;">
+            <div>FROM:</div><div>(SHIPPER)BY:</div>
+          </div>
+
+          <!-- Shipper Box -->
+          <div style="padding: 5px; border-bottom: 1px solid #000; height: 80px; position: relative;">
+            <div style="font-weight: bold; margin-bottom: 5px">{{SHIPPER}}</div>
+            <div style="margin-bottom: 5px">{{SHIPPER_ADDRESS}}</div>
+            <div style="position: absolute; bottom: 5px; left: 5px; font-size: 8px;">
+              Phone/Fax: {{SHIPPER_PHONE}}
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div style="padding: 5px; font-size: 8px; height: 100px">
+            <div style="text-transform: uppercase; font-weight: bold; margin-bottom: 5px; text-align: center;">
+              DESCRIPTION OF PACKAGING CONTENTS
+            </div>
+            <div>{{COMMODITY}}</div>
+            <div>{{CONTAINER_NO}}</div>
+            <div>***NOTHING FOLLOWS***</div>
+          </div>
+        </div>
+
+        <!-- Column 2: Consignee -->
+        <div style="flex: 1; border: 1px solid #000; border-right: none; border-top: none;">
+          <!-- Blank Row -->
+          <div style="height: 40px; border-bottom: 1px solid #000"></div>
+
+          <!-- TO/CONSIGNEE -->
+          <div style="display: flex; justify-content: space-between; font-size: 8px; padding: 5px; border-bottom: 1px solid #000;">
+            <div>TO:</div><div>(CONSIGNEE)ATTENTION OF:</div>
+          </div>
+
+          <!-- Consignee Box -->
+          <div style="padding: 5px; border-bottom: 1px solid #000; height: 80px; position: relative;">
+            <div style="font-weight: bold; margin-bottom: 5px">{{CONSIGNEE}}</div>
+            <div style="margin-bottom: 5px">{{CONSIGNEE_ADDRESS}}</div>
+            <div style="position: absolute; bottom: 5px; left: 5px; font-size: 8px;">
+              Phone/Fax: {{CONSIGNEE_PHONE}}
+            </div>
+          </div>
+
+          <!-- Dimensions -->
+          <div style="padding: 5px; font-size: 8px; height: 100px">
+            <div style="text-transform: uppercase; font-weight: bold; text-align: center; margin-bottom: 5px;">DIMENSIONS: KGS/CBM</div>
+            <div style="display: flex; justify-content: space-between; text-align: center; margin-bottom: 5px;">
+              <div style="flex: 1">{{PCS}}</div>
+              <div style="flex: 1">{{LENGTH}}</div>
+              <div style="flex: 1">{{WIDTH}}</div>
+              <div style="flex: 1">{{HEIGHT}}</div>
+              <div style="flex: 1">{{ACTUAL_WEIGHT}}</div>
+              <div style="flex: 1">{{VOLUMETRIC_WEIGHT}}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 8px; padding: 5px 10px; gap: 20px;">
+              <div style="text-align: left">TOTAL ACTUAL WEIGHT: {{TOTAL_ACTUAL_WEIGHT}}</div>
+              <div style="text-align: left">TOTAL VOLUMETRIC WEIGHT: {{TOTAL_VOL_WEIGHT}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Summary -->
+        <div style="width: 240px; border: 1px solid #000; font-size: 8px;">
+          <!-- Mini Rectangles -->
+          <div style="display: flex;">
+            <div style="width: 45px; height: 35px; border: 1px solid #000; display: flex; justify-content: center; align-items: center; font-weight: bold;">
+              {{ORIGIN_PORT}}
+            </div>
+            <div style="width: 45px; height: 35px; border: 1px solid #000; display: flex; justify-content: center; align-items: center; font-weight: bold;">
+              {{DESTINATION_PORT}}
+            </div>
+            <div style="width: 45px; height: 35px; border: 1px solid #000; display: flex; justify-content: center; align-items: center; font-weight: bold;">
+              {{PIECES}}
+            </div>
+            <div style="width: 105px; height: 35px; border: 1px solid #000; display: flex; justify-content: center; align-items: center; font-weight: bold;">
+              {{CHARGEABLE_WEIGHT}}
+            </div>
+          </div>
+
+          <!-- Mode of Transport -->
+          <div style="display: flex; height: 60px">
+            <div style="width: 90px; border: 1px solid #000; display: flex; flex-direction: column; justify-content: space-between; padding: 2px; font-weight: bold;">
+              <div style="display: flex; justify-content: center; gap: 25px;">
+                <span>SEA</span><span>AIR</span>
+              </div>
+              <div>OTHER</div>
+            </div>
+            <div style="width: 150px; border: 1px solid #000; display: flex; justify-content: space-evenly; align-items: center; font-size: 6px;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div>[ ] DOOR TO DOOR</div><div>[ ] DOOR TO DOOR</div><div>[ ] DOOR TO DOOR</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div>[ ] PORT TO PORT</div><div>[ ] PORT TO PORT</div><div>[ ] PORT TO PORT</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          <div style="display: flex; height: 50px">
+            <div style="width: 110px; border: 1px solid #000; display: flex; flex-direction: column; justify-content: space-between; padding: 2px;">
+              <div>CASH O.R NO. {{CASH_OR}}</div>
+              <div>CARD NO. {{CARD_NO}}</div>
+              <div>EXPIRY DATE {{EXPIRY_DATE}}</div>
+            </div>
+            <div style="width: 140px; border: 1px solid #000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px;">
+              <div style="font-weight: bold">MODE OF PAYMENT</div>
+              <div style="display: flex; gap: 20px; font-size: 7px;">
+                <div>[ ] Prepaid</div><div>[ ] Account</div><div>[ ] Collect</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charges -->
+          <div style="display: flex; height: 100px; border-top: 1px solid #000;">
+            <div style="width: 45px; border-right: 1px solid #000; display: flex; flex-direction: column; font-size: 6px; text-align: center;">
+              <div style="flex:1; border-bottom: 1px solid #000;">INSURANCE</div>
+              <div style="flex:1; border-bottom: 1px solid #000;">INSURED VALUE</div>
+              <div style="flex:1;">CRATING</div>
+            </div>
+            <div style="flex:1; display:flex; justify-content: space-between; padding:2px; font-size:7px;">
+              <div style="width:50%">
+                <div>FREIGHT CHARGES: {{FREIGHT_CHARGES}}</div>
+                <div>INSURANCE CHARGE: {{INSURANCE_CHARGE}}</div>
+                <div>OTHER CHARGES: {{OTHER_CHARGES}}</div>
+                <div style="margin-top:auto; font-weight:bold;">TOTAL: {{TOTAL_CHARGES}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="border: 1px solid #000; font-size: 10px; margin-top: 10px; padding: 10px;">
+        <div style="font-weight: bold; text-align: center; font-size: 7px;">
+          I WARRANT THAT ALL DETAILS GIVEN HEREIN ARE TRUE AND CORRECT
+        </div>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 9px;">
+          <span>SHIPPER'S SIGNATURE</span>
+          <span>DATE: {{DATE}}</span>
+          <span>TIME: {{TIME}}</span>
+        </div>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 9px;">
+          <span>CONSIGNEE'S SIGNATURE</span>
+          <span>Please Print Name</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
