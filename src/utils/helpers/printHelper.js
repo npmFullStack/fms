@@ -1,34 +1,30 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-export async function printBookings(bookings) {
-  // Create a wrapper to hold all bookings vertically
+export async function printBookings(bookings, mode = "print") {
+  // Build the long HTML wrapper
   const wrapper = document.createElement("div");
   wrapper.style.background = "#fff";
   wrapper.style.padding = "20px";
-  wrapper.style.width = "1024px"; // match your template width
+  wrapper.style.width = "1024px";
 
   for (let i = 0; i < bookings.length; i++) {
     const booking = bookings[i];
 
-    // Load template HTML
     const response = await fetch("/printHwb.html");
     let html = await response.text();
 
-    // Replace placeholders with booking data
     html = html
-      .replace("DEREC CO", booking.shipper || "")
-      .replace("CUGMAN, CDO", booking.origin_port || "")
-      .replace("2020", booking.hwb_number || "");
+      .replace(/{{SHIPPER}}/g, booking.shipper || "")
+      .replace(/{{ORIGIN}}/g, booking.origin_port || "")
+      .replace(/{{DESTINATION}}/g, booking.destination_port || "")
+      .replace(/{{HWB}}/g, booking.hwb_number || "");
 
-    // Booking container
     const container = document.createElement("div");
     container.innerHTML = html;
     container.style.marginBottom = "20px";
-
     wrapper.appendChild(container);
 
-    // Add dashed separator except for the last booking
     if (i < bookings.length - 1) {
       const separator = document.createElement("div");
       separator.style.borderTop = "2px dashed #000";
@@ -39,11 +35,11 @@ export async function printBookings(bookings) {
 
   document.body.appendChild(wrapper);
 
-  // Render all in one canvas
+  // Render to canvas
   const canvas = await html2canvas(wrapper, { scale: 2 });
   const imgData = canvas.toDataURL("image/png");
 
-  // Create PDF
+  // Build PDF
   const pdf = new jsPDF("p", "pt", "a4");
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -53,22 +49,27 @@ export async function printBookings(bookings) {
 
   let position = 0;
   while (position < imgHeight) {
-    pdf.addImage(
-      imgData,
-      "PNG",
-      0,
-      -position,
-      pageWidth,
-      imgHeight
-    );
+    pdf.addImage(imgData, "PNG", 0, -position, pageWidth, imgHeight);
     position += pageHeight;
     if (position < imgHeight) pdf.addPage();
   }
 
-  // Cleanup DOM
   document.body.removeChild(wrapper);
 
-  // Open print dialog
-  pdf.autoPrint();
-  window.open(pdf.output("bloburl"));
+  // Actions
+  if (mode === "download") {
+    pdf.save("Waybills.pdf");
+  } else {
+    pdf.autoPrint();
+
+    // Open the PDF in a new tab with autoPrint embedded
+    const printWindow = window.open(pdf.output("bloburl"), "_blank");
+
+    if (printWindow) {
+      // Close tab after printing dialog closes
+      printWindow.addEventListener("afterprint", () => {
+        printWindow.close();
+      });
+    }
+  }
 }

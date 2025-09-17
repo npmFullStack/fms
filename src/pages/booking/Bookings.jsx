@@ -198,11 +198,14 @@ const Bookings = () => {
   onEdit={(id) => handleEditBooking(id)}
   onPrint={(ids) => {
     const records = formattedBookings.filter(b => ids.includes(b.id));
-    printBookings(records);
+    printBookings(records, "print");
+  }}
+  onDownload={(ids) => {
+    const records = formattedBookings.filter(b => ids.includes(b.id));
+    printBookings(records, "download");
   }}
   onDelete={handleBulkDelete}
 />
-
                 </div>
             </div>
 
