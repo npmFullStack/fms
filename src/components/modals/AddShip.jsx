@@ -1,4 +1,4 @@
-// components/modals/AddShip.jsx
+// Fixed AddShip.jsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shipSchema } from "../../schemas/shipSchema";
@@ -32,15 +32,21 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
         resolver: zodResolver(shipSchema),
         mode: "onChange",
         defaultValues: {
+            shippingLineId, // ← ADD THIS! Same as AddContainer
             shipName: "",
             vesselNumber: "",
             remarks: ""
         }
     });
 
-    const handleFormSubmit = async data => {
+    // Use the same pattern as AddContainer
+    const onFormSubmit = async data => {
         try {
             setIsLoading(true);
+            setSuccessMessage("Adding ship...");
+
+            console.log("🚢 Form data being submitted:", data);
+
             const result = await onSubmit({ ...data, shippingLineId });
 
             if (result.success) {
@@ -53,10 +59,10 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
                     result.error || "Failed to add ship. Please try again."
                 );
             }
-        } catch (err) {
-            console.error("Error submitting ship:", err);
+        } catch (error) {
+            console.error("Error submitting form:", error);
             setErrorMessage(
-                err.message || "Failed to add ship. Please try again."
+                error.message || "Failed to add ship. Please try again."
             );
         } finally {
             setIsLoading(false);
@@ -137,10 +143,10 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
             }
             isLoading={isLoading}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit(handleFormSubmit)}
+            onSubmit={handleSubmit(onFormSubmit)} 
             fields={fields}
             infoBox={infoBox}
-            buttonText="Add"
+            buttonText="Add Ship" 
         />
     );
 };

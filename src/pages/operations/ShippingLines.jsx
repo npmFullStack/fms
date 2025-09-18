@@ -4,7 +4,7 @@ import {
   PlusCircleIcon,
   ArrowLeftIcon,
   CubeIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import ShipTable from "../../components/tables/ShipTable";
@@ -22,6 +22,8 @@ const ShippingLines = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const [activeTab, setActiveTab] = useState("ships");
+
   const [isAddShipOpen, setIsAddShipOpen] = useState(false);
   const [isUpdateShipOpen, setIsUpdateShipOpen] = useState(false);
   const [isDeleteShipOpen, setIsDeleteShipOpen] = useState(false);
@@ -33,7 +35,7 @@ const ShippingLines = () => {
     currentPartner,
     fetchPartnerById,
     clearCurrentPartner,
-    loading: partnerLoading
+    loading: partnerLoading,
   } = usePartnerStore();
 
   const {
@@ -45,7 +47,7 @@ const ShippingLines = () => {
     fetchShipById,
     updateShip,
     clearCurrentShip,
-    removeShip
+    removeShip,
   } = useShipStore();
 
   const {
@@ -53,7 +55,7 @@ const ShippingLines = () => {
     fetchContainersByLine,
     addContainer,
     removeContainer,
-    updateContainer
+    updateContainer,
   } = useContainerStore();
 
   useEffect(() => {
@@ -70,10 +72,12 @@ const ShippingLines = () => {
 
   // CRUD Handlers for Ships
   const handleAddShip = async (shipData) => {
-    const result = await addShip({ ...shipData, shippingLineId: id });
-    if (result.success) setIsAddShipOpen(false);
-    return result;
-  };
+  console.log("🎯 handleAddShip called with:", shipData);
+  const result = await addShip({ ...shipData, shippingLineId: id });
+  console.log("🎯 handleAddShip result:", result);
+  if (result.success) setIsAddShipOpen(false);
+  return result;
+};
 
   const handleViewShip = async (ship) => {
     const result = await fetchShipById(ship.id);
@@ -92,10 +96,7 @@ const ShippingLines = () => {
   };
 
   const handleUpdateShip = async (shipId, shipData) => {
-    const result = await updateShip(shipId, {
-      ...shipData,
-      shippingLineId: id
-    });
+    const result = await updateShip(shipId, { ...shipData, shippingLineId: id });
     if (result.success) {
       setIsUpdateShipOpen(false);
       clearCurrentShip();
@@ -140,7 +141,7 @@ const ShippingLines = () => {
   }
 
   // Stats
-  const totalShips = ships?.filter(s => s.shipping_line_id === id)?.length || 0;
+  const totalShips = ships?.filter((s) => s.shipping_line_id === id)?.length || 0;
   const totalContainers = containers?.length || 0;
 
   return (
@@ -169,7 +170,6 @@ const ShippingLines = () => {
 
           {/* Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Total Ships */}
             <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <GlobeAltIcon className="stat-icon-bg h-24 w-24 opacity-10" />
               <div className="stat-content">
@@ -179,8 +179,6 @@ const ShippingLines = () => {
                 </div>
               </div>
             </div>
-
-            {/* Total Containers */}
             <div className="stat-card bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
               <CubeIcon className="stat-icon-bg h-24 w-24 opacity-10" />
               <div className="stat-content">
@@ -192,57 +190,76 @@ const ShippingLines = () => {
             </div>
           </div>
 
-          {/* Ships Table */}
-          <ShipTable
-            data={ships.filter(s => s.shipping_line_id === id)}
-            onView={handleViewShip}
-            onEdit={handleEditShip}
-            onDelete={handleDeleteShip}
-            rightAction={
-              <button
-                onClick={() => setIsAddShipOpen(true)}
-                className="btn-primary"
-              >
-                <PlusCircleIcon className="h-5 w-5" />
-                Add Ship
-              </button>
-            }
-          />
+          {/* Tabs */}
+          <div className="flex border-b border-slate-200 mb-6">
+            <button
+              onClick={() => setActiveTab("ships")}
+              className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                activeTab === "ships"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <GlobeAltIcon className="h-5 w-5" />
+              Ships
+            </button>
+            <button
+              onClick={() => setActiveTab("containers")}
+              className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                activeTab === "containers"
+                  ? "text-emerald-600 border-b-2 border-emerald-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <CubeIcon className="h-5 w-5" />
+              Containers
+            </button>
+          </div>
 
-          {/* Containers Table */}
-          <ContainerTable
-            data={containers}
-            rightAction={
-              <button
-                onClick={() => setIsAddContainerOpen(true)}
-                className="btn-primary"
-              >
-                <PlusCircleIcon className="h-5 w-5" />
-                Add Container
-              </button>
-            }
-          />
+          {/* Conditional Rendering */}
+          {activeTab === "ships" ? (
+            <ShipTable
+              data={ships.filter((s) => s.shipping_line_id === id)}
+              onView={handleViewShip}
+              onEdit={handleEditShip}
+              onDelete={handleDeleteShip}
+              rightAction={
+                <button
+                  onClick={() => setIsAddShipOpen(true)}
+                  className="btn-primary"
+                >
+                  <PlusCircleIcon className="h-5 w-5" /> Add Ship
+                </button>
+              }
+            />
+          ) : (
+            <ContainerTable
+              data={containers}
+              rightAction={
+                <button
+                  onClick={() => setIsAddContainerOpen(true)}
+                  className="btn-primary"
+                >
+                  <PlusCircleIcon className="h-5 w-5" /> Add Container
+                </button>
+              }
+            />
+          )}
         </div>
       </div>
 
-{/* Add Ship Modal */}
-<AddShip
-  isOpen={isAddShipOpen}
-  onClose={() => setIsAddShipOpen(false)}
-  onSubmit={handleAddShip}    
-  shippingLineId={id}
-/>
-
-
-
-      {/* View Ship Modal */}
+      {/* Modals */}
+      <AddShip
+        isOpen={isAddShipOpen}
+        onClose={() => setIsAddShipOpen(false)}
+        onSubmit={handleAddShip}
+        shippingLineId={id}
+      />
       <ViewShip
         isOpen={isViewShipOpen}
         onClose={() => setIsViewShipOpen(false)}
         ship={selectedShip}
       />
-
-      {/* Update Ship Modal */}
       <UpdateShip
         isOpen={isUpdateShipOpen}
         onClose={() => setIsUpdateShipOpen(false)}
@@ -250,16 +267,12 @@ const ShippingLines = () => {
         ship={selectedShip}
         shippingLineId={id}
       />
-
-      {/* Delete Ship Modal */}
       <DeleteShip
         isOpen={isDeleteShipOpen}
         onClose={() => setIsDeleteShipOpen(false)}
         onConfirm={handleConfirmDeleteShip}
         ship={selectedShip}
       />
-
-      {/* Add Container Modal */}
       <AddContainer
         isOpen={isAddContainerOpen}
         onClose={() => setIsAddContainerOpen(false)}
