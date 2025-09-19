@@ -22,19 +22,27 @@ export const step1Schema = z.object({
   first_name: z.string().optional().or(z.literal("")),
   last_name: z.string().optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  // Consignee fields
+  consignee: z.string().min(1, "Consignee is required"),
+  consignee_name: z.string().optional().or(z.literal("")),
+  consignee_phone: z.string().optional().or(z.literal("")),
   preferred_departure: z.string().min(1, "Preferred departure is required"),
   preferred_delivery: z.string().optional().or(z.literal("")),
 });
 
 export const step2Schema = z.object({
   shipping_line_id: z.string().min(1, "Shipping line is required"),
-  ship_id: z.string().min(1, "Ship is required"),
-  container_id: z.string().min(1, "Container is required"), 
-  quantity: z.coerce.number().int().min(1),
+  container_ids: z.array(z.string().uuid()).min(1, "At least one container is required"),
+  quantity: z.coerce.number().int().min(1).max(10),
   booking_mode: z.enum(bookingModes),
   commodity: z.string().min(1),
   origin_port: z.string().min(1),
   destination_port: z.string().min(1),
+}).refine((data) => {
+  return data.container_ids.length === data.quantity;
+}, {
+  message: "Number of selected containers must match the quantity",
+  path: ["container_ids"],
 });
 
 export const step3Schema = z.object({
@@ -54,7 +62,6 @@ export const step4Schema = z.object({
 });
 
 export const step5Schema = z.object({
-  
   status: z.enum(statusTypes).default("PENDING"),
 });
 

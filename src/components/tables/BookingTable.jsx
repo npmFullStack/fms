@@ -82,15 +82,15 @@ const BookingTable = ({ data, rightAction, onSelectionChange }) => {
                             color: "bg-blue-600 text-white"
                         },
                         CY_TO_DOOR: {
-                            label: "CUSTOMER YARD-DOOR",
+                            label: "CY-DOOR",
                             color: "bg-purple-600 text-white"
                         },
                         DOOR_TO_CY: {
-                            label: "DOOR-CUSTOMER YARD",
+                            label: "DOOR-CY",
                             color: "bg-pink-600 text-white"
                         },
                         CY_TO_CY: {
-                            label: "CUSTOMER YARD-CUSTOMER YARD",
+                            label: "CY-CY",
                             color: "bg-green-600 text-white"
                         }
                     };

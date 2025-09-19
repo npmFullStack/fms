@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
 import Select from "react-select";
 import { PH_PORTS } from "../../../utils/helpers/shipRoutes";
-import useShipStore from "../../../utils/store/useShipStore";
+import api from "../../../config/axios";
 
 const bookingModes = [
   { value: "DOOR_TO_DOOR", label: "Door to Door (D-D)" },
@@ -14,46 +14,52 @@ const bookingModes = [
 
 const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
   const shippingLineId = useWatch({ control, name: "shipping_line_id" });
-  const selectedShipId = useWatch({ control, name: "ship_id" });
+  const selectedContainerIds = useWatch({ control, name: "container_ids" }) || [];
+  const quantity = useWatch({ control, name: "quantity" }) || 1;
 
-  const { ships, fetchAllShips, currentShip, fetchShipById, clearCurrentShip } =
-    useShipStore();
-  const [filteredShips, setFilteredShips] = useState([]);
+  const [availableContainers, setAvailableContainers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Filter partners by shipping type
   const shippingLines = partners.filter(
     (partner) => partner.type === "shipping"
   );
 
-  // Fetch ships when shipping line changes
+  // Fetch available containers when shipping line changes
+  useEffect(() => {
+    const fetchAvailableContainers = async () => {
+      if (!shippingLineId) {
+        setAvailableContainers([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.get(`/bookings/available-containers/${shippingLineId}`);
+        setAvailableContainers(response.data.containers || []);
+      } catch (error) {
+        console.error("Error fetching available containers:", error);
+        setAvailableContainers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvailableContainers();
+  }, [shippingLineId]);
+
+  // Reset container selection when shipping line changes
   useEffect(() => {
     if (shippingLineId) {
-      fetchAllShips().then(() => {
-        setFilteredShips(
-          ships.filter(
-            (s) => String(s.shipping_line_id) === String(shippingLineId)
-          )
-        );
-      });
-    } else {
-      setFilteredShips([]);
+      setValue("container_ids", []);
     }
-  }, [shippingLineId, fetchAllShips, ships]);
-
-  // Fetch containers when ship changes
-  useEffect(() => {
-    if (selectedShipId) {
-      fetchShipById(selectedShipId);
-    } else {
-      clearCurrentShip();
-    }
-  }, [selectedShipId, fetchShipById, clearCurrentShip]);
+  }, [shippingLineId, setValue]);
 
   return (
     <div className="space-y-4">
       {/* Shipping Line */}
       <div>
-        <label className="input-label-modern">Shipping Line</label>
+        <label className="input-label-modern">Shipping Line *</label>
         <Controller
           name="shipping_line_id"
           control={control}
@@ -69,9 +75,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
               }
               onChange={(option) => {
                 field.onChange(option ? option.value : null);
-                setValue("ship_id", null); // reset ship when line changes
-                setValue("container_id", null); // reset container too
-                setValue("van_number", null); // reset van number
+                setValue("container_ids", []); // reset containers when line changes
               }}
               options={shippingLines.map((line) => ({
                 value: line.id,
@@ -87,50 +91,103 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         )}
       </div>
 
-      {/* Ship */}
+      {/* Quantity */}
       <div>
-        <label className="input-label-modern">Ship</label>
+        <label className="input-label-modern">Quantity *</label>
+        <input
+          {...register("quantity", { 
+            required: "Quantity is required",
+            min: { value: 1, message: "Quantity must be at least 1" },
+            max: { value: 10, message: "Quantity cannot exceed 10" }
+          })}
+          type="number"
+          min="1"
+          max="10"
+          placeholder="Enter quantity"
+          className={`input-field-modern ${
+            errors.quantity ? "input-error" : ""
+          }`}
+        />
+        {errors.quantity && (
+          <p className="error-message">{errors.quantity.message}</p>
+        )}
+      </div>
+
+      {/* Container Selection */}
+      <div>
+        <label className="input-label-modern">
+          Containers * (Select {quantity} container{quantity > 1 ? 's' : ''})
+        </label>
         <Controller
-          name="ship_id"
+          name="container_ids"
           control={control}
-          rules={{ required: "Ship is required" }}
+          rules={{ 
+            required: "Please select containers",
+            validate: (value) => {
+              if (!value || value.length === 0) {
+                return "Please select at least one container";
+              }
+              if (value.length !== quantity) {
+                return `Please select exactly ${quantity} container${quantity > 1 ? 's' : ''}`;
+              }
+              return true;
+            }
+          }}
           render={({ field }) => (
             <Select
+              {...field}
+              isMulti
               value={
                 field.value
-                  ? filteredShips
-                      .map((ship) => ({
-                        value: ship.id,
-                        label: ship.vessel_number || `Ship ${ship.id}`,
+                  ? availableContainers
+                      .filter((container) => field.value.includes(container.id))
+                      .map((container) => ({
+                        value: container.id,
+                        label: `${container.size} - ${container.van_number}`,
                       }))
-                      .find((opt) => opt.value === field.value) || null
-                  : null
+                  : []
               }
-              onChange={(option) => {
-                field.onChange(option ? option.value : null);
-                setValue("container_id", null); // reset container if ship changes
-                setValue("van_number", null);
+              onChange={(options) => {
+                const values = options ? options.map((opt) => opt.value) : [];
+                // Limit selection to quantity
+                if (values.length <= quantity) {
+                  field.onChange(values);
+                }
               }}
-              options={filteredShips.map((ship) => ({
-                value: ship.id,
-                label: ship.vessel_number || `Ship ${ship.id}`,
+              options={availableContainers.map((container) => ({
+                value: container.id,
+                label: `${container.size} - ${container.van_number}`,
               }))}
               placeholder={
-                shippingLineId ? "Select ship" : "Select shipping line first"
+                loading
+                  ? "Loading containers..."
+                  : shippingLineId
+                  ? availableContainers.length > 0
+                    ? `Select ${quantity} container${quantity > 1 ? 's' : ''}`
+                    : "No available containers"
+                  : "Select shipping line first"
               }
-              isDisabled={!shippingLineId}
-              isClearable
+              isDisabled={!shippingLineId || loading}
+              isLoading={loading}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              isOptionDisabled={() => selectedContainerIds.length >= quantity}
             />
           )}
         />
-        {errors.ship_id && (
-          <p className="error-message">{errors.ship_id.message}</p>
+        {errors.container_ids && (
+          <p className="error-message">{errors.container_ids.message}</p>
+        )}
+        {selectedContainerIds.length > 0 && (
+          <p className="text-sm text-blue-600 mt-1">
+            Selected: {selectedContainerIds.length}/{quantity} containers
+          </p>
         )}
       </div>
 
       {/* Origin Port */}
       <div>
-        <label className="input-label-modern">Origin Port</label>
+        <label className="input-label-modern">Origin Port *</label>
         <Controller
           name="origin_port"
           control={control}
@@ -156,7 +213,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
 
       {/* Destination Port */}
       <div>
-        <label className="input-label-modern">Destination Port</label>
+        <label className="input-label-modern">Destination Port *</label>
         <Controller
           name="destination_port"
           control={control}
@@ -180,66 +237,9 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
         )}
       </div>
 
-      {/* Container (Dynamic) */}
-      <div>
-        <label className="input-label-modern">Container</label>
-        <Controller
-          name="container_id"
-          control={control}
-          rules={{ required: "Container is required" }}
-          render={({ field }) => (
-            <Select
-              value={
-                field.value
-                  ? currentShip?.containers
-                      ?.map((c) => ({
-                        value: c.id,
-                        label: `${c.size} - ${c.van_number}`,
-                      }))
-                      .find((opt) => opt.value === field.value) || null
-                  : null
-              }
-              onChange={(option) => {
-                const id = option ? option.value : null;
-                field.onChange(id);
-
-                if (id) {
-                  const selected = currentShip?.containers?.find(
-                    (c) => String(c.id) === String(id)
-                  );
-                  if (selected) {
-                    setValue("van_number", selected.van_number); // ✅ only keep van_number for Step5 display
-                  }
-                } else {
-                  setValue("van_number", null);
-                }
-              }}
-              options={
-                currentShip?.containers?.map((c) => ({
-                  value: c.id,
-                  label: `${c.size} - ${c.van_number}`,
-                })) || []
-              }
-              placeholder={
-                selectedShipId
-                  ? currentShip?.containers?.length > 0
-                    ? "Select container"
-                    : "No containers available"
-                  : "Select ship first"
-              }
-              isDisabled={!selectedShipId}
-              isClearable
-            />
-          )}
-        />
-        {errors.container_id && (
-          <p className="error-message">{errors.container_id.message}</p>
-        )}
-      </div>
-
       {/* Commodity */}
       <div>
-        <label className="input-label-modern">Commodity</label>
+        <label className="input-label-modern">Commodity *</label>
         <input
           {...register("commodity", { required: "Commodity is required" })}
           placeholder="Enter commodity type"
@@ -254,7 +254,7 @@ const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
 
       {/* Booking Mode */}
       <div>
-        <label className="input-label-modern">Mode of Service</label>
+        <label className="input-label-modern">Mode of Service *</label>
         <Controller
           name="booking_mode"
           control={control}
