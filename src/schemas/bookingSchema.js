@@ -55,10 +55,18 @@ export const step3Schema = z.object({
 export const step4Schema = z.object({
   pickup_location: z.string().optional(),
   delivery_location: z.string().optional(),
+  pickup_province: z.string().optional(),
+  pickup_city: z.string().optional(),
+  pickup_barangay: z.string().optional(),
+  pickup_street: z.string().optional(),
+  delivery_province: z.string().optional(),
+  delivery_city: z.string().optional(),
+  delivery_barangay: z.string().optional(),
+  delivery_street: z.string().optional(),
   pickup_lat: z.number().optional().nullable(),
-  pickup_lng: z.number().optional().nullable(),
+  pickup_Ing: z.number().optional().nullable(),
   delivery_lat: z.number().optional().nullable(),
-  delivery_lng: z.number().optional().nullable(),
+  delivery_Ing: z.number().optional().nullable(),
 });
 
 export const step5Schema = z.object({

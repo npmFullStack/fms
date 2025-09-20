@@ -90,6 +90,18 @@ const BookingStep5 = ({ control, partners = [] }) => {
       `${container.size} (${container.van_number})`
     ).join(", ");
   };
+// Format address for display
+const formatAddress = (type) => {
+  const province = data[`${type}_province`] || "";
+  const city = data[`${type}_city`] || "";
+  const barangay = data[`${type}_barangay`] || "";
+  const street = data[`${type}_street`] || "";
+  
+  if (!province && !city && !barangay && !street) return "--";
+  
+  return `${street}${street ? ", " : ""}${barangay}${barangay ? ", " : ""}${city}${city ? ", " : ""}${province}`;
+};
+
 
   return (
     <div className="p-3 bg-gray-50 rounded-lg">
@@ -221,7 +233,23 @@ const BookingStep5 = ({ control, partners = [] }) => {
           </div>
         </div>
       )}
-
+{!data.skipTrucking && (
+  <div className="bg-white p-3 rounded border mt-3">
+    <h4 className="font-semibold text-blue-700 mb-2">
+      Location Details
+    </h4>
+    <div className="grid grid-cols-2 gap-2 text-sm">
+      <div>
+        <span className="text-gray-600 text-xs">Pickup Address:</span>
+        <p className="font-medium truncate">{formatAddress("pickup")}</p>
+      </div>
+      <div>
+        <span className="text-gray-600 text-xs">Delivery Address:</span>
+        <p className="font-medium truncate">{formatAddress("delivery")}</p>
+      </div>
+    </div>
+  </div>
+)}
       <div className="bg-yellow-50 p-3 rounded border border-yellow-200 text-xs mt-3">
         <p className="text-yellow-800">
           Please review all details carefully before clicking{" "}
