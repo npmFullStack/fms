@@ -3,6 +3,7 @@ import { Suspense, lazy } from "react";
 import PublicLayout from "./components/PublicLayout";
 import ProtectedLayout from "./components/ProtectedLayout";
 import Loading from "./components/Loading";
+import { Toaster } from "react-hot-toast";
 
 // Public pages
 const Home = lazy(() => import("./pages/public/Home"));
@@ -99,7 +100,6 @@ function App() {
                             element={<IncidentReports />}
                         />
 
-
                         {/* Admin Finance */}
                         <Route
                             path="/accounts-receivable"
@@ -132,6 +132,39 @@ function App() {
                     </Route>
                 </Routes>
             </Suspense>
+{/* TOAST */}
+<Toaster
+    position="top-center"
+    containerStyle={{
+        position: "fixed",
+        top: "1rem",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 9999,
+    }}
+    toastOptions={{
+        duration: 1500,
+        className: `
+            font-[Poppins] rounded-lg border
+            shadow-lg border-l-4 px-4 py-3
+        `,
+        style: {
+            minWidth: "280px",
+            maxWidth: "min(90vw, 350px)",
+            margin: "0.5rem auto",
+        },
+        success: {
+            className: "!bg-green-100 !text-green-800 !border-green-200 !border-l-green-500",
+        },
+        error: {
+            className: "!bg-red-100 !text-red-800 !border-red-200 !border-l-red-500",
+        },
+        loading: {
+            className: "!bg-blue-100 !text-blue-800 !border-blue-200 !border-l-blue-500",
+        },
+    }}
+    gutter={8}
+/>
         </Router>
     );
 }

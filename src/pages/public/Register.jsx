@@ -6,9 +6,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { registerSchema } from "../../schemas/authSchema";
 import registerImage from "../../assets/images/register.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-hot-toast"; // <-- Add this import
 
 const Register = () => {
-    const [message, setMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
@@ -17,7 +17,7 @@ const Register = () => {
         register,
         handleSubmit,
         watch,
-        formState: { errors }
+        formState: { errors, isSubmitting } // Added isSubmitting
     } = useForm({
         resolver: zodResolver(registerSchema),
         mode: "onChange"
@@ -25,14 +25,22 @@ const Register = () => {
 
     const onSubmit = async data => {
         try {
-            await api.post("/auth/register", data); // Removed the response assignment
-            setMessage("Registration successful!");
-            navigate("/login");
+            await api.post("/auth/register", data);
+
+            // Show success toast
+            toast.success("Registration successful!");
+
+            // Wait a moment for toast to show before navigating
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
         } catch (error) {
-            setMessage(
+            const errorMessage =
                 error.response?.data?.message ||
-                    "Registration failed. Please try again."
-            );
+                "Registration failed. Please try again.";
+
+            // Show error toast
+            toast.error(errorMessage);
         }
     };
 
@@ -62,18 +70,6 @@ const Register = () => {
                             Join us today — it's free!
                         </p>
                     </div>
-
-                    {message && (
-                        <div
-                            className={`mb-4 ${
-                                message.includes("successful")
-                                    ? "bg-green-50 border border-green-200 text-green-700"
-                                    : "error-message"
-                            }`}
-                        >
-                            {message}
-                        </div>
-                    )}
 
                     <form
                         onSubmit={handleSubmit(onSubmit)}
@@ -242,8 +238,12 @@ const Register = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <button type="submit" className="btn-primary w-full">
-                            Sign up
+                        <button
+                            type="submit"
+                            className="btn-primary w-full"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Creating account..." : "Sign up"}
                         </button>
                     </form>
 

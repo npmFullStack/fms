@@ -7,16 +7,16 @@ import { loginSchema } from "../../schemas/authSchema";
 import loginImage from "../../assets/images/login.png";
 import useAuthStore from "../../utils/store/useAuthStore";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-hot-toast";
 
 const Login = () => {
-    const [message, setMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors, isSubmitting }
     } = useForm({
         resolver: zodResolver(loginSchema),
         mode: "onChange"
@@ -37,9 +37,14 @@ const Login = () => {
             const profileRes = await api.get("/auth/profile");
             setUser(profileRes.data.user);
 
-            navigate("/dashboard");
+            toast.success("Login successful!");
+
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 1500); 
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const errorMessage = error.response?.data?.message || error.message;
+            toast.error(errorMessage);
             setLoading(false);
         }
     };
@@ -71,11 +76,6 @@ const Login = () => {
                         onSubmit={handleSubmit(onSubmit)}
                         className="space-y-6"
                     >
-                        {/* Error Message */}
-                        {message && (
-                            <div className="error-message">{message}</div>
-                        )}
-
                         {/* Email Field */}
                         <div>
                             <label
@@ -150,8 +150,12 @@ const Login = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <button type="submit" className="btn-primary w-full">
-                            Sign in
+                        <button
+                            type="submit"
+                            className="btn-primary w-full"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Signing in..." : "Sign in"}
                         </button>
                     </form>
 
