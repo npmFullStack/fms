@@ -50,15 +50,14 @@ const AddBooking = ({ isOpen, onClose }) => {
             first_name: "",
             last_name: "",
             phone: "",
-            // New consignee fields
+            // Consignee
             consignee: "",
             consignee_name: "",
             consignee_phone: "",
-            preferred_departure: "",
-            preferred_delivery: "",
             // Step 2
             shipping_line_id: "",
-            container_ids: [], // Changed to array
+            ship_id: "",
+            container_ids: [],
             quantity: 1,
             booking_mode: "DOOR_TO_DOOR",
             origin_port: "",
@@ -69,7 +68,7 @@ const AddBooking = ({ isOpen, onClose }) => {
             pickup_truck_id: "",
             delivery_trucker_id: "",
             delivery_truck_id: "",
-            // Step 4 - New address fields
+            // Step 4 & 5 (addresses only, no lat/lng)
             pickup_province: "",
             pickup_city: "",
             pickup_barangay: "",
@@ -78,12 +77,8 @@ const AddBooking = ({ isOpen, onClose }) => {
             delivery_city: "",
             delivery_barangay: "",
             delivery_street: "",
-            pickup_lat: undefined,
-            pickup_Ing: undefined,
-            delivery_lat: undefined,
-            delivery_Ing: undefined,
-            // Step 5
-            status: "PENDING",
+            // Step 6
+            status: "PICKUP_SCHEDULED",
             // Helpers
             skipTrucking: false
         }
@@ -101,7 +96,6 @@ const AddBooking = ({ isOpen, onClose }) => {
     const onSubmit = async data => {
         try {
             setIsLoading(true);
-            // normalize empty strings → null
             const normalize = val =>
                 val === "" || val === undefined ? null : val;
 
@@ -112,15 +106,12 @@ const AddBooking = ({ isOpen, onClose }) => {
                 pickup_truck_id: normalize(data.pickup_truck_id),
                 delivery_trucker_id: normalize(data.delivery_trucker_id),
                 delivery_truck_id: normalize(data.delivery_truck_id),
-                preferred_departure: normalize(data.preferred_departure),
-                preferred_delivery: normalize(data.preferred_delivery),
                 consignee_name: normalize(data.consignee_name),
                 consignee_phone: normalize(data.consignee_phone),
-                // Keep container_ids as array
                 container_ids: data.container_ids || []
             };
 
-            console.log("Submitting booking data:", cleanedData); // Debug log
+            console.log("Submitting booking data:", cleanedData);
             const result = await createBooking(cleanedData);
 
             if (result.success) {
@@ -139,39 +130,31 @@ const AddBooking = ({ isOpen, onClose }) => {
 
     // Step validation mapping
     const stepValidationFields = {
-        1: ["shipper", "consignee", "preferred_departure"],
+        1: ["shipper", "consignee"],
         2: [
             "shipping_line_id",
+            "ship_id",
             "container_ids",
             "quantity",
             "commodity",
             "origin_port",
             "destination_port"
         ],
-        3: [], // Optional fields
-        4: [], // Optional fields
-        5: [], // Optional fields
-        6: [] // Review only
+        3: [], // optional
+        4: [], // optional
+        5: [], // optional
+        6: []  // review only
     };
 
     const handleNext = async () => {
-        // Validate current step fields
         const fieldsToValidate = stepValidationFields[currentStep];
-        if (fieldsToValidate && fieldsToValidate.length > 0) {
+        if (fieldsToValidate?.length > 0) {
             const isValid = await trigger(fieldsToValidate);
-            if (!isValid) {
-                console.log(
-                    "Validation failed for step",
-                    currentStep,
-                    "Fields:",
-                    fieldsToValidate
-                );
-                return; // Don't proceed if validation fails
-            }
+            if (!isValid) return;
         }
 
         if (currentStep === 2 && skipTrucking) {
-            setCurrentStep(4); // Skip trucking steps
+            setCurrentStep(4); // Skip trucking
         } else if (currentStep === 5) {
             setCurrentStep(6); // Go to review step
         } else {
@@ -234,7 +217,7 @@ const AddBooking = ({ isOpen, onClose }) => {
     };
 
     const tooltips = {
-        1: "Enter shipper and consignee details with preferred dates",
+        1: "Enter shipper and consignee details",
         2: "Select shipping line, containers, ports, and service mode",
         3: "Choose trucking company and truck (if applicable)",
         4: "Set pickup location address",
@@ -253,12 +236,12 @@ const AddBooking = ({ isOpen, onClose }) => {
                 Previous
             </button>
             <button
-                type={currentStep < 5 ? "button" : "submit"}
-                onClick={currentStep < 5 ? handleNext : handleSubmit(onSubmit)}
+                type={currentStep < 6 ? "button" : "submit"}
+                onClick={currentStep < 6 ? handleNext : handleSubmit(onSubmit)}
                 disabled={isLoading || isSubmitting}
                 className="btn-primary-modern"
             >
-                {currentStep < 5
+                {currentStep < 6
                     ? "Next"
                     : isLoading || isSubmitting
                     ? "Creating..."
@@ -266,11 +249,6 @@ const AddBooking = ({ isOpen, onClose }) => {
             </button>
         </div>
     );
-
-    // Debug current errors
-    console.log("Current step:", currentStep);
-    console.log("Form errors:", errors);
-    console.log("Form values:", getValues());
 
     return (
         <FormModal
@@ -281,16 +259,14 @@ const AddBooking = ({ isOpen, onClose }) => {
             isLoading={isLoading}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit(onSubmit)}
-            fields={[]}
+            fields={{}}
             infoBox={{
                 title: "Booking Info",
                 items: [
                     { text: `Step ${currentStep} of 6` },
                     { text: tooltips[currentStep] },
                     bookingMode === "PIER_TO_PIER"
-                        ? {
-                              text: "Skipping trucking step (Port-to-Port selected)"
-                          }
+                        ? { text: "Skipping trucking step (Port-to-Port selected)" }
                         : null
                 ].filter(Boolean)
             }}

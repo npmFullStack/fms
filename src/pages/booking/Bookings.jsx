@@ -84,18 +84,19 @@ const Bookings = () => {
         setIsDeleteBookingModalOpen(true);
     };
 
-    const StatCard = ({ title, value, color, icon: Icon, bgIcon }) => (
-        <div className={`stat-card ${color}`}>
-            <div className="stat-icon-bg">{bgIcon}</div>
-            <div className="stat-content">
+    const StatCard = ({ title, value, color, icon: Icon }) => (
+        <div className={`relative overflow-hidden rounded-xl p-5 ${color}`}>
+            {/* Background Icon */}
+            <Icon className="absolute right-2 top-2 h-20 w-20 text-white/20" />
+
+            {/* Content */}
+            <div className="relative flex items-center justify-between">
                 <div>
-                    <p className="stat-title">{title}</p>
-                    <p className="stat-value">{value}</p>
+                    <p className="text-sm font-medium text-white/90">{title}</p>
+                    <p className="text-2xl font-bold text-white">{value}</p>
                 </div>
-                <div className="flex-shrink-0">
-                    <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                        <Icon className="h-6 w-6" />
-                    </div>
+                <div className="p-1 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <Icon className="h-6 w-6 text-white" />
                 </div>
             </div>
         </div>
@@ -131,29 +132,55 @@ const Bookings = () => {
                     </div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <StatCard
                             title="Total Bookings"
                             value={totalBookings}
                             color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
                             icon={CubeIcon}
-                            bgIcon={<CubeIcon className="h-24 w-24" />}
+                            bgIcon={
+                                <CubeIcon className="h-20 w-20 opacity-20" />
+                            }
                         />
 
                         <StatCard
-                            title="Pending"
-                            value={countByStatus("PENDING")}
+                            title="Pickup Scheduled"
+                            value={countByStatus("PICKUP_SCHEDULED")}
                             color="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white"
                             icon={TruckIcon}
-                            bgIcon={<TruckIcon className="h-24 w-24" />}
+                            bgIcon={
+                                <TruckIcon className="h-20 w-20 opacity-20" />
+                            }
                         />
 
                         <StatCard
-                            title="Pickup"
-                            value={countByStatus("PICKUP")}
+                            title="Loaded to Truck"
+                            value={countByStatus("LOADED_TO_TRUCK")}
                             color="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
                             icon={TruckIcon}
-                            bgIcon={<TruckIcon className="h-24 w-24" />}
+                            bgIcon={
+                                <TruckIcon className="h-20 w-20 opacity-20" />
+                            }
+                        />
+
+                        <StatCard
+                            title="Arrived at Origin Port"
+                            value={countByStatus("ARRIVED_ORIGIN_PORT")}
+                            color="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
+                            icon={BuildingLibraryIcon}
+                            bgIcon={
+                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
+                            }
+                        />
+
+                        <StatCard
+                            title="Loaded to Ship"
+                            value={countByStatus("LOADED_TO_SHIP")}
+                            color="bg-gradient-to-br from-sky-500 to-sky-600 text-white"
+                            icon={CubeIcon}
+                            bgIcon={
+                                <CubeIcon className="h-20 w-20 opacity-20" />
+                            }
                         />
 
                         <StatCard
@@ -162,7 +189,27 @@ const Bookings = () => {
                             color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
                             icon={BuildingLibraryIcon}
                             bgIcon={
-                                <BuildingLibraryIcon className="h-24 w-24" />
+                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
+                            }
+                        />
+
+                        <StatCard
+                            title="Arrived at Destination Port"
+                            value={countByStatus("ARRIVED_DESTINATION_PORT")}
+                            color="bg-gradient-to-br from-pink-500 to-pink-600 text-white"
+                            icon={BuildingLibraryIcon}
+                            bgIcon={
+                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
+                            }
+                        />
+
+                        <StatCard
+                            title="Out for Delivery"
+                            value={countByStatus("OUT_FOR_DELIVERY")}
+                            color="bg-gradient-to-br from-teal-500 to-teal-600 text-white"
+                            icon={TruckIcon}
+                            bgIcon={
+                                <TruckIcon className="h-20 w-20 opacity-20" />
                             }
                         />
 
@@ -171,7 +218,9 @@ const Bookings = () => {
                             value={countByStatus("DELIVERED")}
                             color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
                             icon={CheckCircleIcon}
-                            bgIcon={<CheckCircleIcon className="h-24 w-24" />}
+                            bgIcon={
+                                <CheckCircleIcon className="h-20 w-20 opacity-20" />
+                            }
                         />
                     </div>
 
@@ -193,19 +242,23 @@ const Bookings = () => {
                     />
 
                     {/* Bulk Actions */}
-<BulkActionBar
-  selected={selectedBookings}
-  onEdit={(id) => handleEditBooking(id)}
-  onPrint={(ids) => {
-    const records = formattedBookings.filter(b => ids.includes(b.id));
-    printBookings(records, "print");
-  }}
-  onDownload={(ids) => {
-    const records = formattedBookings.filter(b => ids.includes(b.id));
-    printBookings(records, "download");
-  }}
-  onDelete={handleBulkDelete}
-/>
+                    <BulkActionBar
+                        selected={selectedBookings}
+                        onEdit={id => handleEditBooking(id)}
+                        onPrint={ids => {
+                            const records = formattedBookings.filter(b =>
+                                ids.includes(b.id)
+                            );
+                            printBookings(records, "print");
+                        }}
+                        onDownload={ids => {
+                            const records = formattedBookings.filter(b =>
+                                ids.includes(b.id)
+                            );
+                            printBookings(records, "download");
+                        }}
+                        onDelete={handleBulkDelete}
+                    />
                 </div>
             </div>
 
@@ -222,7 +275,8 @@ const Bookings = () => {
                 bookingId={activeBookingId}
             />
 
-            {/* Delete Booking Modal */}
+            {/* Dele
+te Booking Modal */}
             <DeleteBooking
                 isOpen={isDeleteBookingModalOpen}
                 onClose={() => setIsDeleteBookingModalOpen(false)}

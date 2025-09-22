@@ -39,10 +39,9 @@ const FitBounds = ({ positions }) => {
     return null;
 };
 
-const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
+const BookingStep4DL = ({ control, errors, setValue }) => {
     const [provinces, setProvinces] = useState([]);
     const [cities, setCities] = useState([]);
-
     const [provinceOptions, setProvinceOptions] = useState([]);
     const [cityOptions, setCityOptions] = useState([]);
     const [barangayOptions, setBarangayOptions] = useState([]);
@@ -52,28 +51,18 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
     const selectedCity = useWatch({ control, name: "delivery_city" });
     const selectedBarangay = useWatch({ control, name: "delivery_barangay" });
     const selectedStreet = useWatch({ control, name: "delivery_street" });
-    const deliveryLat = useWatch({ control, name: "delivery_lat" });
-    const deliveryLng = useWatch({ control, name: "delivery_lng" });
     const originPortValue = useWatch({ control, name: "origin_port" });
-    const destinationPortValue = useWatch({
-        control,
-        name: "destination_port"
-    });
+    const destinationPortValue = useWatch({ control, name: "destination_port" });
 
     const [debouncedStreet] = useDebounce(selectedStreet, 500);
     const [deliveryCoords, setDeliveryCoords] = useState(null);
 
-    // Get port objects from values
-    const originPortObj = originPortValue
-        ? getPortByValue(originPortValue)
-        : null;
-    const destinationPortObj = destinationPortValue
-        ? getPortByValue(destinationPortValue)
-        : null;
+    const originPortObj = originPortValue ? getPortByValue(originPortValue) : null;
+    const destinationPortObj = destinationPortValue ? getPortByValue(destinationPortValue) : null;
 
-    // Geocode function for map integration
+    // Geocode helper
     const geocode = async place => {
-        if (!place) return null;
+        if (!place) return [];
         try {
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -91,55 +80,35 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
-                const response = await fetch(
-                    "https://psgc.gitlab.io/api/provinces/"
-                );
+                const response = await fetch("https://psgc.gitlab.io/api/provinces/");
                 const data = await response.json();
                 setProvinces(data);
-
-                // Format for react-select
-                const options = data.map(province => ({
-                    value: province.name,
-                    label: province.name,
-                    code: province.code
-                }));
-                setProvinceOptions(options);
+                setProvinceOptions(
+                    data.map(p => ({ value: p.name, label: p.name, code: p.code }))
+                );
             } catch (error) {
                 console.error("Error fetching provinces:", error);
             }
         };
-
         fetchProvinces();
     }, []);
 
-    // Fetch cities when province is selected
+    // Fetch cities
     useEffect(() => {
         const fetchCities = async () => {
             if (selectedProvince) {
-                try {
-                    const province = provinces.find(
-                        p =>
-                            p.name.toLowerCase() ===
-                            selectedProvince.toLowerCase()
+                const province = provinces.find(
+                    p => p.name.toLowerCase() === selectedProvince.toLowerCase()
+                );
+                if (province) {
+                    const response = await fetch(
+                        `https://psgc.gitlab.io/api/provinces/${province.code}/cities-municipalities`
                     );
-
-                    if (province) {
-                        const response = await fetch(
-                            `https://psgc.gitlab.io/api/provinces/${province.code}/cities-municipalities`
-                        );
-                        const data = await response.json();
-                        setCities(data);
-
-                        // Format for react-select
-                        const options = data.map(city => ({
-                            value: city.name,
-                            label: city.name,
-                            code: city.code
-                        }));
-                        setCityOptions(options);
-                    }
-                } catch (error) {
-                    console.error("Error fetching cities:", error);
+                    const data = await response.json();
+                    setCities(data);
+                    setCityOptions(
+                        data.map(c => ({ value: c.name, label: c.name, code: c.code }))
+                    );
                 }
             } else {
                 setCities([]);
@@ -148,68 +117,41 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                 setStreetSuggestions([]);
             }
         };
-
         fetchCities();
     }, [selectedProvince, provinces]);
 
-    // Fetch barangays when city is selected
+    // Fetch barangays
     useEffect(() => {
         const fetchBarangays = async () => {
             if (selectedCity) {
-                try {
-                    const city = cities.find(
-                        c => c.name.toLowerCase() === selectedCity.toLowerCase()
+                const city = cities.find(c => c.name.toLowerCase() === selectedCity.toLowerCase());
+                if (city) {
+                    const response = await fetch(
+                        `https://psgc.gitlab.io/api/cities-municipalities/${city.code}/barangays`
                     );
-
-                    if (city) {
-                        const response = await fetch(
-                            `https://psgc.gitlab.io/api/cities-municipalities/${city.code}/barangays`
-                        );
-                        const data = await response.json();
-
-                        // Format for react-select
-                        const options = data.map(barangay => ({
-                            value: barangay.name,
-                            label: barangay.name,
-                            code: barangay.code
-                        }));
-                        setBarangayOptions(options);
-                    }
-                } catch (error) {
-                    console.error("Error fetching barangays:", error);
+                    const data = await response.json();
+                    setBarangayOptions(
+                        data.map(b => ({ value: b.name, label: b.name, code: b.code }))
+                    );
                 }
             } else {
                 setBarangayOptions([]);
                 setStreetSuggestions([]);
             }
         };
-
         fetchBarangays();
     }, [selectedCity, cities]);
 
-    // Get street suggestions from geocoding when street is entered
+    // Street → geocode
     useEffect(() => {
         const fetchStreetSuggestions = async () => {
-            if (
-                debouncedStreet &&
-                selectedBarangay &&
-                selectedCity &&
-                selectedProvince
-            ) {
+            if (debouncedStreet && selectedBarangay && selectedCity && selectedProvince) {
                 const fullAddress = `${debouncedStreet}, ${selectedBarangay}, ${selectedCity}, ${selectedProvince}, Philippines`;
                 const results = await geocode(fullAddress);
-
                 if (results && results.length > 0) {
                     setStreetSuggestions(results);
-
-                    // Auto-select first result and set coordinates
-                    const firstResult = results[0];
-                    setValue("delivery_lat", parseFloat(firstResult.lat));
-                    setValue("delivery_lng", parseFloat(firstResult.lon));
-                    setDeliveryCoords({
-                        lat: parseFloat(firstResult.lat),
-                        lng: parseFloat(firstResult.lon)
-                    });
+                    const first = results[0];
+                    setDeliveryCoords({ lat: parseFloat(first.lat), lng: parseFloat(first.lon) });
                 } else {
                     setStreetSuggestions([]);
                 }
@@ -217,95 +159,50 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                 setStreetSuggestions([]);
             }
         };
-
         fetchStreetSuggestions();
-    }, [
-        debouncedStreet,
-        selectedBarangay,
-        selectedCity,
-        selectedProvince,
-        setValue
-    ]);
+    }, [debouncedStreet, selectedBarangay, selectedCity, selectedProvince]);
 
-    // Update coordinates when lat/lng changes
-    useEffect(() => {
-        if (deliveryLat && deliveryLng) {
-            setDeliveryCoords({
-                lat: parseFloat(deliveryLat),
-                lng: parseFloat(deliveryLng)
-            });
-        }
-    }, [deliveryLat, deliveryLng]);
-
-    // Handle province selection
-    const handleProvinceChange = selectedOption => {
-        setValue(
-            "delivery_province",
-            selectedOption ? selectedOption.value : ""
-        );
+    const handleProvinceChange = option => {
+        setValue("delivery_province", option ? option.value : "");
         setValue("delivery_city", "");
         setValue("delivery_barangay", "");
         setValue("delivery_street", "");
-        setValue("delivery_lat", null);
-        setValue("delivery_lng", null);
         setDeliveryCoords(null);
     };
 
-    // Handle city selection
-    const handleCityChange = selectedOption => {
-        setValue("delivery_city", selectedOption ? selectedOption.value : "");
+    const handleCityChange = option => {
+        setValue("delivery_city", option ? option.value : "");
         setValue("delivery_barangay", "");
         setValue("delivery_street", "");
-        setValue("delivery_lat", null);
-        setValue("delivery_lng", null);
         setDeliveryCoords(null);
     };
 
-    // Handle barangay selection
-    const handleBarangayChange = selectedOption => {
-        setValue(
-            "delivery_barangay",
-            selectedOption ? selectedOption.value : ""
-        );
+    const handleBarangayChange = option => {
+        setValue("delivery_barangay", option ? option.value : "");
         setValue("delivery_street", "");
-        setValue("delivery_lat", null);
-        setValue("delivery_lng", null);
         setDeliveryCoords(null);
     };
 
-    // Handle street selection from suggestions
     const selectStreetSuggestion = suggestion => {
         setValue("delivery_street", suggestion.display_name);
-        setValue("delivery_lat", parseFloat(suggestion.lat));
-        setValue("delivery_lng", parseFloat(suggestion.lon));
-        setDeliveryCoords({
-            lat: parseFloat(suggestion.lat),
-            lng: parseFloat(suggestion.lon)
-        });
+        setDeliveryCoords({ lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) });
         setStreetSuggestions([]);
     };
 
-    // Marker positions for map
     const positions = useMemo(() => {
         const pts = [];
         if (deliveryCoords) pts.push([deliveryCoords.lat, deliveryCoords.lng]);
         if (originPortObj) pts.push([originPortObj.lat, originPortObj.lng]);
-        if (destinationPortObj)
-            pts.push([destinationPortObj.lat, destinationPortObj.lng]);
+        if (destinationPortObj) pts.push([destinationPortObj.lat, destinationPortObj.lng]);
         return pts;
     }, [deliveryCoords, originPortObj, destinationPortObj]);
 
-    // Custom styles for react-select
     const selectStyles = {
         control: (provided, state) => ({
             ...provided,
             borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
-            boxShadow: state.isFocused
-                ? "0 0 0 2px rgba(59, 130, 246, 0.3)"
-                : "none",
-            "&:hover": {
-                borderColor: "#3b82f6"
-            }
+            boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 130, 246, 0.3)" : "none",
+            "&:hover": { borderColor: "#3b82f6" }
         }),
         option: (provided, state) => ({
             ...provided,
@@ -322,38 +219,28 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
         <div className="space-y-4">
             <h3 className="text-lg font-semibold">Delivery Location</h3>
 
-            {/* Province Select */}
+            {/* Province */}
             <div>
                 <label className="input-label-modern">Province</label>
                 <Select
-                    value={
-                        provinceOptions.find(
-                            opt => opt.value === selectedProvince
-                        ) || null
-                    }
+                    value={provinceOptions.find(opt => opt.value === selectedProvince) || null}
                     onChange={handleProvinceChange}
                     options={provinceOptions}
                     placeholder="Select or type province"
                     isSearchable
                     isClearable
                     styles={selectStyles}
-                    noOptionsMessage={() => "No provinces found"}
                 />
                 {errors.delivery_province && (
-                    <p className="error-message">
-                        {errors.delivery_province.message}
-                    </p>
+                    <p className="error-message">{errors.delivery_province.message}</p>
                 )}
             </div>
 
-            {/* City Select */}
+            {/* City */}
             <div>
                 <label className="input-label-modern">City/Municipality</label>
                 <Select
-                    value={
-                        cityOptions.find(opt => opt.value === selectedCity) ||
-                        null
-                    }
+                    value={cityOptions.find(opt => opt.value === selectedCity) || null}
                     onChange={handleCityChange}
                     options={cityOptions}
                     placeholder="Select or type city/municipality"
@@ -361,28 +248,17 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                     isClearable
                     isDisabled={!selectedProvince}
                     styles={selectStyles}
-                    noOptionsMessage={() =>
-                        selectedProvince
-                            ? "No cities found"
-                            : "Please select a province first"
-                    }
                 />
                 {errors.delivery_city && (
-                    <p className="error-message">
-                        {errors.delivery_city.message}
-                    </p>
+                    <p className="error-message">{errors.delivery_city.message}</p>
                 )}
             </div>
 
-            {/* Barangay Select */}
+            {/* Barangay */}
             <div>
                 <label className="input-label-modern">Barangay</label>
                 <Select
-                    value={
-                        barangayOptions.find(
-                            opt => opt.value === selectedBarangay
-                        ) || null
-                    }
+                    value={barangayOptions.find(opt => opt.value === selectedBarangay) || null}
                     onChange={handleBarangayChange}
                     options={barangayOptions}
                     placeholder="Select or type barangay"
@@ -390,24 +266,15 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                     isClearable
                     isDisabled={!selectedCity}
                     styles={selectStyles}
-                    noOptionsMessage={() =>
-                        selectedCity
-                            ? "No barangays found"
-                            : "Please select a city first"
-                    }
                 />
                 {errors.delivery_barangay && (
-                    <p className="error-message">
-                        {errors.delivery_barangay.message}
-                    </p>
+                    <p className="error-message">{errors.delivery_barangay.message}</p>
                 )}
             </div>
 
-            {/* Street Input */}
+            {/* Street */}
             <div className="relative">
-                <label className="input-label-modern">
-                    House/Building Number and Street Name
-                </label>
+                <label className="input-label-modern">House/Building Number and Street Name</label>
                 <input
                     type="text"
                     value={selectedStreet || ""}
@@ -418,23 +285,19 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                 />
                 {streetSuggestions.length > 0 && (
                     <ul className="absolute bg-white border rounded-md shadow-lg mt-1 w-full max-h-40 overflow-y-auto z-[9999]">
-                        {streetSuggestions.map((suggestion, i) => (
+                        {streetSuggestions.map((s, i) => (
                             <li
                                 key={i}
                                 className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                                onClick={() =>
-                                    selectStreetSuggestion(suggestion)
-                                }
+                                onClick={() => selectStreetSuggestion(s)}
                             >
-                                {suggestion.display_name}
+                                {s.display_name}
                             </li>
                         ))}
                     </ul>
                 )}
                 {errors.delivery_street && (
-                    <p className="error-message">
-                        {errors.delivery_street.message}
-                    </p>
+                    <p className="error-message">{errors.delivery_street.message}</p>
                 )}
             </div>
 
@@ -452,12 +315,8 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
 
                     <FitBounds positions={positions} />
 
-                    {/* Delivery Marker */}
                     {deliveryCoords && (
-                        <Marker
-                            position={deliveryCoords}
-                            icon={markerIcon("red")}
-                        >
+                        <Marker position={deliveryCoords} icon={markerIcon("red")}>
                             <Popup>
                                 Delivery Location:{" "}
                                 {selectedStreet && `${selectedStreet}, `}
@@ -468,7 +327,6 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                         </Marker>
                     )}
 
-                    {/* Origin Port Marker */}
                     {originPortObj && (
                         <Marker
                             position={[originPortObj.lat, originPortObj.lng]}
@@ -478,29 +336,19 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                         </Marker>
                     )}
 
-                    {/* Destination Port Marker */}
                     {destinationPortObj && (
                         <Marker
-                            position={[
-                                destinationPortObj.lat,
-                                destinationPortObj.lng
-                            ]}
+                            position={[destinationPortObj.lat, destinationPortObj.lng]}
                             icon={markerIcon("blue")}
                         >
-                            <Popup>
-                                Destination Port: {destinationPortObj.label}
-                            </Popup>
+                            <Popup>Destination Port: {destinationPortObj.label}</Popup>
                         </Marker>
                     )}
 
-                    {/* Routes */}
                     {destinationPortObj && deliveryCoords && (
                         <Polyline
                             positions={[
-                                [
-                                    destinationPortObj.lat,
-                                    destinationPortObj.lng
-                                ],
+                                [destinationPortObj.lat, destinationPortObj.lng],
                                 [deliveryCoords.lat, deliveryCoords.lng]
                             ]}
                             pathOptions={{ color: "red", weight: 4 }}
@@ -513,23 +361,11 @@ const BookingStep4DL = ({ control, errors, setValue, getValues }) => {
                                 [originPortObj.lat, originPortObj.lng],
                                 [destinationPortObj.lat, destinationPortObj.lng]
                             ]}
-                            pathOptions={{
-                                color: "blue",
-                                weight: 4,
-                                dashArray: "10, 10"
-                            }}
+                            pathOptions={{ color: "blue", weight: 4, dashArray: "10, 10" }}
                         />
                     )}
                 </MapContainer>
             </div>
-
-            {/* Coordinates Display */}
-            {deliveryLat && deliveryLng && (
-                <div className="text-sm text-gray-600">
-                    Coordinates: {parseFloat(deliveryLat).toFixed(6)},{" "}
-                    {parseFloat(deliveryLng).toFixed(6)}
-                </div>
-            )}
 
             {/* Legend */}
             <div className="flex flex-wrap gap-6 text-sm mt-2">

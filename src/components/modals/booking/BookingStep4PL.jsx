@@ -16,7 +16,7 @@ import { getPortByValue } from "../../../utils/helpers/shipRoutes";
 import "leaflet/dist/leaflet.css";
 delete L.Icon.Default.prototype._getIconUrl;
 
-// Custom colored markers
+// Custom marker
 const markerIcon = (color) =>
   new L.Icon({
     iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
@@ -27,7 +27,7 @@ const markerIcon = (color) =>
     popupAnchor: [1, -34],
   });
 
-// Auto-fit map to markers
+// Auto-fit map bounds
 const FitBounds = ({ positions }) => {
   const map = useMap();
   useEffect(() => {
@@ -39,36 +39,36 @@ const FitBounds = ({ positions }) => {
   return null;
 };
 
-const BookingStep4PL = ({ control, errors, setValue, getValues }) => {
+const BookingStep4PL = ({ control, errors, setValue }) => {
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
-  
+
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [cityOptions, setCityOptions] = useState([]);
   const [barangayOptions, setBarangayOptions] = useState([]);
-  const [streetOptions, setStreetOptions] = useState([]);
-  
+
+  const [streetQuery, setStreetQuery] = useState("");
+  const [streetSuggestions, setStreetSuggestions] = useState([]);
+
+  const [debouncedStreet] = useDebounce(streetQuery, 500);
+  const [pickupCoords, setPickupCoords] = useState(null);
+
+  // Watch values
   const selectedProvince = useWatch({ control, name: "pickup_province" });
   const selectedCity = useWatch({ control, name: "pickup_city" });
   const selectedBarangay = useWatch({ control, name: "pickup_barangay" });
   const selectedStreet = useWatch({ control, name: "pickup_street" });
-  const pickupLat = useWatch({ control, name: "pickup_lat" });
-  const pickupLng = useWatch({ control, name: "pickup_lng" });
+
   const originPortValue = useWatch({ control, name: "origin_port" });
   const destinationPortValue = useWatch({ control, name: "destination_port" });
-  const skipTrucking = useWatch({ control, name: "skipTrucking" });
-  
-  const [debouncedStreet] = useDebounce(selectedStreet, 500);
-  const [pickupCoords, setPickupCoords] = useState(null);
 
-  // Get port objects from values
   const originPortObj = originPortValue ? getPortByValue(originPortValue) : null;
   const destinationPortObj = destinationPortValue ? getPortByValue(destinationPortValue) : null;
 
-  // Geocode function for map integration
+  // Geocode helper
   const geocode = async (place) => {
-    if (!place) return null;
+    if (!place) return [];
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -76,214 +76,112 @@ const BookingStep4PL = ({ control, errors, setValue, getValues }) => {
         )}&countrycodes=ph&limit=5`
       );
       return await res.json();
-    } catch (err) {
-      console.error("Geocoding error:", err);
+    } catch {
       return [];
     }
   };
 
-  // Fetch provinces
+  // --- Fetch provinces ---
   useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await fetch("https://psgc.gitlab.io/api/provinces/");
-        const data = await response.json();
+    fetch("https://psgc.gitlab.io/api/provinces/")
+      .then((res) => res.json())
+      .then((data) => {
         setProvinces(data);
-        
-        // Format for react-select
-        const options = data.map(province => ({
-          value: province.name,
-          label: province.name,
-          code: province.code
-        }));
-        setProvinceOptions(options);
-      } catch (error) {
-        console.error("Error fetching provinces:", error);
-      }
-    };
-    
-    fetchProvinces();
+        setProvinceOptions(
+          data.map((p) => ({ value: p.name, label: p.name, code: p.code }))
+        );
+      })
+      .catch(() => {});
   }, []);
-  
-  // Fetch cities when province is selected
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (selectedProvince) {
-        try {
-          const province = provinces.find(p => 
-            p.name.toLowerCase() === selectedProvince.toLowerCase()
-          );
-          
-          if (province) {
-            const response = await fetch(`https://psgc.gitlab.io/api/provinces/${province.code}/cities-municipalities`);
-            const data = await response.json();
-            setCities(data);
-            
-            // Format for react-select
-            const options = data.map(city => ({
-              value: city.name,
-              label: city.name,
-              code: city.code
-            }));
-            setCityOptions(options);
-          }
-        } catch (error) {
-          console.error("Error fetching cities:", error);
-        }
-      } else {
-        setCities([]);
-        setCityOptions([]);
-        setBarangays([]);
-        setBarangayOptions([]);
-        setStreetOptions([]);
-      }
-    };
-    
-    fetchCities();
-  }, [selectedProvince, provinces]);
-  
-  // Fetch barangays when city is selected
-  useEffect(() => {
-    const fetchBarangays = async () => {
-      if (selectedCity) {
-        try {
-          const city = cities.find(c => 
-            c.name.toLowerCase() === selectedCity.toLowerCase()
-          );
-          
-          if (city) {
-            const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${city.code}/barangays`);
-            const data = await response.json();
-            setBarangays(data);
-            
-            // Format for react-select
-            const options = data.map(barangay => ({
-              value: barangay.name,
-              label: barangay.name,
-              code: barangay.code
-            }));
-            setBarangayOptions(options);
-          }
-        } catch (error) {
-          console.error("Error fetching barangays:", error);
-        }
-      } else {
-        setBarangays([]);
-        setBarangayOptions([]);
-        setStreetOptions([]);
-      }
-    };
-    
-    fetchBarangays();
-  }, [selectedCity, cities]);
 
-  // Get street suggestions from geocoding when street is entered
+  // --- Fetch cities when province changes ---
   useEffect(() => {
-    const fetchStreetSuggestions = async () => {
-      if (debouncedStreet && selectedBarangay && selectedCity && selectedProvince) {
-        const fullAddress = `${debouncedStreet}, ${selectedBarangay}, ${selectedCity}, ${selectedProvince}, Philippines`;
-        const results = await geocode(fullAddress);
-        
-        if (results && results.length > 0) {
-          const options = results.map((result, index) => ({
-            value: result.display_name,
-            label: result.display_name,
-            lat: result.lat,
-            lng: result.lon,
-            index
-          }));
-          setStreetOptions(options);
-          
-          // Auto-select first result and set coordinates
-          const firstResult = results[0];
-          setValue("pickup_lat", parseFloat(firstResult.lat));
-          setValue("pickup_lng", parseFloat(firstResult.lon));
-          setPickupCoords({ 
-            lat: parseFloat(firstResult.lat), 
-            lng: parseFloat(firstResult.lon) 
-          });
-        }
-      } else {
-        setStreetOptions([]);
-      }
-    };
-    
-    fetchStreetSuggestions();
-  }, [debouncedStreet, selectedBarangay, selectedCity, selectedProvince, setValue]);
-
-  // Update coordinates when lat/lng changes
-  useEffect(() => {
-    if (pickupLat && pickupLng) {
-      setPickupCoords({ lat: parseFloat(pickupLat), lng: parseFloat(pickupLng) });
-    }
-  }, [pickupLat, pickupLng]);
-
-  // Handle province selection
-  const handleProvinceChange = (selectedOption) => {
-    setValue("pickup_province", selectedOption ? selectedOption.value : "");
-    setValue("pickup_city", "");
-    setValue("pickup_barangay", "");
-    setValue("pickup_street", "");
-    setValue("pickup_lat", null);
-    setValue("pickup_lng", null);
-    setPickupCoords(null);
-  };
-  
-  // Handle city selection
-  const handleCityChange = (selectedOption) => {
-    setValue("pickup_city", selectedOption ? selectedOption.value : "");
-    setValue("pickup_barangay", "");
-    setValue("pickup_street", "");
-    setValue("pickup_lat", null);
-    setValue("pickup_lng", null);
-    setPickupCoords(null);
-  };
-  
-  // Handle barangay selection
-  const handleBarangayChange = (selectedOption) => {
-    setValue("pickup_barangay", selectedOption ? selectedOption.value : "");
-    setValue("pickup_street", "");
-    setValue("pickup_lat", null);
-    setValue("pickup_lng", null);
-    setPickupCoords(null);
-  };
-
-  // Handle street selection
-  const handleStreetChange = (selectedOption) => {
-    if (selectedOption) {
-      setValue("pickup_street", selectedOption.value);
-      if (selectedOption.lat && selectedOption.lng) {
-        setValue("pickup_lat", parseFloat(selectedOption.lat));
-        setValue("pickup_lng", parseFloat(selectedOption.lng));
-        setPickupCoords({ 
-          lat: parseFloat(selectedOption.lat), 
-          lng: parseFloat(selectedOption.lng) 
-        });
-      }
-    } else {
-      setValue("pickup_street", "");
-      setValue("pickup_lat", null);
-      setValue("pickup_lng", null);
+    if (!selectedProvince) {
+      setCities([]);
+      setCityOptions([]);
+      setBarangays([]);
+      setBarangayOptions([]);
       setPickupCoords(null);
+      return;
     }
-  };
-
-  // Custom input component for street (allows typing)
-  const CustomInput = (props) => {
-    return (
-      <input
-        {...props}
-        onChange={(e) => {
-          props.onChange && props.onChange(e);
-          setValue("pickup_street", e.target.value);
-        }}
-        placeholder="e.g., 10 Sampaguita Street"
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+    const province = provinces.find(
+      (p) => p.name.toLowerCase() === selectedProvince.toLowerCase()
     );
-  };
+    if (province) {
+      fetch(`https://psgc.gitlab.io/api/provinces/${province.code}/cities-municipalities`)
+        .then((res) => res.json())
+        .then((data) => {
+          setCities(data);
+          setCityOptions(
+            data.map((c) => ({ value: c.name, label: c.name, code: c.code }))
+          );
+        });
+      // geocode province
+      geocode(`${selectedProvince}, Philippines`).then((results) => {
+        if (results[0]) {
+          setPickupCoords({ lat: +results[0].lat, lng: +results[0].lon });
+        }
+      });
+    }
+  }, [selectedProvince, provinces]);
 
-  // Marker positions for map
+  // --- Fetch barangays when city changes ---
+  useEffect(() => {
+    if (!selectedCity) {
+      setBarangays([]);
+      setBarangayOptions([]);
+      return;
+    }
+    const city = cities.find(
+      (c) => c.name.toLowerCase() === selectedCity.toLowerCase()
+    );
+    if (city) {
+      fetch(`https://psgc.gitlab.io/api/cities-municipalities/${city.code}/barangays`)
+        .then((res) => res.json())
+        .then((data) => {
+          setBarangays(data);
+          setBarangayOptions(
+            data.map((b) => ({ value: b.name, label: b.name, code: b.code }))
+          );
+        });
+      // geocode city
+      geocode(`${selectedCity}, ${selectedProvince}, Philippines`).then((results) => {
+        if (results[0]) {
+          setPickupCoords({ lat: +results[0].lat, lng: +results[0].lon });
+        }
+      });
+    }
+  }, [selectedCity, selectedProvince, cities]);
+
+  // --- Geocode barangay ---
+  useEffect(() => {
+    if (selectedBarangay) {
+      geocode(`${selectedBarangay}, ${selectedCity}, ${selectedProvince}, Philippines`).then(
+        (results) => {
+          if (results[0]) {
+            setPickupCoords({ lat: +results[0].lat, lng: +results[0].lon });
+          }
+        }
+      );
+    }
+  }, [selectedBarangay, selectedCity, selectedProvince]);
+
+  // --- Street autocomplete ---
+  useEffect(() => {
+    if (debouncedStreet && selectedBarangay && selectedCity && selectedProvince) {
+      const full = `${debouncedStreet}, ${selectedBarangay}, ${selectedCity}, ${selectedProvince}, Philippines`;
+      geocode(full).then((results) => {
+        setStreetSuggestions(results.map((r) => r.display_name));
+        if (results[0]) {
+          setPickupCoords({ lat: +results[0].lat, lng: +results[0].lon });
+        }
+      });
+    } else {
+      setStreetSuggestions([]);
+    }
+  }, [debouncedStreet, selectedBarangay, selectedCity, selectedProvince]);
+
+  // --- Marker positions ---
   const positions = useMemo(() => {
     const pts = [];
     if (pickupCoords) pts.push([pickupCoords.lat, pickupCoords.lng]);
@@ -292,130 +190,100 @@ const BookingStep4PL = ({ control, errors, setValue, getValues }) => {
     return pts;
   }, [pickupCoords, originPortObj, destinationPortObj]);
 
-  // Custom styles for react-select
   const selectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
-      boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none',
-      '&:hover': {
-        borderColor: '#3b82f6',
-      },
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#dbeafe' : 'white',
-      color: state.isSelected ? 'white' : '#374151',
+    control: (base, state) => ({
+      ...base,
+      borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+      boxShadow: state.isFocused ? "0 0 0 2px rgba(59,130,246,.3)" : "none",
     }),
   };
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Pickup Location</h3>
-      
-      {/* Province Select */}
+
+      {/* Province */}
       <div>
         <label className="input-label-modern">Province</label>
         <Select
-          value={provinceOptions.find(opt => opt.value === selectedProvince) || null}
-          onChange={handleProvinceChange}
+          value={provinceOptions.find((o) => o.value === selectedProvince) || null}
+          onChange={(o) => setValue("pickup_province", o ? o.value : "")}
           options={provinceOptions}
-          placeholder="Select or type province"
-          isSearchable
           isClearable
+          isSearchable
           styles={selectStyles}
-          noOptionsMessage={() => "No provinces found"}
         />
-        {errors.pickup_province && (
-          <p className="error-message">{errors.pickup_province.message}</p>
-        )}
+        {errors.pickup_province && <p className="error-message">{errors.pickup_province.message}</p>}
       </div>
-      
-      {/* City Select */}
+
+      {/* City */}
       <div>
         <label className="input-label-modern">City/Municipality</label>
         <Select
-          value={cityOptions.find(opt => opt.value === selectedCity) || null}
-          onChange={handleCityChange}
+          value={cityOptions.find((o) => o.value === selectedCity) || null}
+          onChange={(o) => setValue("pickup_city", o ? o.value : "")}
           options={cityOptions}
-          placeholder="Select or type city/municipality"
-          isSearchable
           isClearable
+          isSearchable
           isDisabled={!selectedProvince}
           styles={selectStyles}
-          noOptionsMessage={() => selectedProvince ? "No cities found" : "Please select a province first"}
         />
-        {errors.pickup_city && (
-          <p className="error-message">{errors.pickup_city.message}</p>
-        )}
+        {errors.pickup_city && <p className="error-message">{errors.pickup_city.message}</p>}
       </div>
-      
-      {/* Barangay Select */}
+
+      {/* Barangay */}
       <div>
         <label className="input-label-modern">Barangay</label>
         <Select
-          value={barangayOptions.find(opt => opt.value === selectedBarangay) || null}
-          onChange={handleBarangayChange}
+          value={barangayOptions.find((o) => o.value === selectedBarangay) || null}
+          onChange={(o) => setValue("pickup_barangay", o ? o.value : "")}
           options={barangayOptions}
-          placeholder="Select or type barangay"
-          isSearchable
           isClearable
+          isSearchable
           isDisabled={!selectedCity}
           styles={selectStyles}
-          noOptionsMessage={() => selectedCity ? "No barangays found" : "Please select a city first"}
         />
-        {errors.pickup_barangay && (
-          <p className="error-message">{errors.pickup_barangay.message}</p>
-        )}
+        {errors.pickup_barangay && <p className="error-message">{errors.pickup_barangay.message}</p>}
       </div>
-      
-      {/* Street Select/Input */}
+
+      {/* Street input */}
       <div>
-        <label className="input-label-modern">House/Building Number and Street Name</label>
-        <Select
-          value={streetOptions.find(opt => opt.value === selectedStreet) || null}
-          onChange={handleStreetChange}
-          options={streetOptions}
-          placeholder="Type street address (e.g., 10 Sampaguita Street)"
-          isSearchable
-          isClearable
-          isDisabled={!selectedBarangay}
-          styles={selectStyles}
-          components={{ 
-            Input: CustomInput,
-            NoOptionsMessage: () => selectedBarangay ? "Type to search for addresses" : "Please select a barangay first"
+        <label className="input-label-modern">House/Building & Street</label>
+        <input
+          type="text"
+          value={selectedStreet || ""}
+          onChange={(e) => {
+            setValue("pickup_street", e.target.value);
+            setStreetQuery(e.target.value);
           }}
-          inputValue={selectedStreet || ""}
-          onInputChange={(inputValue, actionMeta) => {
-            if (actionMeta.action !== 'input-blur' && actionMeta.action !== 'menu-close') {
-              setValue("pickup_street", inputValue);
-            }
-          }}
+          list="street-suggestions"
+          placeholder="e.g., 10 Sampaguita Street"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={!selectedBarangay}
         />
-        {errors.pickup_street && (
-          <p className="error-message">{errors.pickup_street.message}</p>
-        )}
+        <datalist id="street-suggestions">
+          {streetSuggestions.map((s, i) => (
+            <option key={i} value={s} />
+          ))}
+        </datalist>
+        {errors.pickup_street && <p className="error-message">{errors.pickup_street.message}</p>}
       </div>
 
       {/* Map */}
       <div className="h-96 w-full rounded-lg overflow-hidden border relative z-0">
         <MapContainer
           center={positions[0] || [12.8797, 121.774]}
-          zoom={positions.length > 0 ? 6 : 5}
+          zoom={6}
           style={{ height: "100%", width: "100%" }}
         >
-          <TileLayer
-            attribution='&copy; <a href="https://osm.org">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           <FitBounds positions={positions} />
 
-          {/* Pickup Marker */}
           {pickupCoords && (
             <Marker position={pickupCoords} icon={markerIcon("green")}>
               <Popup>
-                Pickup Location: {selectedStreet && `${selectedStreet}, `}
+                Pickup: {selectedStreet && `${selectedStreet}, `}
                 {selectedBarangay && `${selectedBarangay}, `}
                 {selectedCity && `${selectedCity}, `}
                 {selectedProvince}
@@ -423,88 +291,25 @@ const BookingStep4PL = ({ control, errors, setValue, getValues }) => {
             </Marker>
           )}
 
-          {/* Origin Port Marker */}
           {originPortObj && (
-            <Marker
-              position={[originPortObj.lat, originPortObj.lng]}
-              icon={markerIcon("yellow")}
-            >
+            <Marker position={[originPortObj.lat, originPortObj.lng]} icon={markerIcon("yellow")}>
               <Popup>Origin Port: {originPortObj.label}</Popup>
             </Marker>
           )}
 
-          {/* Destination Port Marker */}
           {destinationPortObj && (
-            <Marker
-              position={[destinationPortObj.lat, destinationPortObj.lng]}
-              icon={markerIcon("blue")}
-            >
+            <Marker position={[destinationPortObj.lat, destinationPortObj.lng]} icon={markerIcon("blue")}>
               <Popup>Destination Port: {destinationPortObj.label}</Popup>
             </Marker>
           )}
 
-          {/* Routes */}
           {pickupCoords && originPortObj && (
-            <Polyline
-              positions={[
-                [pickupCoords.lat, pickupCoords.lng],
-                [originPortObj.lat, originPortObj.lng],
-              ]}
-              pathOptions={{ color: "green", weight: 4 }}
-            />
+            <Polyline positions={[[pickupCoords.lat, pickupCoords.lng], [originPortObj.lat, originPortObj.lng]]} pathOptions={{ color: "green" }} />
           )}
-          
           {originPortObj && destinationPortObj && (
-            <Polyline
-              positions={[
-                [originPortObj.lat, originPortObj.lng],
-                [destinationPortObj.lat, destinationPortObj.lng],
-              ]}
-              pathOptions={{ color: "blue", weight: 4, dashArray: "10, 10" }}
-            />
+            <Polyline positions={[[originPortObj.lat, originPortObj.lng], [destinationPortObj.lat, destinationPortObj.lng]]} pathOptions={{ color: "blue", dashArray: "10,10" }} />
           )}
         </MapContainer>
-      </div>
-
-      {/* Coordinates Display */}
-      {pickupLat && pickupLng && (
-        <div className="text-sm text-gray-600">
-          Coordinates: {parseFloat(pickupLat).toFixed(6)}, {parseFloat(pickupLng).toFixed(6)}
-        </div>
-      )}
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-6 text-sm mt-2">
-        {pickupCoords && (
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-            Pickup Location
-          </div>
-        )}
-        {originPortObj && (
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
-            Origin Port
-          </div>
-        )}
-        {destinationPortObj && (
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-            Destination Port
-          </div>
-        )}
-        {pickupCoords && originPortObj && (
-          <div className="flex items-center gap-1">
-            <span className="w-6 h-0.5 bg-green-500"></span>
-            Truck Route (Pickup → Origin Port)
-          </div>
-        )}
-        {originPortObj && destinationPortObj && (
-          <div className="flex items-center gap-1">
-            <span className="w-6 h-0.5 border-t-2 border-blue-500 border-dashed"></span>
-            Sea Route (Origin → Destination Port)
-          </div>
-        )}
       </div>
     </div>
   );
