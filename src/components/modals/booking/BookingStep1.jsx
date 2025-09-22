@@ -1,20 +1,23 @@
 // src/components/modals/booking/BookingStep1.jsx
 import { Controller } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const BookingStep1 = ({ register, control, errors }) => {
     return (
         <div className="space-y-4">
             {/* Shipper Section */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h4 className="font-semibold text-gray-700 mb-3">Shipper Information</h4>
+                <h4 className="font-semibold text-gray-700 mb-3">
+                    Shipper Information
+                </h4>
 
                 {/* Shipper */}
                 <div className="mb-3">
                     <label className="input-label-modern">Shipper</label>
                     <input
                         {...register("shipper", {
-                            required: "Shipper is required",
+                            required: "Shipper is required"
                         })}
                         placeholder="Enter shipper name"
                         className={`input-field-modern ${
@@ -22,7 +25,9 @@ const BookingStep1 = ({ register, control, errors }) => {
                         }`}
                     />
                     {errors.shipper && (
-                        <p className="error-message">{errors.shipper.message}</p>
+                        <p className="error-message">
+                            {errors.shipper.message}
+                        </p>
                     )}
                 </div>
 
@@ -38,7 +43,9 @@ const BookingStep1 = ({ register, control, errors }) => {
                             }`}
                         />
                         {errors.first_name && (
-                            <p className="error-message">{errors.first_name.message}</p>
+                            <p className="error-message">
+                                {errors.first_name.message}
+                            </p>
                         )}
                     </div>
                     <div>
@@ -51,7 +58,9 @@ const BookingStep1 = ({ register, control, errors }) => {
                             }`}
                         />
                         {errors.last_name && (
-                            <p className="error-message">{errors.last_name.message}</p>
+                            <p className="error-message">
+                                {errors.last_name.message}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -81,14 +90,16 @@ const BookingStep1 = ({ register, control, errors }) => {
 
             {/* Consignee Section */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h4 className="font-semibold text-gray-700 mb-3">Consignee Information</h4>
+                <h4 className="font-semibold text-gray-700 mb-3">
+                    Consignee Information
+                </h4>
 
                 {/* Consignee */}
                 <div className="mb-3">
                     <label className="input-label-modern">Consignee</label>
                     <input
                         {...register("consignee", {
-                            required: "Consignee is required",
+                            required: "Consignee is required"
                         })}
                         placeholder="Enter consignee name"
                         className={`input-field-modern ${
@@ -96,13 +107,17 @@ const BookingStep1 = ({ register, control, errors }) => {
                         }`}
                     />
                     {errors.consignee && (
-                        <p className="error-message">{errors.consignee.message}</p>
+                        <p className="error-message">
+                            {errors.consignee.message}
+                        </p>
                     )}
                 </div>
 
                 {/* Consignee Contact Person */}
                 <div className="mb-3">
-                    <label className="input-label-modern">Consignee Contact Name</label>
+                    <label className="input-label-modern">
+                        Consignee Contact Name
+                    </label>
                     <input
                         {...register("consignee_name")}
                         placeholder="Enter contact person name"
@@ -111,13 +126,17 @@ const BookingStep1 = ({ register, control, errors }) => {
                         }`}
                     />
                     {errors.consignee_name && (
-                        <p className="error-message">{errors.consignee_name.message}</p>
+                        <p className="error-message">
+                            {errors.consignee_name.message}
+                        </p>
                     )}
                 </div>
 
                 {/* Consignee Phone Number */}
                 <div>
-                    <label className="input-label-modern">Consignee Phone Number</label>
+                    <label className="input-label-modern">
+                        Consignee Phone Number
+                    </label>
                     <Controller
                         name="consignee_phone"
                         control={control}
@@ -133,7 +152,9 @@ const BookingStep1 = ({ register, control, errors }) => {
                         )}
                     />
                     {errors.consignee_phone && (
-                        <p className="error-message">{errors.consignee_phone.message}</p>
+                        <p className="error-message">
+                            {errors.consignee_phone.message}
+                        </p>
                     )}
                 </div>
             </div>
