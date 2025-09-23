@@ -1,4 +1,4 @@
-// Enhanced useShipStore.js with debugging
+//  utils/store/useShipStore.js 
 import { create } from "zustand";
 import api from "../../config/axios";
 
@@ -41,6 +41,20 @@ const useShipStore = create((set, get) => ({
       return { success: false, error };
     }
   },
+
+// Fetch ship by shipping line
+fetchShipsByLine: async (lineId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await api.get(`/ships/by-line/${lineId}`);
+    set({ ships: res.data.ships, loading: false });
+    return { success: true, data: res.data.ships };
+  } catch (err) {
+    const error = err.response?.data?.message || "Failed to fetch ships";
+    set({ error, loading: false, ships: [] });
+    return { success: false, error };
+  }
+},
 
   // Add new ship
   addShip: async shipData => {
