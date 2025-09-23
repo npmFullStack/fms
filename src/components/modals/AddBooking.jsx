@@ -93,6 +93,38 @@ const AddBooking = ({ isOpen, onClose }) => {
         }
     }, [isOpen, fetchPartners]);
 
+    // Debug effect to monitor form values
+    useEffect(() => {
+        const subscription = watch((value, { name, type }) => {
+            console.log(
+                "Form field changed:",
+                name,
+                "Value:",
+                value[name],
+                "Type:",
+                type
+            );
+
+            // Log pickup data specifically
+            if (name?.includes("pickup_")) {
+                console.log("Current pickup data:", {
+                    pickup_province: value.pickup_province,
+                    pickup_city: value.pickup_city,
+                    pickup_barangay: value.pickup_barangay,
+                    pickup_street: value.pickup_street
+                });
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [watch]);
+
+    // Also add this useEffect to log current form state when step changes
+    useEffect(() => {
+        console.log("Step changed to:", currentStep);
+        console.log("Current form values:", getValues());
+    }, [currentStep, getValues]);
+
     const onSubmit = async data => {
         try {
             setIsLoading(true);
@@ -143,7 +175,7 @@ const AddBooking = ({ isOpen, onClose }) => {
         3: [], // optional
         4: [], // optional
         5: [], // optional
-        6: []  // review only
+        6: [] // review only
     };
 
     const handleNext = async () => {
@@ -266,7 +298,9 @@ const AddBooking = ({ isOpen, onClose }) => {
                     { text: `Step ${currentStep} of 6` },
                     { text: tooltips[currentStep] },
                     bookingMode === "PIER_TO_PIER"
-                        ? { text: "Skipping trucking step (Port-to-Port selected)" }
+                        ? {
+                              text: "Skipping trucking step (Port-to-Port selected)"
+                          }
                         : null
                 ].filter(Boolean)
             }}
