@@ -5,6 +5,7 @@ import {
   ArrowLeftIcon,
   CubeIcon,
   GlobeAltIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import Loading from "../../components/Loading";
 import ShipTable from "../../components/tables/ShipTable";
@@ -52,7 +53,9 @@ const ShippingLines = () => {
 
   const {
     containers,
+    allContainers, // New: all containers including in-use ones
     fetchContainersByLine,
+    fetchAllContainersByLine, // New: fetch all containers function
     addContainer,
     removeContainer,
     updateContainer,
@@ -62,22 +65,23 @@ const ShippingLines = () => {
     if (id) {
       fetchPartnerById(id, "shipping");
       fetchAllShips();
-      fetchContainersByLine(id);
+      fetchContainersByLine(id); // For booking selection
+      fetchAllContainersByLine(id); // For management table
     }
     return () => {
       clearCurrentPartner();
       clearCurrentShip();
     };
-  }, [id, fetchPartnerById, clearCurrentPartner, fetchAllShips, clearCurrentShip, fetchContainersByLine]);
+  }, [id, fetchPartnerById, clearCurrentPartner, fetchAllShips, clearCurrentShip, fetchContainersByLine, fetchAllContainersByLine]);
 
   // CRUD Handlers for Ships
   const handleAddShip = async (shipData) => {
-  console.log("🎯 handleAddShip called with:", shipData);
-  const result = await addShip({ ...shipData, shippingLineId: id });
-  console.log("🎯 handleAddShip result:", result);
-  if (result.success) setIsAddShipOpen(false);
-  return result;
-};
+    console.log("🎯 handleAddShip called with:", shipData);
+    const result = await addShip({ ...shipData, shippingLineId: id });
+    console.log("🎯 handleAddShip result:", result);
+    if (result.success) setIsAddShipOpen(false);
+    return result;
+  };
 
   const handleViewShip = async (ship) => {
     const result = await fetchShipById(ship.id);
@@ -142,7 +146,9 @@ const ShippingLines = () => {
 
   // Stats
   const totalShips = ships?.filter((s) => s.shipping_line_id === id)?.length || 0;
-  const totalContainers = containers?.length || 0;
+  const totalContainers = allContainers?.length || 0;
+  const inUseContainers = allContainers?.filter(container => !container.is_returned)?.length || 0;
+  const returnedContainers = allContainers?.filter(container => container.is_returned)?.length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -169,7 +175,7 @@ const ShippingLines = () => {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <GlobeAltIcon className="stat-icon-bg h-24 w-24 opacity-10" />
               <div className="stat-content">
@@ -185,6 +191,24 @@ const ShippingLines = () => {
                 <div>
                   <p className="stat-title">Total Containers</p>
                   <p className="stat-value">{totalContainers}</p>
+                </div>
+              </div>
+            </div>
+            <div className="stat-card bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+              <ExclamationTriangleIcon className="stat-icon-bg h-24 w-24 opacity-10" />
+              <div className="stat-content">
+                <div>
+                  <p className="stat-title">In Use Containers</p>
+                  <p className="stat-value">{inUseContainers}</p>
+                </div>
+              </div>
+            </div>
+            <div className="stat-card bg-gradient-to-br from-green-500 to-green-600 text-white">
+              <CubeIcon className="stat-icon-bg h-24 w-24 opacity-10" />
+              <div className="stat-content">
+                <div>
+                  <p className="stat-title">Available Containers</p>
+                  <p className="stat-value">{returnedContainers}</p>
                 </div>
               </div>
             </div>
@@ -233,17 +257,18 @@ const ShippingLines = () => {
               }
             />
           ) : (
-            <ContainerTable
-              data={containers}
-              rightAction={
-                <button
-                  onClick={() => setIsAddContainerOpen(true)}
-                  className="btn-primary"
-                >
-                  <PlusCircleIcon className="h-5 w-5" /> Add Container
-                </button>
-              }
-            />
+<ContainerTable
+  data={allContainers}
+  rightAction={
+    <button
+      onClick={() => setIsAddContainerOpen(true)}
+      className="btn-primary"
+    >
+      <PlusCircleIcon className="h-5 w-5" /> Add Container
+    </button>
+  }
+/>
+
           )}
         </div>
       </div>

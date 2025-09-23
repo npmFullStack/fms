@@ -1,13 +1,15 @@
+// utils/store/useContainerStore
 import { create } from "zustand";
 import api from "../../config/axios";
 
 const useContainerStore = create((set, get) => ({
   containers: [],
+  allContainers: [], // New state for all containers (including in-use)
   loading: false,
   error: null,
   currentContainer: null,
 
-  // Fetch all containers by shipping line
+  // Fetch containers by shipping line (only returned ones - for booking selection)
   fetchContainersByLine: async (shippingLineId) => {
     set({ loading: true, error: null });
     try {
@@ -21,12 +23,28 @@ const useContainerStore = create((set, get) => ({
     }
   },
 
+  // Fetch ALL containers by shipping line (both returned and in-use - for management table)
+  fetchAllContainersByLine: async (shippingLineId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get(`/containers/line/${shippingLineId}/all`);
+      set({ allContainers: res.data, loading: false });
+      return { success: true, data: res.data };
+    } catch (err) {
+      const error = err.response?.data?.message || "Failed to fetch all containers";
+      set({ error, loading: false, allContainers: [] });
+      return { success: false, error };
+    }
+  },
+
   // Add new container
   addContainer: async (containerData) => {
     set({ loading: true, error: null });
     try {
       const res = await api.post("/containers", containerData);
+      // Refresh both container lists
       await get().fetchContainersByLine(containerData.shippingLineId);
+      await get().fetchAllContainersByLine(containerData.shippingLineId);
       set({ loading: false });
       return { success: true, data: res.data };
     } catch (err) {
@@ -41,7 +59,9 @@ const useContainerStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const res = await api.put(`/containers/${id}`, updatedData);
+      // Refresh both container lists
       await get().fetchContainersByLine(updatedData.shippingLineId);
+      await get().fetchAllContainersByLine(updatedData.shippingLineId);
       set({ loading: false });
       return { success: true, data: res.data };
     } catch (err) {
@@ -56,7 +76,9 @@ const useContainerStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.delete(`/containers/${id}`);
+      // Refresh both container lists
       await get().fetchContainersByLine(shippingLineId);
+      await get().fetchAllContainersByLine(shippingLineId);
       set({ loading: false });
       return { success: true };
     } catch (err) {
@@ -69,7 +91,13 @@ const useContainerStore = create((set, get) => ({
   clearCurrentContainer: () => set({ currentContainer: null }),
   clearError: () => set({ error: null }),
   setLoading: (loading) => set({ loading }),
-  clearAll: () => set({ containers: [], currentContainer: null, error: null, loading: false }),
+  clearAll: () => set({ 
+    containers: [], 
+    allContainers: [], 
+    currentContainer: null, 
+    error: null, 
+    loading: false 
+  }),
 }));
 
 export default useContainerStore;
