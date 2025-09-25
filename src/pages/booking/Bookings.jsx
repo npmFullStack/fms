@@ -64,7 +64,73 @@ const Bookings = () => {
         safeBookings.filter(b => b.status === status).length;
 
     const totalBookings = safeBookings.length;
+    // inside Bookings component
 
+    const statsConfig = [
+        {
+            key: "TOTAL",
+            title: "Total",
+            value: totalBookings,
+            color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+            icon: CubeIcon
+        },
+        {
+            key: "PICKUP_SCHEDULED",
+            title: "Pickup",
+            value: countByStatus("PICKUP_SCHEDULED"),
+            color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
+            icon: TruckIcon
+        },
+        {
+            key: "LOADED_TO_TRUCK",
+            title: "Loaded Truck",
+            value: countByStatus("LOADED_TO_TRUCK"),
+            color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
+            icon: TruckIcon
+        },
+        {
+            key: "ARRIVED_ORIGIN_PORT",
+            title: "Origin Port",
+            value: countByStatus("ARRIVED_ORIGIN_PORT"),
+            color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
+            icon: BuildingLibraryIcon
+        },
+        {
+            key: "LOADED_TO_SHIP",
+            title: "Loaded Ship",
+            value: countByStatus("LOADED_TO_SHIP"),
+            color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
+            icon: CubeIcon
+        },
+        {
+            key: "IN_TRANSIT",
+            title: "Transit",
+            value: countByStatus("IN_TRANSIT"),
+            color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
+            icon: BuildingLibraryIcon
+        },
+        {
+            key: "ARRIVED_DESTINATION_PORT",
+            title: "Dest. Port",
+            value: countByStatus("ARRIVED_DESTINATION_PORT"),
+            color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
+            icon: BuildingLibraryIcon
+        },
+        {
+            key: "OUT_FOR_DELIVERY",
+            title: "Delivery",
+            value: countByStatus("OUT_FOR_DELIVERY"),
+            color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
+            icon: TruckIcon
+        },
+        {
+            key: "DELIVERED",
+            title: "Delivered",
+            value: countByStatus("DELIVERED"),
+            color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
+            icon: CheckCircleIcon
+        }
+    ];
     // Handlers
     const handleAddBooking = () => setIsAddBookingModalOpen(true);
 
@@ -130,98 +196,17 @@ const Bookings = () => {
                             Manage and track all freight bookings
                         </p>
                     </div>
-
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <StatCard
-                            title="Total Bookings"
-                            value={totalBookings}
-                            color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-                            icon={CubeIcon}
-                            bgIcon={
-                                <CubeIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Pickup Scheduled"
-                            value={countByStatus("PICKUP_SCHEDULED")}
-                            color="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white"
-                            icon={TruckIcon}
-                            bgIcon={
-                                <TruckIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Loaded to Truck"
-                            value={countByStatus("LOADED_TO_TRUCK")}
-                            color="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
-                            icon={TruckIcon}
-                            bgIcon={
-                                <TruckIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Arrived at Origin Port"
-                            value={countByStatus("ARRIVED_ORIGIN_PORT")}
-                            color="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
-                            icon={BuildingLibraryIcon}
-                            bgIcon={
-                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Loaded to Ship"
-                            value={countByStatus("LOADED_TO_SHIP")}
-                            color="bg-gradient-to-br from-sky-500 to-sky-600 text-white"
-                            icon={CubeIcon}
-                            bgIcon={
-                                <CubeIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="In Transit"
-                            value={countByStatus("IN_TRANSIT")}
-                            color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
-                            icon={BuildingLibraryIcon}
-                            bgIcon={
-                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Arrived at Destination Port"
-                            value={countByStatus("ARRIVED_DESTINATION_PORT")}
-                            color="bg-gradient-to-br from-pink-500 to-pink-600 text-white"
-                            icon={BuildingLibraryIcon}
-                            bgIcon={
-                                <BuildingLibraryIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Out for Delivery"
-                            value={countByStatus("OUT_FOR_DELIVERY")}
-                            color="bg-gradient-to-br from-teal-500 to-teal-600 text-white"
-                            icon={TruckIcon}
-                            bgIcon={
-                                <TruckIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
-
-                        <StatCard
-                            title="Delivered"
-                            value={countByStatus("DELIVERED")}
-                            color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-                            icon={CheckCircleIcon}
-                            bgIcon={
-                                <CheckCircleIcon className="h-20 w-20 opacity-20" />
-                            }
-                        />
+                        {statsConfig.map(stat => (
+                            <StatCard
+                                key={stat.key}
+                                title={stat.title}
+                                value={stat.value}
+                                color={stat.color}
+                                icon={stat.icon}
+                            />
+                        ))}
                     </div>
 
                     {/* Table */}

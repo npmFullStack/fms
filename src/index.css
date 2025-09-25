@@ -176,29 +176,68 @@
     /* ---------------- Table ---------------- */
     .table-wrapper {
         @apply bg-white/70 backdrop-blur-sm rounded-2xl 
-               shadow-lg border border-white/20 overflow-hidden;
+         shadow-lg border border-white/20 overflow-hidden;
     }
-    .table-header {
-        @apply px-6 py-4 text-left text-xs font-semibold 
-               text-slate-600 uppercase tracking-wider;
+
+    .table-header-container {
+        @apply px-6 py-4 border-b border-slate-200/50 
+         bg-gradient-to-r from-slate-50 to-slate-100;
     }
-    .table-subheader {
-        @apply ml-2 text-sm font-normal text-gray-500;
+
+    .table-title {
+        @apply text-xl font-semibold text-slate-800;
     }
+
     .table-count {
         @apply text-sm text-gray-500;
     }
-    .table-th {
-        @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+
+    .table-thead {
+        @apply bg-slate-50/50;
     }
-    .table-td {
-        @apply px-6 py-4 whitespace-nowrap;
+
+    .table-header {
+        @apply px-6 py-4 text-left text-sm font-semibold uppercase 
+         text-slate-700 cursor-pointer select-none 
+         hover:bg-slate-100/50 transition-colors;
     }
-    .table-cell {
-        @apply px-6 py-4 whitespace-nowrap text-sm text-slate-700;
+
+    .table-body {
+        @apply divide-y divide-slate-200/50 text-xs;
     }
+
     .table-row {
         @apply hover:bg-white/70 transition-all duration-200;
+    }
+
+    .table-cell {
+        @apply px-6 py-4 whitespace-nowrap text-xs text-slate-700;
+    }
+
+    .table-cell-stack {
+        @apply text-xs;
+    }
+
+    .table-text-bold {
+        @apply font-medium text-xs text-slate-800;
+    }
+
+    .table-subtext {
+        @apply text-[11px] text-slate-500;
+    }
+
+    .table-checkbox {
+        @apply w-4 h-4 rounded border-slate-300 
+         text-blue-600 focus:ring-blue-500 cursor-pointer;
+    }
+
+    .table-sort-icon {
+        @apply w-4 h-4 text-slate-500;
+    }
+
+    /* ---------------- Badge ---------------- */
+    .badge {
+        @apply px-2 py-0.5 text-[10px] rounded-full font-semibold border;
     }
 
     /* ---------------- Filters ---------------- */
@@ -214,21 +253,36 @@
         @apply w-full sm:w-48 px-3 py-2 border border-gray-300 
                rounded-md text-sm focus:ring-2 focus:ring-blue-500;
     }
-    /* ---------------- Tooltip Styles ---------------- */
-    .tooltip-icon {
-        @apply h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help;
+
+    /* ---------------- Table Pagination ---------------- */
+    .table-pagination-container {
+        @apply px-6 py-4 border-t border-slate-200/50 bg-slate-50/30;
     }
 
-    .tooltip {
-        @apply invisible group-hover:visible fixed bg-slate-800 text-white text-xs rounded-md py-2 px-3 whitespace-nowrap shadow-lg;
-        z-index: 99999;
-        transform: translateX(-50%);
+    .table-pagination-inner {
+        @apply flex items-center justify-between;
     }
-    
-    /* Tooltip container to handle positioning */
-    .tooltip-container {
-        @apply relative;
+
+    .table-pagination-info {
+        @apply text-xs text-slate-500;
     }
+
+    .table-pagination-actions {
+        @apply flex gap-2;
+    }
+
+    .table-pagination-button {
+        @apply px-4 py-2 text-sm font-semibold rounded-lg transition-colors;
+        @apply bg-slate-100 border;
+
+        /* Enabled (active) */
+        @apply border-blue-600 text-blue-600 hover:bg-slate-50;
+
+        /* Disabled (inactive) */
+        @apply disabled:border-slate-300 disabled:text-slate-300 
+         disabled:cursor-not-allowed disabled:hover:bg-white;
+    }
+
     /* ---------------- Empty States ---------------- */
     .empty-state {
         @apply text-center py-12;
@@ -241,6 +295,21 @@
     }
     .empty-state-description {
         @apply mt-1 text-sm text-gray-500;
+    }
+    /* ---------------- Tooltip Styles ---------------- */
+    .tooltip-icon {
+        @apply h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help;
+    }
+
+    .tooltip {
+        @apply invisible group-hover:visible fixed bg-slate-800 text-white text-xs rounded-md py-2 px-3 whitespace-nowrap shadow-lg;
+        z-index: 99999;
+        transform: translateX(-50%);
+    }
+
+    /* Tooltip container to handle positioning */
+    .tooltip-container {
+        @apply relative;
     }
 
     /* ---------------- Misc ---------------- */

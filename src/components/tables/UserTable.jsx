@@ -170,7 +170,7 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="table-header cursor-pointer select-none hover:bg-slate-100/50 transition-colors"
+                    className="table-header text-sm cursor-pointer select-none hover:bg-slate-100/50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       {flexRender(header.column.columnDef.header, header.getContext())}
