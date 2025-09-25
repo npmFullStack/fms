@@ -46,7 +46,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 accessorKey: "hwb_number",
                 header: "HWB#",
                 cell: ({ row }) => (
-                    <span className="table-text-bold">
+                    <span className="table-cell">
                         {toCaps(row.original.hwb_number)}
                     </span>
                 )
@@ -62,7 +62,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
             },
             {
                 accessorKey: "pickup_stuffing",
-                header: "Stuffing",
+                header: "Stuffing/Pickup date",
                 cell: () => <span className="table-cell">—</span> // manual input later
             },
             {
@@ -72,8 +72,6 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     const containers = row.original.containers || [];
                     if (!containers.length)
                         return <span className="table-cell">—</span>;
-
-                    // Group containers by size and count them
                     const containerGroups = containers.reduce(
                         (acc, container) => {
                             if (!acc[container.size]) {
@@ -113,34 +111,49 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
             },
             {
                 id: "van_numbers",
-                header: "Van#",
+                header: "van#",
                 cell: ({ row }) => {
                     const containers = row.original.containers || [];
                     if (!containers.length)
                         return <span className="table-cell">—</span>;
 
-                    const vanNumbers = containers
-                        .map(container => toCaps(container.van_number))
-                        .join(", ");
-
                     return (
-                        <span className="table-cell text-sm">{vanNumbers}</span>
+                        <span className="table-cell">
+                            <div className="flex flex-col">
+                                {containers.map((container, idx) => (
+                                    <div key={idx}>
+                                        {toCaps(container.van_number)}
+                                    </div>
+                                ))}
+                            </div>
+                        </span>
                     );
                 }
             },
+
             {
                 accessorKey: "route",
                 header: "Route",
                 cell: ({ row }) => (
                     <span className="table-cell">
-                        {toCaps(row.original.origin_port)} →{" "}
-                        {toCaps(row.original.destination_port)}
+                        <div>
+                            <span className="text-yellow-600 font-medium mr-1">
+                                ORIGIN:
+                            </span>{" "}
+                            {toCaps(row.original.origin_port)}
+                        </div>
+                        <div>
+                            <span className="text-blue-600 font-medium mr-1">
+                                DEST:
+                            </span>{" "}
+                            {toCaps(row.original.destination_port)}
+                        </div>
                     </span>
                 )
             },
             {
                 accessorKey: "booking_mode",
-                header: "Service Mode",
+                header: "mode of service",
                 cell: ({ row }) => {
                     const { label, bg, text } = getModeBadge(
                         row.original.booking_mode
@@ -151,8 +164,8 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 }
             },
             {
-                id: "departure",
-                header: "Departure",
+                id: "atd",
+                header: "atd",
                 cell: ({ row }) => (
                     <span className="table-cell">
                         {row.original.actual_departure || "—"}
@@ -160,8 +173,8 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 )
             },
             {
-                id: "arrival",
-                header: "Arrival",
+                id: "ata",
+                header: "ata",
                 cell: ({ row }) => (
                     <span className="table-cell">
                         {row.original.actual_arrival || "—"}
@@ -170,7 +183,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
             },
             {
                 id: "trucks",
-                header: "Truck Origin & Truck Dest",
+                header: "truck origin & truck dest.",
                 cell: ({ row }) => {
                     // Get trucking company names from partners
                     const getCompanyName = id => {
@@ -192,16 +205,26 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
 
                     return (
                         <span className="table-cell">
-                            <div className="text-sm">
-                                <div>Origin: {pickupCompany}</div>
-                                <div className="text-xs text-gray-500">
-                                    Dest: {deliveryCompany}
-                                </div>
+                            <div>
+                                <span
+                                    className="text-yellow-600 font-medium
+                                mr-1"
+                                >
+                                    ORIGIN:
+                                </span>{" "}
+                                {pickupCompany}
+                            </div>
+                            <div>
+                                <span className="text-blue-600 font-medium mr-1">
+                                    DEST:
+                                </span>{" "}
+                                {deliveryCompany}
                             </div>
                         </span>
                     );
                 }
             },
+
             {
                 id: "delivery",
                 header: "Delivery",
@@ -213,7 +236,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
             },
             {
                 id: "empty_return",
-                header: "Empty Return",
+                header: "Empty Container Return date",
                 cell: ({ row }) => (
                     <span className="table-cell">
                         {row.original.empty_return || "—"}

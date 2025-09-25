@@ -9,9 +9,6 @@ import useContainerStore from "../../../utils/store/useContainerStore";
 const bookingModes = [
   { value: "DOOR_TO_DOOR", label: "Door to Door (D-D)" },
   { value: "PIER_TO_PIER", label: "Port to Port (P-P)" },
-  { value: "CY_TO_DOOR", label: "CY to Door (CY-D)" },
-  { value: "DOOR_TO_CY", label: "Door to CY (D-CY)" },
-  { value: "CY_TO_CY", label: "CY to CY (CY-CY)" }
 ];
 
 const BookingStep2 = ({ control, register, errors, partners, setValue }) => {

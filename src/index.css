@@ -198,13 +198,13 @@
     }
 
     .table-header {
-        @apply px-6 py-4 text-left text-sm font-semibold uppercase 
-         text-slate-700 cursor-pointer select-none 
-         hover:bg-slate-100/50 transition-colors;
+        @apply px-3 py-4 text-left text-xs font-semibold uppercase text-slate-700 
+           cursor-pointer select-none hover:bg-slate-100/50 transition-colors;
+        @apply whitespace-nowrap;
     }
 
     .table-body {
-        @apply divide-y divide-slate-200/50 text-xs;
+        @apply divide-y text-left divide-slate-200/50 text-xs;
     }
 
     .table-row {
@@ -212,7 +212,8 @@
     }
 
     .table-cell {
-        @apply px-6 py-4 whitespace-nowrap text-xs text-slate-700;
+        @apply px-3 py-4 text-xs text-slate-700 text-left align-top;
+        @apply whitespace-nowrap;
     }
 
     .table-cell-stack {
@@ -224,12 +225,12 @@
     }
 
     .table-subtext {
-        @apply text-[11px] text-slate-500;
+        @apply text-[10px] text-slate-500;
     }
 
     .table-checkbox {
-        @apply w-4 h-4 rounded border-slate-300 
-         text-blue-600 focus:ring-blue-500 cursor-pointer;
+        @apply w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer;
+        @apply inline-flex items-center justify-center; /* Align center */
     }
 
     .table-sort-icon {

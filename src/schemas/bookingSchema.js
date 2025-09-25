@@ -4,9 +4,6 @@ import { z } from "zod";
 const bookingModes = [
     "DOOR_TO_DOOR",
     "PIER_TO_PIER",
-    "CY_TO_DOOR",
-    "DOOR_TO_CY",
-    "CY_TO_CY"
 ];
 
 const statusTypes = [
@@ -56,11 +53,12 @@ export const step2Schema = z
     );
 
 export const step3Schema = z.object({
-    pickup_trucker_id: z.string().optional().or(z.literal("")),
-    pickup_truck_id: z.string().optional().or(z.literal("")),
-    delivery_trucker_id: z.string().optional().or(z.literal("")),
-    delivery_truck_id: z.string().optional().or(z.literal(""))
+  pickup_trucker_id: z.string().uuid().optional().nullable(),
+  pickup_truck_id: z.string().uuid().optional().nullable(),
+  delivery_trucker_id: z.string().uuid().optional().nullable(),
+  delivery_truck_id: z.string().uuid().optional().nullable()
 });
+
 
 export const step4Schema = z.object({
     pickup_location: z.string().optional(),

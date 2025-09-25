@@ -8,9 +8,6 @@ import api from "../../../config/axios";
 const bookingModes = {
     DOOR_TO_DOOR: "Door to Door (D-D)",
     PIER_TO_PIER: "Port to Port (P-P)",
-    CY_TO_DOOR: "Customer Yard to Door (CY-D)",
-    DOOR_TO_CY: "Door to Customer Yard (D-CY)",
-    CY_TO_CY: "Customer Yard to Customer Yard (CY-CY)"
 };
 
 const BookingStep5 = ({ control, partners = [] }) => {
