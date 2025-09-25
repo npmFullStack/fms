@@ -1,51 +1,46 @@
+// src/components/modals/AddUser.jsx
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addUserSchema } from "../../schemas/userSchema";
 import useUserStore from "../../utils/store/useUserStore";
 import FormModal from "./FormModal";
 import {
-  QuestionMarkCircleIcon,
-  InformationCircleIcon,
   ShieldCheckIcon,
   EnvelopeIcon,
   KeyIcon,
   PhotoIcon,
-  TrashIcon
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import Select from "react-select";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import useImageUpload from "../../utils/hooks/useImageUpload";
 import useModal from "../../utils/hooks/useModal";
+import { toast } from "react-hot-toast";
+
+// ✅ Helper to sanitize strings for email generation
+const sanitize = (str) => str.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 
 const AddUser = ({ isOpen, onClose }) => {
   const {
     previewImage,
     selectedFile,
-    error: imageError,
     handleImageChange,
-    clearImage
+    clearImage,
   } = useImageUpload();
-  
-  const {
-    message,
-    isLoading,
-    setIsLoading,
-    setSuccessMessage,
-    setErrorMessage,
-    handleClose: modalClose
-  } = useModal(() => {
+
+  const { setIsLoading, isLoading, handleClose: modalClose } = useModal(() => {
     reset();
     clearImage();
   });
-  
-  const addUser = useUserStore(state => state.addUser);
-  
+
+  const addUser = useUserStore((state) => state.addUser);
+
   const roles = [
     { value: "customer", label: "Customer" },
     { value: "marketing_coordinator", label: "Marketing Coordinator" },
     { value: "admin_finance", label: "Admin Finance" },
-    { value: "general_manager", label: "General Manager" }
+    { value: "general_manager", label: "General Manager" },
   ];
 
   const {
@@ -53,56 +48,48 @@ const AddUser = ({ isOpen, onClose }) => {
     handleSubmit,
     reset,
     control,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(addUserSchema),
     mode: "onChange",
     defaultValues: {
       role: roles[0].value,
-      phone: ""
-    }
+      phone: "",
+    },
   });
 
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
-      setSuccessMessage("Uploading image...");
-      
+
       const formData = new FormData();
       formData.append("firstName", data.firstName);
       formData.append("lastName", data.lastName);
+
+      // ✅ Generate sanitized email
       formData.append(
         "email",
-        `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@example.com`
+        `${sanitize(data.firstName)}.${sanitize(data.lastName)}@example.com`
       );
+
       formData.append("role", data.role);
       formData.append("password", "password");
-      
-      if (data.phone) {
-        formData.append("phone", data.phone);
-      }
-      
-      if (selectedFile) {
-        formData.append("profile_picture", selectedFile);
-      }
-      
+
+      if (data.phone) formData.append("phone", data.phone);
+      if (selectedFile) formData.append("profile_picture", selectedFile);
+
       const result = await addUser(formData);
-      
+
       if (result.success) {
-        setSuccessMessage("User added successfully");
+        toast.success("User added successfully!");
         setTimeout(() => {
           handleClose();
         }, 1500);
       } else {
-        setErrorMessage(
-          result.error || "Failed to add user. Please try again."
-        );
+        toast.error(result.error || "Failed to add user. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setErrorMessage(
-        error.message || "Failed to add user. Please try again."
-      );
+      toast.error(error.message || "Failed to add user. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +102,8 @@ const AddUser = ({ isOpen, onClose }) => {
 
   const clearSelectedImage = () => {
     clearImage();
-    document.getElementById("profile_picture").value = "";
+    const fileInput = document.getElementById("profile_picture");
+    if (fileInput) fileInput.value = "";
   };
 
   const fields = [
@@ -168,7 +156,7 @@ const AddUser = ({ isOpen, onClose }) => {
             )}
           </div>
         </div>
-      )
+      ),
     },
     // First Name
     {
@@ -177,7 +165,7 @@ const AddUser = ({ isOpen, onClose }) => {
       type: "text",
       register: register("firstName"),
       error: errors.firstName?.message,
-      placeholder: "Enter first name"
+      placeholder: "Enter first name",
     },
     // Last Name
     {
@@ -186,7 +174,7 @@ const AddUser = ({ isOpen, onClose }) => {
       type: "text",
       register: register("lastName"),
       error: errors.lastName?.message,
-      placeholder: "Enter last name"
+      placeholder: "Enter last name",
     },
     // Phone Number
     {
@@ -212,7 +200,7 @@ const AddUser = ({ isOpen, onClose }) => {
             />
           )}
         />
-      )
+      ),
     },
     // Role
     {
@@ -231,35 +219,43 @@ const AddUser = ({ isOpen, onClose }) => {
             <Select
               {...field}
               options={roles}
-              getOptionValue={opt => opt.value}
-              getOptionLabel={opt => opt.label}
-              value={roles.find(r => r.value === field.value)}
-              onChange={opt => field.onChange(opt.value)}
-              className={`react-select-container ${errors.role ? "react-select-error" : ""}`}
+              getOptionValue={(opt) => opt.value}
+              getOptionLabel={(opt) => opt.label}
+              value={roles.find((r) => r.value === field.value)}
+              onChange={(opt) => field.onChange(opt.value)}
+              className={`react-select-container ${
+                errors.role ? "react-select-error" : ""
+              }`}
               classNamePrefix="react-select"
             />
           )}
         />
-      )
-    }
+      ),
+    },
   ];
 
   const infoBox = {
     title: "Account Setup Information",
     items: [
       {
-        icon: <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />,
-        text: "Email generated as: firstname.lastname@example.com"
+        icon: (
+          <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
+        text: "Email generated as: firstname.lastname@example.com",
       },
       {
-        icon: <KeyIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />,
-        text: 'Default password set to "password"'
+        icon: (
+          <KeyIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
+        text: 'Default password set to "password"',
       },
       {
-        icon: <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />,
-        text: "User can change password after first login"
-      }
-    ]
+        icon: (
+          <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+        ),
+        text: "User can change password after first login",
+      },
+    ],
   };
 
   return (
@@ -267,10 +263,6 @@ const AddUser = ({ isOpen, onClose }) => {
       isOpen={isOpen}
       onClose={handleClose}
       title="Add New User"
-      message={message.text || imageError ? {
-        type: message.type || "error",
-        text: message.text || imageError
-      } : null}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onSubmit)}
