@@ -1,23 +1,87 @@
 // components/tables/CargoMonitoringTable.jsx
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
     ChevronUpIcon,
     ChevronDownIcon,
-    CubeIcon
+    CubeIcon,
+    ClockIcon
 } from "@heroicons/react/24/outline";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
-import { toCaps, getModeBadge } from "../../utils/helpers/tableDataFormatters";
+import {
+    toCaps,
+    getStatusBadge,
+    getModeBadge
+} from "../../utils/helpers/tableDataFormatters";
 import usePartnerStore from "../../utils/store/usePartnerStore";
+import useCourierStore from "../../utils/store/useCourierStore";
 
 const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
     const { partners, fetchPartners } = usePartnerStore();
+    const { courierData, fetchShippingTimeline, setCourierData } =
+        useCourierStore();
+    const [loadingTimelines, setLoadingTimelines] = useState({});
 
     useEffect(() => {
-        // Fetch partners to get trucking company names
         fetchPartners();
     }, [fetchPartners]);
+
+    // Fetch shipping timeline when data changes
+    useEffect(() => {
+        const fetchTimelines = async () => {
+            for (const booking of data) {
+                if (booking.hwb_number && !courierData[booking.id]) {
+                    setLoadingTimelines(prev => ({
+                        ...prev,
+                        [booking.id]: true
+                    }));
+                    try {
+                        const result = await fetchShippingTimeline(
+                            booking.hwb_number
+                        );
+                        if (result.success) {
+                            setCourierData(booking.id, result.data);
+                        }
+                    } catch (error) {
+                        console.error(
+                            `Failed to fetch timeline for booking ${booking.id}:`,
+                            error
+                        );
+                    } finally {
+                        setLoadingTimelines(prev => ({
+                            ...prev,
+                            [booking.id]: false
+                        }));
+                    }
+                }
+            }
+        };
+
+        if (data.length > 0) {
+            fetchTimelines();
+        }
+    }, [data, courierData, fetchShippingTimeline, setCourierData]);
+
+    const getTimelineEvent = (bookingId, eventType) => {
+        const timeline = courierData[bookingId]?.booking?.timeline || [];
+        const event = timeline.find(item => item.event_type === eventType);
+        return event ? new Date(event.event_date).toLocaleDateString() : "--";
+    };
+
+    const getEmptyReturnDate = booking => {
+        // Use is_returned column from containers
+        const containers = booking.containers || [];
+        const returnedContainer = containers.find(
+            container => container.is_returned
+        );
+        if (returnedContainer) {
+            return booking.actual_delivery
+                ? new Date(booking.actual_delivery).toLocaleDateString()
+                : "--";
+        }
+        return "--";
+    };
 
     const columns = useMemo(
         () => [
@@ -46,7 +110,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 accessorKey: "hwb_number",
                 header: "HWB#",
                 cell: ({ row }) => (
-                    <span className="table-cell">
+                    <span className="table-cell font-medium">
                         {toCaps(row.original.hwb_number)}
                     </span>
                 )
@@ -61,9 +125,52 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 )
             },
             {
-                accessorKey: "pickup_stuffing",
-                header: "Stuffing/Pickup date",
-                cell: () => <span className="table-cell">—</span> // manual input later
+                id: "origin_trucker_dates",
+                header: "Origin Trucker Dates",
+                cell: ({ row }) => {
+                    const timeline =
+                        courierData[row.original.id]?.booking?.timeline || [];
+
+                    // Find relevant dates from timeline
+                    const gateOutEmpty = timeline.find(
+                        item =>
+                            item.event_type === "GATE_OUT_EMPTY" ||
+                            item.description?.includes("Gate out Empty")
+                    );
+
+                    const gateIn = timeline.find(
+                        item =>
+                            item.event_type === "GATE_IN" ||
+                            item.description?.includes("Gate in")
+                    );
+
+                    return (
+                        <span className="table-cell text-xs">
+                            <div className="flex flex-col gap-1">
+                                <div>
+                                    <span className="font-medium text-gray-600">
+                                        Pickup:{" "}
+                                    </span>
+                                    {gateOutEmpty
+                                        ? new Date(
+                                              gateOutEmpty.event_date
+                                          ).toLocaleDateString()
+                                        : "--"}
+                                </div>
+                                <div>
+                                    <span className="font-medium text-gray-600">
+                                        Port Arrival:{" "}
+                                    </span>
+                                    {gateIn
+                                        ? new Date(
+                                              gateIn.event_date
+                                          ).toLocaleDateString()
+                                        : "--"}
+                                </div>
+                            </div>
+                        </span>
+                    );
+                }
             },
             {
                 id: "volume",
@@ -71,57 +178,44 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 cell: ({ row }) => {
                     const containers = row.original.containers || [];
                     if (!containers.length)
-                        return <span className="table-cell">—</span>;
+                        return <span className="table-cell">---</span>;
+
                     const containerGroups = containers.reduce(
                         (acc, container) => {
-                            if (!acc[container.size]) {
-                                acc[container.size] = 0;
-                            }
+                            if (!acc[container.size]) acc[container.size] = 0;
                             acc[container.size]++;
                             return acc;
                         },
                         {}
                     );
 
-                    // Format as "2x20FT, 1x40FT"
                     const volumeText = Object.entries(containerGroups)
                         .map(([size, count]) => `${count}X${toCaps(size)}`)
                         .join(", ");
 
-                    return <span className="table-cell">{volumeText}</span>;
+                    return (
+                        <span className="table-cell font-medium">
+                            {volumeText}
+                        </span>
+                    );
                 }
             },
             {
-                id: "commodity_ship",
-                header: "Commodity",
-                cell: ({ row }) => (
-                    <span className="table-cell">
-                        {toCaps(row.original.commodity)}
-                    </span>
-                )
-            },
-            {
-                id: "shipping_line",
-                header: "Shipping Line",
-                cell: ({ row }) => (
-                    <span className="table-cell text-xs text-gray-600">
-                        {toCaps(row.original.shipping_line_name)}
-                    </span>
-                )
-            },
-            {
                 id: "van_numbers",
-                header: "van#",
+                header: "Van#",
                 cell: ({ row }) => {
                     const containers = row.original.containers || [];
                     if (!containers.length)
-                        return <span className="table-cell">—</span>;
+                        return <span className="table-cell">--</span>;
 
                     return (
                         <span className="table-cell">
-                            <div className="flex flex-col">
+                            <div className="flex flex-col gap-1">
                                 {containers.map((container, idx) => (
-                                    <div key={idx}>
+                                    <div
+                                        key={idx}
+                                        className="text-xs font-mono"
+                                    >
                                         {toCaps(container.van_number)}
                                     </div>
                                 ))}
@@ -130,22 +224,111 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     );
                 }
             },
+            {
+                id: "shipping_dates",
+                header: "Shipping Dates",
+                cell: ({ row }) => (
+                    <span className="table-cell text-xs">
+                        <div className="flex flex-col gap-1">
+                            <div>
+                                <span className="font-medium text-gray-600">
+                                    ATD:{" "}
+                                </span>
+                                {row.original.actual_departure
+                                    ? new Date(
+                                          row.original.actual_departure
+                                      ).toLocaleDateString()
+                                    : "--"}
+                            </div>
+                            <div>
+                                <span className="font-medium text-gray-600">
+                                    ATA:{" "}
+                                </span>
+                                {row.original.actual_arrival
+                                    ? new Date(
+                                          row.original.actual_arrival
+                                      ).toLocaleDateString()
+                                    : "--"}
+                            </div>
+                        </div>
+                    </span>
+                )
+            },
+            {
+                id: "destination_trucker_dates",
+                header: "Dest. Trucker Dates",
+                cell: ({ row }) => {
+                    const timeline =
+                        courierData[row.original.id]?.booking?.timeline || [];
 
+                    const gateOutDelivery = timeline.find(
+                        item =>
+                            item.event_type === "GATE_OUT_DELIVERY" ||
+                            item.description?.includes("Gate out for Delivery")
+                    );
+
+                    const emptyReturn = timeline.find(
+                        item =>
+                            item.event_type === "EMPTY_RETURN" ||
+                            item.description?.includes("Empty Container Return")
+                    );
+
+                    return (
+                        <span className="table-cell text-xs">
+                            <div className="flex flex-col gap-1">
+                                <div>
+                                    <span className="font-medium text-gray-600">
+                                        Port Pickup:{" "}
+                                    </span>
+                                    {gateOutDelivery
+                                        ? new Date(
+                                              gateOutDelivery.event_date
+                                          ).toLocaleDateString()
+                                        : "--"}
+                                </div>
+                                <div>
+                                    <span className="font-medium text-gray-600">
+                                        Delivery:{" "}
+                                    </span>
+                                    {row.original.actual_delivery
+                                        ? new Date(
+                                              row.original.actual_delivery
+                                          ).toLocaleDateString()
+                                        : "--"}
+                                </div>
+                            </div>
+                        </span>
+                    );
+                }
+            },
+            {
+                id: "empty_return",
+                header: "Empty Return",
+                cell: ({ row }) => (
+                    <span className="table-cell">
+                        {loadingTimelines[row.original.id] ? (
+                            <ClockIcon className="h-4 w-4 animate-spin" />
+                        ) : (
+                            getEmptyReturnDate(row.original)
+                        )}
+                    </span>
+                )
+            },
             {
                 accessorKey: "route",
                 header: "Route",
                 cell: ({ row }) => (
-                    <span className="table-cell">
+                    <span className="table-cell text-xs">
                         <div>
                             <span className="text-yellow-600 font-medium mr-1">
                                 ORIGIN:
-                            </span>{" "}
+                            </span>
                             {toCaps(row.original.origin_port)}
                         </div>
                         <div>
                             <span className="text-blue-600 font-medium mr-1">
                                 DEST:
-                            </span>{" "}
+                            </span>
                             {toCaps(row.original.destination_port)}
                         </div>
                     </span>
@@ -153,7 +336,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
             },
             {
                 accessorKey: "booking_mode",
-                header: "mode of service",
+                header: "Mode of service",
                 cell: ({ row }) => {
                     const { label, bg, text } = getModeBadge(
                         row.original.booking_mode
@@ -164,94 +347,25 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 }
             },
             {
-                id: "atd",
-                header: "atd",
-                cell: ({ row }) => (
-                    <span className="table-cell">
-                        {row.original.actual_departure || "—"}
-                    </span>
-                )
-            },
-            {
-                id: "ata",
-                header: "ata",
-                cell: ({ row }) => (
-                    <span className="table-cell">
-                        {row.original.actual_arrival || "—"}
-                    </span>
-                )
-            },
-            {
-                id: "trucks",
-                header: "truck origin & truck dest.",
+                accessorKey: "status",
+                header: "Status",
                 cell: ({ row }) => {
-                    // Get trucking company names from partners
-                    const getCompanyName = id => {
-                        if (!id || !Array.isArray(partners)) return "—";
-                        const company = partners.find(
-                            p =>
-                                String(p.id) === String(id) &&
-                                p.type === "trucking"
-                        );
-                        return company ? toCaps(company.name) : "—";
-                    };
-
-                    const pickupCompany = getCompanyName(
-                        row.original.pickup_trucker_id
+                    const { label, bg, text } = getStatusBadge(
+                        row.original.status
                     );
-                    const deliveryCompany = getCompanyName(
-                        row.original.delivery_trucker_id
-                    );
-
                     return (
-                        <span className="table-cell">
-                            <div>
-                                <span
-                                    className="text-yellow-600 font-medium
-                                mr-1"
-                                >
-                                    ORIGIN:
-                                </span>{" "}
-                                {pickupCompany}
-                            </div>
-                            <div>
-                                <span className="text-blue-600 font-medium mr-1">
-                                    DEST:
-                                </span>{" "}
-                                {deliveryCompany}
-                            </div>
-                        </span>
+                        <span className={`badge ${bg} ${text}`}>{label}</span>
                     );
                 }
-            },
-
-            {
-                id: "delivery",
-                header: "Delivery",
-                cell: ({ row }) => (
-                    <span className="table-cell">
-                        {row.original.actual_delivery || "—"}
-                    </span>
-                )
-            },
-            {
-                id: "empty_return",
-                header: "Empty Container Return date",
-                cell: ({ row }) => (
-                    <span className="table-cell">
-                        {row.original.empty_return || "—"}
-                    </span>
-                )
             }
         ],
-        [partners]
+        [partners, courierData, loadingTimelines]
     );
 
     const { table, globalFilter, setGlobalFilter } = useTable({
         data,
         columns
     });
-
     const { paginationInfo, actions } = usePagination(table, data?.length);
 
     const selectedRows = table.getSelectedRowModel().rows;

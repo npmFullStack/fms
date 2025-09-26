@@ -5,8 +5,7 @@ import {
     CubeIcon,
     TruckIcon,
     ArrowRightIcon,
-    MapPinIcon,
-    PlusIcon
+    MapPinIcon
 } from "@heroicons/react/24/outline";
 
 import Loading from "../../components/Loading";
@@ -38,7 +37,7 @@ const CargoMonitoring = () => {
     const formattedBookings = useMemo(() => {
         return safeBookings.map(b => ({
             ...b,
-            route: `${b.origin_port ?? "-"} → ${b.destination_port ?? "-"}`
+            route: `${b.origin_port ?? "-"} -> ${b.destination_port ?? "-"}`
         }));
     }, [safeBookings]);
 
@@ -124,7 +123,7 @@ const CargoMonitoring = () => {
                     <div className="mb-8">
                         <h1 className="page-title">Cargo Monitoring</h1>
                         <p className="page-subtitle">
-                            Track shipments end-to-end
+                            Track shipments end-to-end with detailed timeline
                         </p>
                     </div>
 
@@ -139,12 +138,7 @@ const CargoMonitoring = () => {
                     <CargoMonitoringTable
                         data={formattedBookings}
                         onSelectionChange={setSelectedBookings}
-                        rightAction={
-                            <button className="btn-primary flex items-center gap-2">
-                                <PlusIcon className="h-5 w-5" />
-                                New Record
-                            </button>
-                        }
+                        rightAction={null} // Removed the New Record button
                     />
 
                     {/* Bulk Action Bar */}
