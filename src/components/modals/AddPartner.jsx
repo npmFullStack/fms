@@ -6,26 +6,22 @@ import useImageUpload from "../../utils/hooks/useImageUpload";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
 import {
-    QuestionMarkCircleIcon,
     PhotoIcon,
     TrashIcon
 } from "@heroicons/react/24/outline";
+import { toast } from "react-hot-toast";
 
 const AddPartner = ({ isOpen, onClose, type }) => {
     const {
         previewImage,
         selectedFile,
-        error: imageError,
         handleImageChange,
         clearImage
     } = useImageUpload();
 
     const {
-        message,
         isLoading,
         setIsLoading,
-        setSuccessMessage,
-        setErrorMessage,
         handleClose: modalClose
     } = useModal(() => {
         reset();
@@ -47,7 +43,6 @@ const AddPartner = ({ isOpen, onClose, type }) => {
     const onSubmit = async data => {
         try {
             setIsLoading(true);
-            setSuccessMessage("Uploading image...");
 
             const formData = new FormData();
             formData.append("name", data.name);
@@ -59,18 +54,18 @@ const AddPartner = ({ isOpen, onClose, type }) => {
             const result = await addPartner(formData, type);
 
             if (result.success) {
-                setSuccessMessage(
+                toast.success(
                     `${
                         type === "shipping"
                             ? "Shipping line"
                             : "Trucking company"
                     } added successfully`
                 );
-                setTimeout(() => {
-                    handleClose();
-                }, 1500);
+                handleClose();
+                reset();
+                clearImage();
             } else {
-                setErrorMessage(
+                toast.error(
                     result.error ||
                         `Failed to add ${
                             type === "shipping"
@@ -81,7 +76,7 @@ const AddPartner = ({ isOpen, onClose, type }) => {
             }
         } catch (error) {
             console.error("Error submitting form:", error);
-            setErrorMessage(
+            toast.error(
                 error.message ||
                     `Failed to add ${
                         type === "shipping"
@@ -176,14 +171,6 @@ const AddPartner = ({ isOpen, onClose, type }) => {
             title={`Add ${
                 type === "shipping" ? "Shipping Line" : "Trucking Company"
             }`}
-            message={
-                message.text || imageError
-                    ? {
-                          type: message.type || "error",
-                          text: message.text || imageError
-                      }
-                    : null
-            }
             isLoading={isLoading}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit(onSubmit)}
