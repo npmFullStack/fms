@@ -151,7 +151,7 @@ const AddPartner = ({ isOpen, onClose, type }) => {
                 </div>
             )
         },
-        // Company Name
+
         {
             name: "name",
             label: "Company Name",

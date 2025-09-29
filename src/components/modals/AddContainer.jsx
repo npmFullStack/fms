@@ -4,14 +4,12 @@ import { containerSchema } from "../../schemas/containerSchema";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
 import Select from "react-select";
+import { toast } from "react-hot-toast";
 
 const AddContainer = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
   const {
-    message,
     isLoading,
     setIsLoading,
-    setSuccessMessage,
-    setErrorMessage,
     handleClose: modalClose,
   } = useModal(() => reset());
 
@@ -35,21 +33,18 @@ const AddContainer = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
   const onFormSubmit = async (data) => {
     try {
       setIsLoading(true);
-      setSuccessMessage("Adding container...");
-
       const result = await onSubmit({ ...data, shippingLineId });
 
       if (result.success) {
-        setSuccessMessage("Container added successfully");
-        setTimeout(() => {
-          handleClose();
-        }, 1500);
+        toast.success("Container added successfully");
+        handleClose();
+        reset();
       } else {
-        setErrorMessage(result.error || "Failed to add container. Please try again.");
+        toast.error(result.error || "Failed to add container. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setErrorMessage(error.message || "Failed to add container. Please try again.");
+      toast.error(error.message || "Failed to add container. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -116,14 +111,6 @@ const AddContainer = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
       isOpen={isOpen}
       onClose={handleClose}
       title="Add Container"
-      message={
-        message.text
-          ? {
-              type: message.type,
-              text: message.text,
-            }
-          : null
-      }
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onFormSubmit)}
