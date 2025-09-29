@@ -42,15 +42,6 @@ const TruckTable = ({ data, onDelete, onEdit, onView, rightAction }) => {
         ),
       },
       {
-        accessorKey: "remarks",
-        header: "REMARKS",
-        cell: ({ row }) => (
-          <span className="text-slate-500 text-sm">
-            {row.original.remarks || "—"}
-          </span>
-        ),
-      },
-      {
         id: "actions",
         header: "ACTIONS",
         cell: ({ row }) => (

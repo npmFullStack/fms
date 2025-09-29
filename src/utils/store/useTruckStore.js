@@ -59,10 +59,7 @@ const useTruckStore = create((set, get) => ({
         set({ loading: true, error: null });
         try {
             const res = await api.put(`/trucks/${id}`, updatedData);
-
-            // Refresh trucks list
-            await get().fetchAllTrucks();
-
+            await get().fetchTrucks(); // ✅ Changed from fetchAllTrucks
             set({ loading: false });
             return { success: true, data: res.data };
         } catch (err) {
@@ -77,10 +74,7 @@ const useTruckStore = create((set, get) => ({
         set({ loading: true, error: null });
         try {
             await api.delete(`/trucks/${id}`);
-
-            // Refresh trucks list
-            await get().fetchAllTrucks();
-
+            await get().fetchTrucks(); // ✅ Changed from fetchAllTrucks
             set({ loading: false });
             return { success: true };
         } catch (err) {

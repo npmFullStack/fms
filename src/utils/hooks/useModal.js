@@ -1,3 +1,5 @@
+// utils/hooks/useModal
+
 import { useState, useCallback } from "react";
 
 const useModal = (onCloseCallback = null) => {

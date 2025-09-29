@@ -54,23 +54,23 @@ const AddShip = ({ isOpen, onClose, onSubmit, shippingLineId }) => {
     };
 
     const fields = [
-        {
-            name: "name",
-            label: "Ship Name",
-            type: "text",
-            register: register("name"),
-            error: errors.name?.message,
-            placeholder: "Enter ship name"
-        },
-        {
-            name: "vesselNumber",
-            label: "Vessel Number",
-            type: "text",
-            register: register("vesselNumber"),
-            error: errors.vesselNumber?.message,
-            placeholder: "Enter vessel number"
-        }
-    ];
+  {
+    name: "shipName", // ✅ Changed from "name"
+    label: "Ship Name",
+    type: "text",
+    register: register("shipName"), // ✅ Changed
+    error: errors.shipName?.message, // ✅ Changed
+    placeholder: "Enter ship name"
+  },
+  {
+    name: "vesselNumber",
+    label: "Vessel Number",
+    type: "text",
+    register: register("vesselNumber"),
+    error: errors.vesselNumber?.message,
+    placeholder: "Enter vessel number"
+  }
+];
 
     const infoBox = {
         title: "Ship Information",
