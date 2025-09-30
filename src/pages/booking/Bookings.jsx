@@ -260,8 +260,6 @@ const Bookings = () => {
                 bookingId={activeBookingId}
             />
 
-            {/* Dele
-te Booking Modal */}
             <DeleteBooking
                 isOpen={isDeleteBookingModalOpen}
                 onClose={() => setIsDeleteBookingModalOpen(false)}
