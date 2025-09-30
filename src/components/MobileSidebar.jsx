@@ -1,9 +1,5 @@
 import { NavLink } from "react-router-dom";
-import {
-    ChevronDownIcon,
-    ChevronUpIcon,
-    XMarkIcon
-} from "@heroicons/react/24/outline";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import ProfileMenu from "./ProfileMenu";
 import { useState } from "react";
 
@@ -46,9 +42,9 @@ const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
                                 </span>
                             </div>
                             {openDropdowns[name] ? (
-                                <ChevronUpIcon className="w-4 h-4 shrink-0" />
+                                <ChevronUp className="w-4 h-4 shrink-0" />
                             ) : (
-                                <ChevronDownIcon className="w-4 h-4 shrink-0" />
+                                <ChevronDown className="w-4 h-4 shrink-0" />
                             )}
                         </button>
 
@@ -106,7 +102,7 @@ const MobileSidebar = ({ isOpen, onClose, user, navLinks, navigate }) => {
                         onClick={onClose}
                         className="p-2 text-white hover:bg-blue-700 rounded-lg transition-colors"
                     >
-                        <XMarkIcon className="w-5 h-5" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 

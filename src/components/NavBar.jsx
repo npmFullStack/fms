@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BellIcon, Bars3Icon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { Bell, Menu, UserCircle } from "lucide-react";
 import useAuthStore from "../utils/store/useAuthStore";
 
 const NavBar = ({ onToggleSidebar }) => {
@@ -13,7 +13,7 @@ const NavBar = ({ onToggleSidebar }) => {
             {/* Left side: Sidebar toggle */}
             <div className="flex items-center gap-3">
                 <button onClick={onToggleSidebar}>
-                    <Bars3Icon className="w-6 h-6" />
+                    <Menu className="w-6 h-6" />
                 </button>
                 <span className="text-lg font-semibold hidden sm:block">
                     X-TRA MILE FREIGHT FORWARDING INC.
@@ -22,26 +22,28 @@ const NavBar = ({ onToggleSidebar }) => {
 
             {/* Right side: Icons */}
             <div className="flex items-center gap-4 relative">
-                <BellIcon className="w-6 h-6 cursor-pointer" />
+                <Bell className="w-6 h-6 cursor-pointer" />
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
                     className="flex items-center gap-1"
                 >
                     {user?.profile_picture ? (
-                        <img 
-                            src={user.profile_picture} 
+                        <img
+                            src={user.profile_picture}
                             alt="Profile"
                             className="w-7 h-7 rounded-full object-cover"
                         />
                     ) : (
-                        <UserCircleIcon className="w-7 h-7" />
+                        <UserCircle className="w-7 h-7" />
                     )}
-                    <span className="hidden sm:block">{user?.first_name || "User"}</span>
+                    <span className="hidden sm:block">
+                        {user?.first_name || "User"}
+                    </span>
                 </button>
 
                 {menuOpen && (
                     <div className="absolute right-0 top-full bg-white text-gray-800 rounded shadow-md w-40 z-10">
-                        <button 
+                        <button
                             onClick={() => {
                                 setMenuOpen(false);
                                 navigate("/profile");

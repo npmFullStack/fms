@@ -1,17 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-    TruckIcon,
-    UserPlusIcon,
-    ClipboardDocumentListIcon,
-    EyeIcon,
-    ArrowRightIcon,
-    ShieldCheckIcon,
-    ClockIcon,
-    CurrencyDollarIcon,
-    ChatBubbleLeftRightIcon,
-    CheckCircleIcon
-} from "@heroicons/react/24/outline";
+    Truck,
+    UserPlus,
+    ClipboardList,
+    Eye,
+    ArrowRight,
+    ShieldCheck,
+    Clock,
+    DollarSign,
+    MessageSquare,
+    CheckCircle
+} from "lucide-react";
+
 
 const Home = () => {
     return (
@@ -38,7 +39,7 @@ const Home = () => {
                         </p>
                         <Link to="/register" className="btn-primary font-bold">
                             Get Started{" "}
-                            <ArrowRightIcon className="h-6 w-6 text-white" />
+                            <ArrowRight className="h-6 w-6 text-white" />
                         </Link>
                     </div>
                 </section>
@@ -64,7 +65,7 @@ const Home = () => {
                             <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
                                 <div className="flex justify-center mb-6">
                                     <div className="bg-blue-100 p-4 rounded-full">
-                                        <UserPlusIcon className="h-12 w-12 text-blue-600" />
+                                        <UserPlus className="h-12 w-12 text-blue-600" />
                                     </div>
                                 </div>
                                 <div className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
@@ -84,7 +85,7 @@ const Home = () => {
                             <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
                                 <div className="flex justify-center mb-6">
                                     <div className="bg-green-100 p-4 rounded-full">
-                                        <ClipboardDocumentListIcon className="h-12 w-12 text-green-600" />
+                                        <ClipboardList className="h-12 w-12 text-green-600" />
                                     </div>
                                 </div>
                                 <div className="bg-green-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
@@ -104,7 +105,7 @@ const Home = () => {
                             <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
                                 <div className="flex justify-center mb-6">
                                     <div className="bg-purple-100 p-4 rounded-full">
-                                        <EyeIcon className="h-12 w-12 text-purple-600" />
+                                        <Eye className="h-12 w-12 text-purple-600" />
                                     </div>
                                 </div>
                                 <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
@@ -142,7 +143,7 @@ const Home = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <ShieldCheckIcon className="h-12 w-12 text-blue-600" />
+                                    <ShieldCheck className="h-12 w-12 text-blue-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     Reliable & Secure
@@ -157,7 +158,7 @@ const Home = () => {
 
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <CurrencyDollarIcon className="h-12 w-12 text-green-600" />
+                                    <DollarSign className="h-12 w-12 text-green-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     Competitive Pricing
@@ -172,7 +173,7 @@ const Home = () => {
 
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <ChatBubbleLeftRightIcon className="h-12 w-12 text-purple-600" />
+                                    <MessageSquare className="h-12 w-12 text-purple-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     24/7 Customer Support
@@ -187,7 +188,7 @@ const Home = () => {
 
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <ClockIcon className="h-12 w-12 text-orange-600" />
+                                    <Clock className="h-12 w-12 text-orange-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     Fast Processing
@@ -201,13 +202,13 @@ const Home = () => {
 
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <TruckIcon className="h-12 w-12 text-red-600" />
+                                    <Truck className="h-12 w-12 text-red-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     Global Network
                                 </h3>
                                 <p className="text-gray-600">
-                                    Extensive worldwide network of trusted
+                                    Extensive worldwide network oftrusted
                                     partners and agents providing comprehensive
                                     coverage for all your international shipping
                                     needs.
@@ -216,7 +217,7 @@ const Home = () => {
 
                             <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
-                                    <CheckCircleIcon className="h-12 w-12 text-teal-600" />
+                                    <CheckCircle className="h-12 w-12 text-teal-600" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-4">
                                     Proven Track Record

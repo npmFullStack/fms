@@ -5,8 +5,9 @@ import api from "../../config/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { registerSchema } from "../../schemas/authSchema";
 import registerImage from "../../assets/images/register.png";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { toast } from "react-hot-toast"; // <-- Add this import
+import { Eye, EyeOff } from "lucide-react";
+
+import { toast } from "react-hot-toast";
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -173,9 +174,9 @@ const Register = () => {
                                     }
                                 >
                                     {showPassword ? (
-                                        <EyeSlashIcon className="h-5 w-5" />
+                                        <EyeOff className="h-5 w-5" />
                                     ) : (
-                                        <EyeIcon className="h-5 w-5" />
+                                        <Eye className="h-5 w-5" />
                                     )}
                                 </button>
                             </div>
@@ -224,9 +225,9 @@ const Register = () => {
                                     }
                                 >
                                     {showConfirmPassword ? (
-                                        <EyeSlashIcon className="h-5 w-5" />
+                                        <EyeOff className="h-5 w-5" />
                                     ) : (
-                                        <EyeIcon className="h-5 w-5" />
+                                        <Eye className="h-5 w-5" />
                                     )}
                                 </button>
                             </div>

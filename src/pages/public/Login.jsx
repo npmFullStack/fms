@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { loginSchema } from "../../schemas/authSchema";
 import loginImage from "../../assets/images/login.png";
 import useAuthStore from "../../utils/store/useAuthStore";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const Login = () => {
@@ -41,7 +41,7 @@ const Login = () => {
 
             setTimeout(() => {
                 navigate("/dashboard");
-            }, 1500); 
+            }, 1500);
         } catch (error) {
             const errorMessage = error.response?.data?.message || error.message;
             toast.error(errorMessage);
@@ -126,9 +126,9 @@ const Login = () => {
                                     }
                                 >
                                     {showPassword ? (
-                                        <EyeSlashIcon className="h-5 w-5" />
+                                        <EyeOff className="h-5 w-5" />
                                     ) : (
-                                        <EyeIcon className="h-5 w-5" />
+                                        <Eye className="h-5 w-5" />
                                     )}
                                 </button>
                             </div>

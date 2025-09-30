@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Menu, X } from "lucide-react";
 
 const MobileHeader = ({ activeSection, handleClick }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,9 +25,9 @@ const MobileHeader = ({ activeSection, handleClick }) => {
                     aria-label="Toggle menu"
                 >
                     {isMenuOpen ? (
-                        <XMarkIcon className="h-6 w-6 text-gray-700" />
+                        <X className="h-6 w-6 text-gray-700" />
                     ) : (
-                        <Bars3Icon className="h-6 w-6 text-gray-700" />
+                        <Menu className="h-6 w-6 text-gray-700" />
                     )}
                 </button>
             </div>
