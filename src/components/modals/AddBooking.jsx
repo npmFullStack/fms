@@ -84,20 +84,24 @@ const AddBooking = ({ isOpen, onClose }) => {
         if (isOpen) fetchPartners();
     }, [isOpen, fetchPartners]);
 
+    const handleClose = () => {
+        modalClose();
+        onClose();
+    };
+
     const onSubmit = async data => {
         try {
             setIsLoading(true);
 
-            // directly submit form data (no normalize unless backend needs nulls)
             const result = await createBooking(data);
 
             if (result.success) {
                 toast.success("Booking created successfully");
-                handleClose();
+                handleClose(); 
                 reset();
             } else {
                 toast.error(
-                    result.error || `Failed to add booking. Please try again.`
+                    result.error || "Failed to add booking. Please try again."
                 );
             }
         } catch (err) {
@@ -106,11 +110,6 @@ const AddBooking = ({ isOpen, onClose }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleClose = () => {
-        modalClose();
-        onClose();
     };
 
     // Step validation rules

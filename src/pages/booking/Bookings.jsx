@@ -60,8 +60,8 @@ const Bookings = () => {
     }, [safeBookings]);
 
     // Count by status (enum-based)
-    const countByStatus = status =>
-        safeBookings.filter(b => b.status === status).length;
+    const countByBookingMode = booking_mode =>
+        safeBookings.filter(b => b.booking_mode === booking_mode).length;
 
     const totalBookings = safeBookings.length;
     // inside Bookings component
@@ -75,60 +75,18 @@ const Bookings = () => {
             icon: CubeIcon
         },
         {
-            key: "PICKUP_SCHEDULED",
-            title: "Pickup",
-            value: countByStatus("PICKUP_SCHEDULED"),
-            color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
-            icon: TruckIcon
-        },
-        {
-            key: "LOADED_TO_TRUCK",
-            title: "Loaded Truck",
-            value: countByStatus("LOADED_TO_TRUCK"),
-            color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
-            icon: TruckIcon
-        },
-        {
-            key: "ARRIVED_ORIGIN_PORT",
-            title: "Origin Port",
-            value: countByStatus("ARRIVED_ORIGIN_PORT"),
-            color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
-            icon: BuildingLibraryIcon
-        },
-        {
-            key: "LOADED_TO_SHIP",
-            title: "Loaded Ship",
-            value: countByStatus("LOADED_TO_SHIP"),
+            key: "DOOR_TO_DOOR",
+            title: "Door to Door",
+            value: countByBookingMode("DOOR_TO_DOOR"),
             color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
-            icon: CubeIcon
-        },
-        {
-            key: "IN_TRANSIT",
-            title: "Transit",
-            value: countByStatus("IN_TRANSIT"),
-            color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
-            icon: BuildingLibraryIcon
-        },
-        {
-            key: "ARRIVED_DESTINATION_PORT",
-            title: "Dest. Port",
-            value: countByStatus("ARRIVED_DESTINATION_PORT"),
-            color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
-            icon: BuildingLibraryIcon
-        },
-        {
-            key: "OUT_FOR_DELIVERY",
-            title: "Delivery",
-            value: countByStatus("OUT_FOR_DELIVERY"),
-            color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
             icon: TruckIcon
         },
         {
-            key: "DELIVERED",
-            title: "Delivered",
-            value: countByStatus("DELIVERED"),
-            color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
-            icon: CheckCircleIcon
+            key: "PIER_TO_PIER",
+            title: "Port to Port",
+            value: countByBookingMode("PIER_TO_PIER"),
+            color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
+            icon: TruckIcon
         }
     ];
     // Handlers
@@ -189,9 +147,7 @@ const Bookings = () => {
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="page-title">
-                            Booking Management
-                        </h1>
+                        <h1 className="page-title">Booking Management</h1>
                         <p className="page-subtitle">
                             Manage and track all freight bookings
                         </p>

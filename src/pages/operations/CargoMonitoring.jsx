@@ -5,9 +5,10 @@ import {
     CubeIcon,
     TruckIcon,
     ArrowRightIcon,
-    MapPinIcon
+    MapPinIcon,
+    BuildingLibraryIcon,
+    CheckCircleIcon
 } from "@heroicons/react/24/outline";
-
 import Loading from "../../components/Loading";
 import CargoMonitoringTable from "../../components/tables/CargoMonitoringTable";
 import BulkActionBar from "../../components/BulkActionBar";
@@ -22,7 +23,6 @@ const CargoMonitoring = () => {
         clearError,
         deleteBooking
     } = useBookingStore();
-
     const [selectedBookings, setSelectedBookings] = useState([]);
 
     useEffect(() => {
@@ -46,36 +46,60 @@ const CargoMonitoring = () => {
 
     const statsConfig = [
         {
-            key: "ORIGIN",
-            title: "Origin Port",
-            value: safeBookings.filter(b => b.status === "ARRIVED_ORIGIN_PORT")
-                .length,
-            color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
-            icon: MapPinIcon
+            key: "PICKUP_SCHEDULED",
+            title: "Pickup",
+            value: countByStatus("PICKUP_SCHEDULED"),
+            color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
+            icon: TruckIcon
         },
         {
-            key: "LOADED",
-            title: "Loaded Ship",
-            value: safeBookings.filter(b => b.status === "LOADED_TO_SHIP")
-                .length,
+            key: "LOADED_TO_TRUCK",
+            title: "Loaded Truck",
+            value: countByStatus("LOADED_TO_TRUCK"),
+            color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
+            icon: TruckIcon
+        },
+        {
+            key: "ARRIVED_ORIGIN_PORT",
+            title: "Origin Port",
+            value: countByStatus("ARRIVED_ORIGIN_PORT"),
             color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
+            icon: BuildingLibraryIcon
+        },
+        {
+            key: "LOADED_TO_SHIP",
+            title: "Loaded Ship",
+            value: countByStatus("LOADED_TO_SHIP"),
+            color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
             icon: CubeIcon
         },
         {
-            key: "TRANSIT",
+            key: "IN_TRANSIT",
             title: "Transit",
             value: countByStatus("IN_TRANSIT"),
             color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
-            icon: ArrowRightIcon
+            icon: BuildingLibraryIcon
         },
         {
-            key: "DEST",
+            key: "ARRIVED_DESTINATION_PORT",
             title: "Dest. Port",
-            value: safeBookings.filter(
-                b => b.status === "ARRIVED_DESTINATION_PORT"
-            ).length,
-            color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
+            value: countByStatus("ARRIVED_DESTINATION_PORT"),
+            color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
+            icon: BuildingLibraryIcon
+        },
+        {
+            key: "OUT_FOR_DELIVERY",
+            title: "Delivery",
+            value: countByStatus("OUT_FOR_DELIVERY"),
+            color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
             icon: TruckIcon
+        },
+        {
+            key: "DELIVERED",
+            title: "Delivered",
+            value: countByStatus("DELIVERED"),
+            color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
+            icon: CheckCircleIcon
         }
     ];
 
@@ -83,6 +107,10 @@ const CargoMonitoring = () => {
         ids.forEach(async id => {
             await deleteBooking(id);
         });
+    };
+
+    const handleDataUpdate = () => {
+        fetchBookings();
     };
 
     const StatCard = ({ title, value, color, icon: Icon }) => (
@@ -138,7 +166,8 @@ const CargoMonitoring = () => {
                     <CargoMonitoringTable
                         data={formattedBookings}
                         onSelectionChange={setSelectedBookings}
-                        rightAction={null} // Removed the New Record button
+                        onDataUpdate={handleDataUpdate}
+                        rightAction={null}
                     />
 
                     {/* Bulk Action Bar */}
