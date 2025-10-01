@@ -1,3 +1,4 @@
+// utils/store/usePartnerStore
 import { create } from "zustand";
 import api from "../../config/axios";
 
@@ -7,32 +8,38 @@ const usePartnerStore = create((set, get) => ({
     error: null,
     currentPartner: null,
 
-  // Fetch all partners (both shipping & trucking)
-fetchPartners: async () => {
-  set({ loading: true, error: null });
+    // Fetch all partners (both shipping & trucking)
+    fetchPartners: async () => {
+        set({ loading: true, error: null });
 
-  try {
-    const [shippingRes, truckingRes] = await Promise.all([
-      api.get("/shipping-lines"),
-      api.get("/trucking-companies")
-    ]);
+        try {
+            const [shippingRes, truckingRes] = await Promise.all([
+                api.get("/shipping-lines"),
+                api.get("/trucking-companies")
+            ]);
 
-    const shippingPartners = shippingRes.data.map(p => ({ ...p, type: "shipping" }));
-    const truckingPartners = truckingRes.data.map(p => ({ ...p, type: "trucking" }));
+            const shippingPartners = shippingRes.data.map(p => ({
+                ...p,
+                type: "shipping"
+            }));
+            const truckingPartners = truckingRes.data.map(p => ({
+                ...p,
+                type: "trucking"
+            }));
 
-    set({
-      partners: [...shippingPartners, ...truckingPartners],
-      loading: false
-    });
+            set({
+                partners: [...shippingPartners, ...truckingPartners],
+                loading: false
+            });
 
-    return { success: true };
-  } catch (err) {
-    const error = err.response?.data?.message || "Failed to fetch partners";
-    set({ error, loading: false });
-    return { success: false, error };
-  }
-},
-
+            return { success: true };
+        } catch (err) {
+            const error =
+                err.response?.data?.message || "Failed to fetch partners";
+            set({ error, loading: false });
+            return { success: false, error };
+        }
+    },
 
     // Fetch partner by ID
     fetchPartnerById: async (id, type) => {
@@ -52,6 +59,22 @@ fetchPartners: async () => {
                 err.response?.data?.message || "Failed to fetch partner";
             set({ error, loading: false });
             return { success: false, error };
+        }
+    },
+
+    // Fetch success booking by partner
+    fetchSuccessBookings: async (id, type) => {
+        try {
+            const endpoint =
+                type === "shipping"
+                    ? `/shipping-lines/${id}/success-bookings`
+                    : `/trucking-companies/${id}/success-bookings`;
+
+            const res = await api.get(endpoint);
+            return res.data.totalSuccess;
+        } catch (err) {
+            console.error("Failed to fetch success bookings:", err);
+            return 0;
         }
     },
 
@@ -114,7 +137,6 @@ fetchPartners: async () => {
         }
     },
 
-    // Toggle partner status
     // Remove partner
     removePartner: async (id, type) => {
         set({ loading: true, error: null });

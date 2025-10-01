@@ -1,7 +1,14 @@
-// pages/operations/ShippingLines
-import { useState, useEffect } from "react";
+// pages/operations/ShippingLines.jsx
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { PlusCircle, ArrowLeft, Ship, Cuboid, AlertTriangle } from "lucide-react";
+import {
+    PlusCircle,
+    ArrowLeft,
+    Ship,
+    Cuboid,
+    AlertTriangle,
+    PackageCheck
+} from "lucide-react";
 
 import Loading from "../../components/Loading";
 import ShipTable from "../../components/tables/ShipTable";
@@ -9,29 +16,31 @@ import ContainerTable from "../../components/tables/ContainerTable";
 import AddShip from "../../components/modals/AddShip";
 import UpdateShip from "../../components/modals/UpdateShip";
 import DeleteShip from "../../components/modals/DeleteShip";
-import ViewShip from "../../components/modals/ViewShip";
 import AddContainer from "../../components/modals/AddContainer";
 import usePartnerStore from "../../utils/store/usePartnerStore";
 import useShipStore from "../../utils/store/useShipStore";
 import useContainerStore from "../../utils/store/useContainerStore";
+import StatCard from "../../components/cards/StatCard";
 
 const ShippingLines = () => {
     const navigate = useNavigate();
     const { id } = useParams();
 
+    // 🔹 Local state
     const [activeTab, setActiveTab] = useState("ships");
-
     const [isAddShipOpen, setIsAddShipOpen] = useState(false);
     const [isUpdateShipOpen, setIsUpdateShipOpen] = useState(false);
     const [isDeleteShipOpen, setIsDeleteShipOpen] = useState(false);
-    const [isViewShipOpen, setIsViewShipOpen] = useState(false);
     const [isAddContainerOpen, setIsAddContainerOpen] = useState(false);
     const [selectedShip, setSelectedShip] = useState(null);
+    const [successBookings, setSuccessBookings] = useState(0);
 
+    // 🔹 Stores
     const {
         currentPartner,
         fetchPartnerById,
         clearCurrentPartner,
+        fetchSuccessBookings,
         loading: partnerLoading
     } = usePartnerStore();
 
@@ -48,21 +57,26 @@ const ShippingLines = () => {
     } = useShipStore();
 
     const {
-        containers,
-        allContainers, // New: all containers including in-use ones
+        allContainers,
         fetchContainersByLine,
-        fetchAllContainersByLine, // New: fetch all containers function
-        addContainer,
-        removeContainer,
-        updateContainer
+        fetchAllContainersByLine,
+        addContainer
     } = useContainerStore();
 
+    // 🔹 Fetch partner + ships + containers
     useEffect(() => {
         if (id) {
             fetchPartnerById(id, "shipping");
             fetchAllShips();
-            fetchContainersByLine(id); // For booking selection
-            fetchAllContainersByLine(id); // For management table
+            fetchContainersByLine(id);
+            fetchAllContainersByLine(id);
+
+            // Fetch success deliveries
+            const fetchSuccess = async () => {
+                const total = await fetchSuccessBookings(id);
+                setSuccessBookings(total);
+            };
+            fetchSuccess();
         }
         return () => {
             clearCurrentPartner();
@@ -75,24 +89,64 @@ const ShippingLines = () => {
         fetchAllShips,
         clearCurrentShip,
         fetchContainersByLine,
-        fetchAllContainersByLine
+        fetchAllContainersByLine,
+        fetchSuccessBookings
     ]);
 
-    // CRUD Handlers for Ships
+    // 🔹 Stats Config
+    const statsConfig = useMemo(() => {
+        const totalShips =
+            ships?.filter(s => s.shipping_line_id === id)?.length || 0;
+        const totalContainers = allContainers?.length || 0;
+        const inUseContainers =
+            allContainers?.filter(c => !c.is_returned)?.length || 0;
+        const returnedContainers =
+            allContainers?.filter(c => c.is_returned)?.length || 0;
+
+        return [
+            {
+                key: "SHIPS",
+                title: "Total Ships",
+                value: totalShips,
+                color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+                icon: Ship
+            },
+            {
+                key: "CONTAINERS",
+                title: "Total Containers",
+                value: totalContainers,
+                color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
+                icon: Cuboid
+            },
+            {
+                key: "AVAILABLE",
+                title: "Available Containers",
+                value: returnedContainers,
+                color: "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white",
+                icon: Cuboid
+            },
+            {
+                key: "IN_USE",
+                title: "In Use Containers",
+                value: inUseContainers,
+                color: "bg-gradient-to-br from-red-500 to-red-600 text-white",
+                icon: AlertTriangle
+            },
+            {
+                key: "SUCCESS",
+                title: "Successful Deliveries",
+                value: successBookings,
+                color: "bg-gradient-to-br from-green-500 to-green-600 text-white",
+                icon: PackageCheck
+            }
+        ];
+    }, [ships, allContainers, id, successBookings]);
+
+    // 🔹 CRUD handlers (ships)
     const handleAddShip = async shipData => {
-        console.log("🎯 handleAddShip called with:", shipData);
         const result = await addShip({ ...shipData, shippingLineId: id });
-        console.log("🎯 handleAddShip result:", result);
         if (result.success) setIsAddShipOpen(false);
         return result;
-    };
-
-    const handleViewShip = async ship => {
-        const result = await fetchShipById(ship.id);
-        if (result.success) {
-            setSelectedShip(ship);
-            setIsViewShipOpen(true);
-        }
     };
 
     const handleEditShip = async ship => {
@@ -128,7 +182,7 @@ const ShippingLines = () => {
         }
     };
 
-    // CRUD Handler for Containers
+    // 🔹 Container handlers
     const handleAddContainer = async containerData => {
         const result = await addContainer({
             ...containerData,
@@ -138,6 +192,7 @@ const ShippingLines = () => {
         return result;
     };
 
+    // 🔹 Conditional rendering
     if (partnerLoading || shipsLoading) return <Loading />;
 
     if (!currentPartner) {
@@ -156,15 +211,7 @@ const ShippingLines = () => {
         );
     }
 
-    // Stats
-    const totalShips =
-        ships?.filter(s => s.shipping_line_id === id)?.length || 0;
-    const totalContainers = allContainers?.length || 0;
-    const inUseContainers =
-        allContainers?.filter(container => !container.is_returned)?.length || 0;
-    const returnedContainers =
-        allContainers?.filter(container => container.is_returned)?.length || 0;
-
+    // 🔹 Render UI
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <div className="relative z-10 p-6">
@@ -182,63 +229,24 @@ const ShippingLines = () => {
                         <img
                             src={currentPartner.logo_url}
                             alt={currentPartner.name}
-                            className="w-24 h-24 object-cover border rounded-md"
+                            className="w-20 h-20 object-cover border rounded-md"
                         />
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                            {currentPartner.name}
-                        </h1>
+                        <div>
+                            <h1 className="page-title">
+                                {currentPartner.name}
+                            </h1>
+                            <p className="page-subtitle">
+                                Manage ships and containers for this shipping
+                                line
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Stat Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                            <Ship className="stat-icon-bg h-24 w-24 opacity-10" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-title">Total Ships</p>
-                                    <p className="stat-value">{totalShips}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="stat-card bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-                            <Cuboid className="stat-icon-bg h-24 w-24 opacity-10" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-title">
-                                        Total Containers
-                                    </p>
-                                    <p className="stat-value">
-                                        {totalContainers}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="stat-card bg-gradient-to-br from-amber-500 to-amber-600 text-white">
-                            <AlertTriangle className="stat-icon-bg h-24 w-24 opacity-10" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-title">
-                                        In Use Containers
-                                    </p>
-                                    <p className="stat-value">
-                                        {inUseContainers}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="stat-card bg-gradient-to-br from-green-500 to-green-600 text-white">
-                            <Cuboid className="stat-icon-bg h-24 w-24 opacity-10" />
-                            <div className="stat-content">
-                                <div>
-                                    <p className="stat-title">
-                                        Available Containers
-                                    </p>
-                                    <p className="stat-value">
-                                        {returnedContainers}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        {statsConfig.map(stat => (
+                            <StatCard key={stat.key} {...stat} />
+                        ))}
                     </div>
 
                     {/* Tabs */}
@@ -258,7 +266,7 @@ const ShippingLines = () => {
                             onClick={() => setActiveTab("containers")}
                             className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                                 activeTab === "containers"
-                                    ? "text-emerald-600 border-b-2 border-emerald-600"
+                                    ? "text-sky-600 border-b-2 border-sky-600"
                                     : "text-slate-500 hover:text-slate-700"
                             }`}
                         >
@@ -267,11 +275,10 @@ const ShippingLines = () => {
                         </button>
                     </div>
 
-                    {/* Conditional Rendering */}
+                    {/* Table Views */}
                     {activeTab === "ships" ? (
                         <ShipTable
                             data={ships.filter(s => s.shipping_line_id === id)}
-                            onView={handleViewShip}
                             onEdit={handleEditShip}
                             onDelete={handleDeleteShip}
                             rightAction={
@@ -306,11 +313,6 @@ const ShippingLines = () => {
                 onClose={() => setIsAddShipOpen(false)}
                 onSubmit={handleAddShip}
                 shippingLineId={id}
-            />
-            <ViewShip
-                isOpen={isViewShipOpen}
-                onClose={() => setIsViewShipOpen(false)}
-                ship={selectedShip}
             />
             <UpdateShip
                 isOpen={isUpdateShipOpen}

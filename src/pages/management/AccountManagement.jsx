@@ -1,3 +1,4 @@
+// pages/management/AccountManagement.jsx
 import { useEffect, useState, useMemo } from "react";
 import useUserStore from "../../utils/store/useUserStore";
 import { UserCircle, UserPlus } from "lucide-react";
@@ -8,6 +9,7 @@ import UpdateUser from "../../components/modals/UpdateUser";
 import RestrictUser from "../../components/modals/RestrictUser";
 import { formatName, formatRole } from "../../utils/helpers/formatters";
 import UserTable from "../../components/tables/UserTable";
+import StatCard from "../../components/cards/StatCard"; // ✅ reusable
 
 const AccountManagement = () => {
   const {
@@ -102,22 +104,30 @@ const AccountManagement = () => {
     clearCurrentUser();
   };
 
-  const StatCard = ({ title, value, color, icon: Icon, bgIcon }) => (
-    <div className={`stat-card ${color}`}>
-      <div className="stat-icon-bg">{bgIcon}</div>
-      <div className="stat-content">
-        <div>
-          <p className="stat-title">{title}</p>
-          <p className="stat-value">{value}</p>
-        </div>
-        <div className="flex-shrink-0">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <Icon className="h-6 w-6" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // ✅ Stats config
+  const statsConfig = [
+    {
+      key: "TOTAL",
+      title: "Total Users",
+      value: users.length,
+      color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+      icon: UserCircle,
+    },
+    {
+      key: "ACTIVE",
+      title: "Active Users",
+      value: users.filter((u) => u.is_active).length,
+      color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
+      icon: UserCircle,
+    },
+    {
+      key: "RESTRICTED",
+      title: "Restricted Users",
+      value: users.filter((u) => !u.is_active).length,
+      color: "bg-gradient-to-br from-red-500 to-red-600 text-white",
+      icon: UserCircle,
+    },
+  ];
 
   if (loading) return <Loading />;
 
@@ -145,32 +155,12 @@ const AccountManagement = () => {
             </p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard
-              title="Total Users"
-              value={users.length}
-              color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-              icon={UserCircle}
-              bgIcon={<UserCircle className="h-24 w-24" />}
-            />
-
-            <StatCard
-              title="Active Users"
-              value={users.filter((u) => u.is_active).length}
-              color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-              icon={UserCircle}
-              bgIcon={<UserCircle className="h-24 w-24" />}
-            />
-
-            <StatCard
-              title="Restricted Users"
-              value={users.filter((u) => !u.is_active).length}
-              color="bg-gradient-to-br from-red-500 to-red-600 text-white"
-              icon={UserCircle}
-              bgIcon={<UserCircle className="h-24 w-24" />}
-            />
-          </div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        {statsConfig.map(stat => (
+                            <StatCard key={stat.key} {...stat} />
+                        ))}
+                    </div>
 
           {/* Users Table */}
           <UserTable
@@ -181,7 +171,7 @@ const AccountManagement = () => {
             rightAction={
               <button
                 onClick={() => setIsAddUserModalOpen(true)}
-                className="btn-primary"
+                className="btn-primary flex items-center gap-2"
               >
                 <UserPlus className="h-5 w-5" />
                 Add New User

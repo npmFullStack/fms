@@ -1,14 +1,7 @@
 // pages/booking/Bookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import {
-  PlusCircle,
-  Ship,
-  Truck,
-  File
-} from "lucide-react";
-
-
+import { PlusCircle, Ship, Truck, File } from "lucide-react";
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
 import UpdateBooking from "../../components/modals/UpdateBooking";
@@ -16,6 +9,7 @@ import DeleteBooking from "../../components/modals/DeleteBooking";
 import BookingTable from "../../components/tables/BookingTable";
 import BulkActionBar from "../../components/BulkActionBar";
 import { printBookings } from "../../utils/helpers/printHelper";
+import StatCard from "../../components/cards/StatCard";
 
 const Bookings = () => {
     const {
@@ -64,7 +58,6 @@ const Bookings = () => {
         safeBookings.filter(b => b.booking_mode === booking_mode).length;
 
     const totalBookings = safeBookings.length;
-    // inside Bookings component
 
     const statsConfig = [
         {
@@ -89,6 +82,7 @@ const Bookings = () => {
             icon: Ship
         }
     ];
+
     // Handlers
     const handleAddBooking = () => setIsAddBookingModalOpen(true);
 
@@ -107,24 +101,6 @@ const Bookings = () => {
         setActiveBookingId(ids); // pass array of ids
         setIsDeleteBookingModalOpen(true);
     };
-
-    const StatCard = ({ title, value, color, icon: Icon }) => (
-        <div className={`relative overflow-hidden rounded-xl p-5 ${color}`}>
-            {/* Background Icon */}
-            <Icon className="absolute right-2 top-2 h-20 w-20 text-white/20" />
-
-            {/* Content */}
-            <div className="relative flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-white/90">{title}</p>
-                    <p className="text-2xl font-bold text-white">{value}</p>
-                </div>
-                <div className="p-1 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Icon className="h-6 w-6 text-white" />
-                </div>
-            </div>
-        </div>
-    );
 
     if (loading) return <Loading />;
 
@@ -152,16 +128,11 @@ const Bookings = () => {
                             Manage and track all freight bookings
                         </p>
                     </div>
+
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {statsConfig.map(stat => (
-                            <StatCard
-                                key={stat.key}
-                                title={stat.title}
-                                value={stat.value}
-                                color={stat.color}
-                                icon={stat.icon}
-                            />
+                            <StatCard key={stat.key} {...stat} />
                         ))}
                     </div>
 
@@ -216,6 +187,7 @@ const Bookings = () => {
                 bookingId={activeBookingId}
             />
 
+            {/* Delete Booking Modal */}
             <DeleteBooking
                 isOpen={isDeleteBookingModalOpen}
                 onClose={() => setIsDeleteBookingModalOpen(false)}

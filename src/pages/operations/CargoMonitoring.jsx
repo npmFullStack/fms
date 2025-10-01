@@ -1,17 +1,12 @@
-// pages/bookings/CargoMonitoring.jsx
+// pages/booking/CargoMonitoring.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
-import {
-    Ship,
-    Truck,
-    MapPin,
-    CheckCircle,
-    Loader2
-} from "lucide-react";
+import { Ship, Truck, MapPin, CheckCircle, Loader2 } from "lucide-react";
 import Loading from "../../components/Loading";
 import CargoMonitoringTable from "../../components/tables/CargoMonitoringTable";
 import BulkActionBar from "../../components/BulkActionBar";
 import { printBookings } from "../../utils/helpers/printHelper";
+import StatCard from "../../components/cards/StatCard";
 
 const CargoMonitoring = () => {
     const {
@@ -111,21 +106,6 @@ const CargoMonitoring = () => {
     const handleDataUpdate = () => {
         fetchBookings();
     };
-
-    const StatCard = ({ title, value, color, icon: Icon }) => (
-        <div className={`relative overflow-hidden rounded-xl p-5 ${color}`}>
-            <Icon className="absolute right-2 top-2 h-20 w-20 text-white/20" />
-            <div className="relative flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-white/90">{title}</p>
-                    <p className="text-2xl font-bold text-white">{value}</p>
-                </div>
-                <div className="p-1 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Icon className="h-6 w-6 text-white" />
-                </div>
-            </div>
-        </div>
-    );
 
     if (loading) return <Loading />;
 
