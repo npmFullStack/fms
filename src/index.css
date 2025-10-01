@@ -336,3 +336,20 @@
         @apply bg-gradient-to-r from-[#178fff] to-[#006dd2];
     }
 }
+
+/* CUSTOM LOADING */
+@keyframes rock {
+  0% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
+
+.animate-rock {
+  animation: rock 0.5s ease-in-out infinite;
+}
