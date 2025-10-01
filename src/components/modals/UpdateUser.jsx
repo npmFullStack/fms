@@ -3,15 +3,16 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema } from "../../schemas/userSchema";
 import {
-    XMarkIcon,
-    QuestionMarkCircleIcon,
-    InformationCircleIcon,
-    ShieldCheckIcon,
-    EnvelopeIcon,
-    UserPlusIcon,
-    PhotoIcon,
-    TrashIcon
-} from "@heroicons/react/24/outline";
+    X,
+    HelpCircle,
+    Info,
+    ShieldCheck,
+    Mail,
+    UserPlus,
+    Image,
+    Trash2
+} from "lucide-react";
+
 import Select from "react-select";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -39,12 +40,15 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
         clearImage();
     });
 
-    const roles = useMemo(() => [
-    { value: "customer", label: "Customer" },
-    { value: "marketing_coordinator", label: "Marketing Coordinator" },
-    { value: "admin_finance", label: "Admin Finance" },
-    { value: "general_manager", label: "General Manager" }
-], []);
+    const roles = useMemo(
+        () => [
+            { value: "customer", label: "Customer" },
+            { value: "marketing_coordinator", label: "Marketing Coordinator" },
+            { value: "admin_finance", label: "Admin Finance" },
+            { value: "general_manager", label: "General Manager" }
+        ],
+        []
+    );
 
     const {
         register,
@@ -142,7 +146,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                             onClick={handleClose}
                             className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
-                            <XMarkIcon className="h-5 w-5" />
+                            <X className="h-5 w-5" />
                         </button>
 
                         {/* Icon and title */}
@@ -165,7 +169,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                     }`}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <InformationCircleIcon className="h-4 w-4" />
+                                        <Info className="h-4 w-4" />
                                         {message.text || imageError}
                                     </div>
                                 </div>
@@ -176,7 +180,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                 <label className="input-label-modern">
                                     Profile Picture
                                     <div className="group relative">
-                                        <QuestionMarkCircleIcon className="tooltip-icon" />
+                                        <HelpCircle className="tooltip-icon" />
                                         <div className="tooltip">
                                             Max 5MB, JPEG/PNG/GIF formats
                                         </div>
@@ -200,7 +204,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                                                <PhotoIcon className="h-5 w-5 text-slate-400" />
+                                                <Image className="h-5 w-5 text-slate-400" />
                                             </div>
                                         )}
                                     </div>
@@ -218,7 +222,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                             htmlFor="profile_picture"
                                             className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
                                         >
-                                            <PhotoIcon className="h-3 w-3" />
+                                            <Image className="h-3 w-3" />
                                             {user.profile_picture
                                                 ? "Change Image"
                                                 : "Choose Image"}
@@ -230,7 +234,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                                 onClick={clearSelectedImage}
                                                 className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded-lg hover:bg-red-200 transition-colors"
                                             >
-                                                <TrashIcon className="h-3 w-3" />
+                                                <Trash2 className="h-3 w-3" />
                                                 Remove
                                             </button>
                                         )}
@@ -297,7 +301,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                 >
                                     Email Address
                                     <div className="group relative">
-                                        <QuestionMarkCircleIcon className="tooltip-icon" />
+                                        <HelpCircle className="tooltip-icon" />
                                         <div className="tooltip">
                                             User's primary email address
                                         </div>
@@ -325,7 +329,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                     <label className="input-label-modern">
                                         Phone Number
                                         <div className="group relative">
-                                            <QuestionMarkCircleIcon className="tooltip-icon" />
+                                            <HelpCircle className="tooltip-icon" />
                                             <div className="tooltip">
                                                 Optional field, international
                                                 format
@@ -360,7 +364,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                     <label className="input-label-modern">
                                         Role
                                         <div className="group relative">
-                                            <QuestionMarkCircleIcon className="tooltip-icon" />
+                                            <HelpCircle className="tooltip-icon" />
                                             <div className="tooltip">
                                                 Select user permission level
                                             </div>
@@ -370,13 +374,16 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         name="role"
                                         control={control}
                                         render={({ field }) => (
-<Select
-    {...field}
-    options={roles}
-    className={`react-select-container ${errors.role ? "react-select-error" : ""}`}
-    classNamePrefix="react-select"
-/>
-
+                                            <Select
+                                                {...field}
+                                                options={roles}
+                                                className={`react-select-container ${
+                                                    errors.role
+                                                        ? "react-select-error"
+                                                        : ""
+                                                }`}
+                                                classNamePrefix="react-select"
+                                            />
                                         )}
                                     />
                                     {errors.role && (
@@ -391,7 +398,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                             <div className="info-box-modern">
                                 <div className="flex items-start gap-3">
                                     <div className="p-1.5 bg-blue-100 rounded-lg">
-                                        <InformationCircleIcon className="h-4 w-4 text-blue-600" />
+                                        <Info className="h-4 w-4 text-blue-600" />
                                     </div>
                                     <div className="flex-1">
                                         <h4 className="text-sm font-semibold text-slate-800 mb-2">
@@ -399,21 +406,21 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         </h4>
                                         <div className="space-y-1.5 text-xs text-slate-600">
                                             <div className="flex items-start gap-2">
-                                                <EnvelopeIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <Mail className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
                                                 <span>
                                                     Email changes will affect
                                                     user login credentials
                                                 </span>
                                             </div>
                                             <div className="flex items-start gap-2">
-                                                <PhotoIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <Image className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
                                                 <span>
                                                     Profile picture updates will
                                                     be reflected immediately
                                                 </span>
                                             </div>
                                             <div className="flex items-start gap-2">
-                                                <ShieldCheckIcon className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
+                                                <ShieldCheck className="h-3 w-3 mt-0.5 text-blue-500 flex-shrink-0" />
                                                 <span>
                                                     Role changes affect user
                                                     permissions
@@ -451,7 +458,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
                                         </>
                                     ) : (
                                         <>
-                                            <UserPlusIcon className="h-4 w-4" />
+                                            <UserPlus className="h-4 w-4" />
                                             Update User
                                         </>
                                     )}

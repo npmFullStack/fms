@@ -2,13 +2,14 @@
 import { useMemo, useEffect, useState } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  CubeIcon,
-  PencilIcon,
-  CheckIcon,
-  XMarkIcon
-} from "@heroicons/react/24/outline";
+  ChevronUp,
+  ChevronDown,
+  Ship,
+  Pencil,
+  Check,
+  X
+} from "lucide-react";
+
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import useTable from "../../utils/hooks/useTable";
@@ -134,13 +135,13 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
             onClick={() => handleSaveDate(bookingId, dateType)}
             className="p-1 text-green-600 hover:bg-green-50 rounded"
           >
-            <CheckIcon className="h-4 w-4" />
+            <Check className="h-4 w-4" />
           </button>
           <button
             onClick={handleCancelEdit}
             className="p-1 text-red-600 hover:bg-red-50 rounded"
           >
-            <XMarkIcon className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       );
@@ -154,7 +155,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
             onClick={() => handleEditDate(bookingId, dateType)}
             className="opacity-0 group-hover:opacity-100 p-1 text-blue-600 hover:bg-blue-50 rounded transition-opacity"
           >
-            <PencilIcon className="h-3 w-3" />
+            <Pencil className="h-3 w-3" />
           </button>
         )}
       </div>
@@ -427,10 +428,10 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
                         header.getContext()
                       )}
                       {header.column.getIsSorted() === "asc" && (
-                        <ChevronUpIcon className="table-sort-icon" />
+                        <ChevronUp className="table-sort-icon" />
                       )}
                       {header.column.getIsSorted() === "desc" && (
-                        <ChevronDownIcon className="table-sort-icon" />
+                        <ChevronDown className="table-sort-icon" />
                       )}
                     </div>
                   </th>
@@ -456,7 +457,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
               <tr>
                 <td colSpan={columns.length}>
                   <div className="empty-state">
-                    <CubeIcon className="empty-state-icon" />
+                    <Ship className="empty-state-icon" />
                     <h3 className="empty-state-title">No cargo records found</h3>
                     <p className="empty-state-description">
                       Try adjusting your search.

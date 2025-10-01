@@ -1,20 +1,19 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
-    HomeIcon,
-    TruckIcon,
-    ClipboardDocumentListIcon,
-    CurrencyDollarIcon,
-    ChartBarIcon,
-    ChevronDownIcon,
-    ChevronUpIcon,
-    PlusCircleIcon,
-    DocumentTextIcon,
-    DocumentIcon,
-    ExclamationTriangleIcon,
-    CalculatorIcon,
-    ShieldCheckIcon,
-    UserGroupIcon,
-} from "@heroicons/react/24/outline";
+    Home,
+    Ship,
+    Clipboard,
+    DollarSign,
+    BarChart2,
+    ChevronDown,
+    ChevronUp,
+    File,
+    AlertTriangle,
+    Calculator,
+    ShieldCheck,
+    Users
+} from "lucide-react";
+
 import { useState } from "react";
 import ProfileMenu from "./ProfileMenu";
 import MobileSidebar from "./MobileSidebar";
@@ -23,74 +22,73 @@ import useIsMobile from "../utils/hooks/useIsMobile";
 // ---------------- MENU CONFIG ----------------
 const menuByRole = {
     customer: [
-        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Dashboard", path: "/dashboard", icon: Home },
         {
             name: "My Bookings",
             path: "/booking",
-            icon: ClipboardDocumentListIcon,
-            
+            icon: Clipboard
         },
-        { name: "Track Orders", path: "/track-order", icon: TruckIcon }
+        { name: "Track Orders", path: "/track-order", icon: Ship }
     ],
     marketing_coordinator: [
-        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Dashboard", path: "/dashboard", icon: Home },
         {
             name: "Bookings",
             path: "/bookings",
-            icon: ClipboardDocumentListIcon
+            icon: Clipboard
         },
         {
             name: "Cargo Monitoring",
             path: "/cargo-monitoring",
-            icon: TruckIcon
+            icon: Ship
         },
-        { name: "House Waybill", path: "/house-waybill", icon: DocumentIcon },
+        { name: "House Waybill", path: "/house-waybill", icon: File },
         {
             name: "Incident Reports",
             path: "/incident-reports",
-            icon: ExclamationTriangleIcon
+            icon: AlertTriangle
         },
         {
             name: "Partners",
             path: "/partners",
-            icon: UserGroupIcon
+            icon: Users
         }
     ],
     admin_finance: [
-        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Dashboard", path: "/dashboard", icon: Home },
         {
             name: "Accounts Receivable",
             path: "/accounts-receivable",
-            icon: CurrencyDollarIcon
+            icon: DollarSign
         },
         {
             name: "Accounts Payable",
             path: "/accounts-payable",
-            icon: CurrencyDollarIcon
+            icon: DollarSign
         },
         {
             name: "Payment Reconciliation",
             path: "/payment-reconciliation",
-            icon: CalculatorIcon
+            icon: Calculator
         }
     ],
     general_manager: [
-        { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+        { name: "Dashboard", path: "/dashboard", icon: Home },
         {
             name: "Financial Overview",
             path: "/financial-overview",
-            icon: ChartBarIcon
+            icon: BarChart2
         },
-        { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheckIcon },
+        { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
         {
             name: "Account Management",
             path: "/account-management",
-            icon: UserGroupIcon
+            icon: Users
         },
         {
             name: "Partners",
             path: "/partners",
-            icon: UserGroupIcon
+            icon: Users
         }
     ]
 };
@@ -156,7 +154,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                             </div>
                             {isOpen &&
                                 (openDropdowns[name] ? (
-                                    <ChevronUpIcon
+                                    <ChevronUp
                                         className={`w-4 h-4 shrink-0 transition-all duration-300 ${
                                             isActiveParent
                                                 ? "text-white"
@@ -164,7 +162,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
                                         }`}
                                     />
                                 ) : (
-                                    <ChevronDownIcon
+                                    <ChevronDown
                                         className={`w-4 h-4 shrink-0 transition-all duration-300 ${
                                             isActiveParent
                                                 ? "text-white"
@@ -233,7 +231,7 @@ const SideBar = ({ isOpen = true, user, className, onClose }) => {
             className={`bg-gray-50 border-r border-gray-200 text-gray-800 p-4 flex flex-col transition-all duration-300 ease-in-out hidden md:flex ${
                 isOpen ? "w-64" : "w-20"
             } ${className}`}
-            style={{ transitionProperty: 'width, transform' }}
+            style={{ transitionProperty: "width, transform" }}
         >
             <nav className="flex flex-col gap-2 flex-grow">
                 {renderLinks(navLinks)}

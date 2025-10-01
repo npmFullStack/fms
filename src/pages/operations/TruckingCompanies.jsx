@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  PlusCircleIcon,
-  ArrowLeftIcon,
-  TruckIcon,
-} from "@heroicons/react/24/outline";
+  PlusCircle,
+  ArrowLeft,
+  Truck,
+} from "lucide-react";
 import Loading from "../../components/Loading";
 import TruckTable from "../../components/tables/TruckTable";
 import AddTruck from "../../components/modals/AddTruck";
@@ -102,7 +102,7 @@ const TruckingCompany = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-blue-600 hover:underline mb-6"
           >
-            <ArrowLeftIcon className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> Back
           </button>
 
           {/* Header */}
@@ -132,14 +132,14 @@ const TruckingCompany = () => {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-              <TruckIcon className="stat-icon-bg h-24 w-24" />
+              <Truck className="stat-icon-bg h-24 w-24" />
               <div className="stat-content">
                 <div>
                   <p className="stat-title">Total Trucks</p>
                   <p className="stat-value">{totalTrucks}</p>
                 </div>
                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <TruckIcon className="h-6 w-6" />
+                  <Truck className="h-6 w-6" />
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ const TruckingCompany = () => {
                 onClick={() => setIsAddModalOpen(true)}
                 className="btn-primary"
               >
-                <PlusCircleIcon className="h-5 w-5" />
+                <PlusCircle className="h-5 w-5" />
                 Add Truck
               </button>
             }

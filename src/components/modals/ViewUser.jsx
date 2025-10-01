@@ -1,10 +1,5 @@
-import {
-    XMarkIcon,
-    UserCircleIcon,
-    EnvelopeIcon,
-    PhoneIcon,
-    InformationCircleIcon
-} from "@heroicons/react/24/outline";
+import { X, UserCircle, Mail, Phone, Info } from "lucide-react";
+
 import { formatRole, formatName } from "../../utils/helpers/formatters";
 
 const ViewUser = ({ isOpen, onClose, user }) => {
@@ -36,7 +31,7 @@ const ViewUser = ({ isOpen, onClose, user }) => {
                             onClick={onClose}
                             className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                         >
-                            <XMarkIcon className="h-5 w-5" />
+                            <X className="h-5 w-5" />
                         </button>
 
                         <div className="flex flex-col items-center">
@@ -60,7 +55,7 @@ const ViewUser = ({ isOpen, onClose, user }) => {
                                         />
                                     ) : (
                                         <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
-                                            <UserCircleIcon className="h-8 w-8 text-slate-400" />
+                                            <UserCircle className="h-8 w-8 text-slate-400" />
                                         </div>
                                     )}
                                 </div>
@@ -95,7 +90,7 @@ const ViewUser = ({ isOpen, onClose, user }) => {
                             <div className="info-box-modern">
                                 <div className="flex items-start gap-3">
                                     <div className="p-1.5 bg-blue-100 rounded-lg">
-                                        <InformationCircleIcon className="h-4 w-4 text-blue-600" />
+                                        <Info className="h-4 w-4 text-blue-600" />
                                     </div>
                                     <div className="flex-1">
                                         <h4 className="text-sm font-semibold text-slate-800 mb-2">
@@ -130,7 +125,7 @@ const ViewUser = ({ isOpen, onClose, user }) => {
                                         Email Address
                                     </label>
                                     <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                                        <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                                        <Mail className="h-5 w-5 text-slate-400" />
                                         <span className="text-slate-800">
                                             {user.email || "Not provided"}
                                         </span>
@@ -143,7 +138,7 @@ const ViewUser = ({ isOpen, onClose, user }) => {
                                         Phone Number
                                     </label>
                                     <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                                        <PhoneIcon className="h-5 w-5 text-slate-400" />
+                                        <Phone className="h-5 w-5 text-slate-400" />
                                         <span className="text-slate-800">
                                             {user.phone || "Not provided"}
                                         </span>

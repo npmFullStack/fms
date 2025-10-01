@@ -1,9 +1,5 @@
-import {
-    PencilIcon,
-    PrinterIcon,
-    TrashIcon,
-    ArrowDownTrayIcon
-} from "@heroicons/react/24/outline";
+import { Edit2, Printer, Trash2, Download } from "lucide-react";
+
 import { useState, useEffect } from "react";
 
 const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
@@ -37,7 +33,7 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
                                 : "bg-emerald-600 text-white hover:bg-emerald-700"
                         }`}
                     >
-                        <PencilIcon className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" />
                         Edit
                     </button>
 
@@ -48,7 +44,7 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
                         onClick={() => onPrint(selected)}
                         className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
                     >
-                        <PrinterIcon className="w-4 h-4" />
+                        <Printer className="w-4 h-4" />
                         Print
                     </button>
 
@@ -59,7 +55,7 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
                         onClick={() => onDownload(selected)}
                         className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700"
                     >
-                        <ArrowDownTrayIcon className="w-4 h-4" />
+                        <Download className="w-4 h-4" />
                         Download
                     </button>
 
@@ -70,7 +66,7 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
                         onClick={() => onDelete(selected)}
                         className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700"
                     >
-                        <TrashIcon className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                         Delete
                     </button>
                 </div>

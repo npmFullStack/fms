@@ -2,14 +2,15 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { flexRender } from "@tanstack/react-table";
 import {
-    ArrowRightCircleIcon,
-    PencilIcon,
-    TrashIcon,
-    ChevronUpIcon,
-    ChevronDownIcon,
-    BuildingOfficeIcon,
-    TruckIcon
-} from "@heroicons/react/24/outline";
+  ArrowRightCircle,
+  Edit2,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  Ship,
+  Truck
+} from "lucide-react";
+
 import useTable from "../../utils/hooks/useTable";
 import { formatDate } from "../../utils/helpers/formatters";
 import usePagination from "../../utils/hooks/usePagination";
@@ -33,9 +34,9 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                         ) : (
                             <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center">
                                 {type === "shipping" ? (
-                                    <BuildingOfficeIcon className="h-7 w-7 text-slate-400" />
+                                    <Ship className="h-7 w-7 text-slate-400" />
                                 ) : (
-                                    <TruckIcon className="h-7 w-7 text-slate-400" />
+                                    <Truck className="h-7 w-7 text-slate-400" />
                                 )}
                             </div>
                         )}
@@ -70,7 +71,7 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                             className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
                             title="View Details"
                         >
-                            <ArrowRightCircleIcon className="w-5 h-5" />
+                            <ArrowRightCircle className="w-5 h-5" />
                         </button>
 
                         <button
@@ -78,7 +79,7 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                             className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
                             title="Edit Partner"
                         >
-                            <PencilIcon className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4" />
                         </button>
 
                         <button
@@ -94,7 +95,7 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                                     : "Reactivate Partner"
                             }
                         >
-                            <TrashIcon className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                         </button>
                     </div>
                 )
@@ -165,11 +166,11 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                                             )}
                                             {header.column.getIsSorted() ===
                                                 "asc" && (
-                                                <ChevronUpIcon className="w-4 h-4" />
+                                                <ChevronUp className="w-4 h-4" />
                                             )}
                                             {header.column.getIsSorted() ===
                                                 "desc" && (
-                                                <ChevronDownIcon className="w-4 h-4" />
+                                                <ChevronDown className="w-4 h-4" />
                                             )}
                                         </div>
                                     </th>
@@ -199,9 +200,9 @@ const PartnerTable = ({ data, onEdit, onDelete, rightAction, type }) => {
                                 <td colSpan={columns.length}>
                                     <div className="empty-state">
                                         {type === "shipping" ? (
-                                            <BuildingOfficeIcon className="empty-state-icon" />
+                                            <Ship className="empty-state-icon" />
                                         ) : (
-                                            <TruckIcon className="empty-state-icon" />
+                                            <Truck className="empty-state-icon" />
                                         )}
                                         <h3 className="empty-state-title">
                                             No{" "}

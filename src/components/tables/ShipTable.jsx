@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
-  EyeIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ChevronUpIcon,
-  ChevronDownIcon
-} from "@heroicons/react/24/outline";
+  Eye,
+  Edit2,
+  Trash2,
+  ChevronUp,
+  ChevronDown
+} from "lucide-react";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 
@@ -41,21 +41,21 @@ const ShipTable = ({ data, onDelete, onEdit, onView, rightAction }) => {
               className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
               title="View Ship"
             >
-              <EyeIcon className="w-5 h-5" />
+              <Eye className="w-5 h-5" />
             </button>
             <button
               onClick={() => onEdit(row.original)}
               className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
               title="Update Ship"
             >
-              <PencilSquareIcon className="w-4 h-4" />
+              <Edit2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDelete(row.original)}
               className="action-btn bg-red-50 text-red-600 hover:bg-red-100"
               title="Delete Ship"
             >
-              <TrashIcon className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         )
@@ -106,10 +106,10 @@ const ShipTable = ({ data, onDelete, onEdit, onView, rightAction }) => {
                     <div className="flex items-center gap-2">
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getIsSorted() === "asc" && (
-                        <ChevronUpIcon className="w-4 h-4" />
+                        <ChevronUp className="w-4 h-4" />
                       )}
                       {header.column.getIsSorted() === "desc" && (
-                        <ChevronDownIcon className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4" />
                       )}
                     </div>
                   </th>

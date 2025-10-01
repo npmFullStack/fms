@@ -21,14 +21,6 @@ const AddBooking = ({ isOpen, onClose }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const createBooking = useBookingStore(state => state.createBooking);
     const { partners, fetchPartners } = usePartnerStore();
-    const {
-        isLoading,
-        setIsLoading,
-        handleClose: modalClose
-    } = useModal(() => {
-        reset();
-        setCurrentStep(1);
-    });
 
     const {
         register,
@@ -76,10 +68,19 @@ const AddBooking = ({ isOpen, onClose }) => {
         }
     });
 
+    const {
+        isLoading,
+        setIsLoading,
+        handleClose: modalClose
+    } = useModal(() => {
+        reset();
+        setCurrentStep(1);
+    });
+
     const bookingMode = watch("booking_mode");
     const skipTrucking = watch("skipTrucking");
 
-    // fetch partners on open
+    // Fetch partners on open
     useEffect(() => {
         if (isOpen) fetchPartners();
     }, [isOpen, fetchPartners]);
@@ -92,13 +93,11 @@ const AddBooking = ({ isOpen, onClose }) => {
     const onSubmit = async data => {
         try {
             setIsLoading(true);
-
             const result = await createBooking(data);
 
             if (result.success) {
                 toast.success("Booking created successfully");
-                handleClose(); 
-                reset();
+                handleClose();
             } else {
                 toast.error(
                     result.error || "Failed to add booking. Please try again."
@@ -227,7 +226,7 @@ const AddBooking = ({ isOpen, onClose }) => {
             </button>
             <button
                 type={currentStep < 6 ? "button" : "submit"}
-                onClick={currentStep < 6 ? handleNext : handleSubmit(onSubmit)}
+                onClick={currentStep < 6 ? handleNext : undefined} // ✅ no double-submit
                 disabled={isLoading || isSubmitting}
                 className="btn-primary-modern"
             >

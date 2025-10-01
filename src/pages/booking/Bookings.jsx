@@ -2,12 +2,12 @@
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
 import {
-    PlusIcon,
-    CubeIcon,
-    TruckIcon,
-    CheckCircleIcon,
-    BuildingLibraryIcon
-} from "@heroicons/react/24/outline";
+  PlusCircle,
+  Ship,
+  Truck,
+  File
+} from "lucide-react";
+
 
 import Loading from "../../components/Loading";
 import AddBooking from "../../components/modals/AddBooking";
@@ -72,21 +72,21 @@ const Bookings = () => {
             title: "Total",
             value: totalBookings,
             color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
-            icon: CubeIcon
+            icon: File
         },
         {
             key: "DOOR_TO_DOOR",
             title: "Door to Door",
             value: countByBookingMode("DOOR_TO_DOOR"),
             color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
-            icon: TruckIcon
+            icon: Truck
         },
         {
             key: "PIER_TO_PIER",
             title: "Port to Port",
             value: countByBookingMode("PIER_TO_PIER"),
             color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
-            icon: TruckIcon
+            icon: Ship
         }
     ];
     // Handlers
@@ -176,7 +176,7 @@ const Bookings = () => {
                                 onClick={handleAddBooking}
                                 className="btn-primary flex items-center gap-2"
                             >
-                                <PlusIcon className="h-5 w-5" />
+                                <PlusCircle className="h-5 w-5" />
                                 New Booking
                             </button>
                         }

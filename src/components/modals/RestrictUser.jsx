@@ -1,7 +1,4 @@
-import {
-    XMarkIcon,
-    ExclamationTriangleIcon
-} from "@heroicons/react/24/outline";
+import { X, AlertTriangle } from "lucide-react";
 
 const RestrictUser = ({ isOpen, onClose, onConfirm, user }) => {
     if (!isOpen || !user) return null;
@@ -20,7 +17,7 @@ const RestrictUser = ({ isOpen, onClose, onConfirm, user }) => {
                             onClick={onClose}
                             className="absolute top-2 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
                         >
-                            <XMarkIcon className="h-5 w-5" />
+                            <X className="h-5 w-5" />
                         </button>
                         <div className="flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white">
@@ -33,7 +30,7 @@ const RestrictUser = ({ isOpen, onClose, onConfirm, user }) => {
 
                     {/* Body */}
                     <div className="p-6 text-center space-y-4">
-                        <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto" />
+                        <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
                         <p className="text-slate-700">
                             Are you sure you want to{" "}
                             <span className="font-semibold">

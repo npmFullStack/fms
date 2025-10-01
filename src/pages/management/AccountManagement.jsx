@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import useUserStore from "../../utils/store/useUserStore";
-import { UserCircleIcon, UserPlusIcon } from "@heroicons/react/24/outline";
+import { UserCircle, UserPlus } from "lucide-react";
 import Loading from "../../components/Loading";
 import AddUser from "../../components/modals/AddUser";
 import ViewUser from "../../components/modals/ViewUser";
@@ -151,24 +151,24 @@ const AccountManagement = () => {
               title="Total Users"
               value={users.length}
               color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-              icon={UserCircleIcon}
-              bgIcon={<UserCircleIcon className="h-24 w-24" />}
+              icon={UserCircle}
+              bgIcon={<UserCircle className="h-24 w-24" />}
             />
 
             <StatCard
               title="Active Users"
               value={users.filter((u) => u.is_active).length}
               color="bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-              icon={UserCircleIcon}
-              bgIcon={<UserCircleIcon className="h-24 w-24" />}
+              icon={UserCircle}
+              bgIcon={<UserCircle className="h-24 w-24" />}
             />
 
             <StatCard
               title="Restricted Users"
               value={users.filter((u) => !u.is_active).length}
               color="bg-gradient-to-br from-red-500 to-red-600 text-white"
-              icon={UserCircleIcon}
-              bgIcon={<UserCircleIcon className="h-24 w-24" />}
+              icon={UserCircle}
+              bgIcon={<UserCircle className="h-24 w-24" />}
             />
           </div>
 
@@ -183,7 +183,7 @@ const AccountManagement = () => {
                 onClick={() => setIsAddUserModalOpen(true)}
                 className="btn-primary"
               >
-                <UserPlusIcon className="h-5 w-5" />
+                <UserPlus className="h-5 w-5" />
                 Add New User
               </button>
             }

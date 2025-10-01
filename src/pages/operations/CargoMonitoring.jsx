@@ -2,13 +2,12 @@
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
 import {
-    CubeIcon,
-    TruckIcon,
-    ArrowRightIcon,
-    MapPinIcon,
-    BuildingLibraryIcon,
-    CheckCircleIcon
-} from "@heroicons/react/24/outline";
+    Ship,
+    Truck,
+    MapPin,
+    CheckCircle,
+    Loader2
+} from "lucide-react";
 import Loading from "../../components/Loading";
 import CargoMonitoringTable from "../../components/tables/CargoMonitoringTable";
 import BulkActionBar from "../../components/BulkActionBar";
@@ -50,56 +49,56 @@ const CargoMonitoring = () => {
             title: "Pickup",
             value: countByStatus("PICKUP_SCHEDULED"),
             color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
-            icon: TruckIcon
+            icon: Truck
         },
         {
             key: "LOADED_TO_TRUCK",
             title: "Loaded Truck",
             value: countByStatus("LOADED_TO_TRUCK"),
             color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
-            icon: TruckIcon
+            icon: Truck
         },
         {
             key: "ARRIVED_ORIGIN_PORT",
             title: "Origin Port",
             value: countByStatus("ARRIVED_ORIGIN_PORT"),
             color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
-            icon: BuildingLibraryIcon
+            icon: MapPin
         },
         {
             key: "LOADED_TO_SHIP",
             title: "Loaded Ship",
             value: countByStatus("LOADED_TO_SHIP"),
             color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
-            icon: CubeIcon
+            icon: Ship
         },
         {
             key: "IN_TRANSIT",
             title: "Transit",
             value: countByStatus("IN_TRANSIT"),
             color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
-            icon: BuildingLibraryIcon
+            icon: Loader2
         },
         {
             key: "ARRIVED_DESTINATION_PORT",
             title: "Dest. Port",
             value: countByStatus("ARRIVED_DESTINATION_PORT"),
             color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
-            icon: BuildingLibraryIcon
+            icon: MapPin
         },
         {
             key: "OUT_FOR_DELIVERY",
             title: "Delivery",
             value: countByStatus("OUT_FOR_DELIVERY"),
             color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
-            icon: TruckIcon
+            icon: Truck
         },
         {
             key: "DELIVERED",
             title: "Delivered",
             value: countByStatus("DELIVERED"),
             color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
-            icon: CheckCircleIcon
+            icon: CheckCircle
         }
     ];
 

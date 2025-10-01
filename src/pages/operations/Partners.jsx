@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import {
-    PlusCircleIcon,
-    BuildingOfficeIcon,
-    TruckIcon,
-    CubeIcon
-} from "@heroicons/react/24/outline";
+  PlusCircle,
+  Users,
+  Truck,
+  Ship
+} from "lucide-react";
+
 import Loading from "../../components/Loading";
 import AddPartner from "../../components/modals/AddPartner";
 import UpdatePartner from "../../components/modals/UpdatePartner";
@@ -114,7 +115,7 @@ const Partners = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         {/* Total Partners */}
                         <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600">
-                            <BuildingOfficeIcon className="stat-icon-bg h-24 w-24" />
+                            <Users className="stat-icon-bg h-24 w-24" />
                             <div className="stat-content">
                                 <div>
                                     <p className="stat-label">Total Partners</p>
@@ -128,14 +129,14 @@ const Partners = () => {
                                     </p>
                                 </div>
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <BuildingOfficeIcon className="h-6 w-6" />
+                                    <Users className="h-6 w-6" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Total Shipping Lines */}
                         <div className="stat-card bg-gradient-to-br from-blue-400 to-blue-500">
-                            <CubeIcon className="stat-icon-bg h-24 w-24" />
+                            <Ship className="stat-icon-bg h-24 w-24" />
                             <div className="stat-content">
                                 <div>
                                     <p className="stat-label">
@@ -150,14 +151,14 @@ const Partners = () => {
                                     </p>
                                 </div>
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <CubeIcon className="h-6 w-6" />
+                                    <Ship className="h-6 w-6" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Total Trucking Companies */}
                         <div className="stat-card bg-gradient-to-br from-orange-500 to-orange-600">
-                            <TruckIcon className="stat-icon-bg h-24 w-24" />
+                            <Truck className="stat-icon-bg h-24 w-24" />
                             <div className="stat-content">
                                 <div>
                                     <p className="stat-label">
@@ -172,7 +173,7 @@ const Partners = () => {
                                     </p>
                                 </div>
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <TruckIcon className="h-6 w-6" />
+                                    <Truck className="h-6 w-6" />
                                 </div>
                             </div>
                         </div>
@@ -188,7 +189,7 @@ const Partners = () => {
                                     : "text-slate-500 hover:text-slate-700"
                             }`}
                         >
-                            <BuildingOfficeIcon className="h-5 w-5" />
+                            <Users className="h-5 w-5" />
                             Shipping Lines
                         </button>
                         <button
@@ -199,7 +200,7 @@ const Partners = () => {
                                     : "text-slate-500 hover:text-slate-700"
                             }`}
                         >
-                            <TruckIcon className="h-5 w-5" />
+                            <Truck className="h-5 w-5" />
                             Trucking Companies
                         </button>
                     </div>
@@ -216,7 +217,7 @@ const Partners = () => {
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="btn-primary"
                             >
-                                <PlusCircleIcon className="h-5 w-5" />
+                                <PlusCircle className="h-5 w-5" />
                                 Add{" "}
                                 {activeTab === "shipping"
                                     ? "Shipping Line"

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
-    PencilSquareIcon,
-    TrashIcon,
-    ChevronUpIcon,
-    ChevronDownIcon
-} from "@heroicons/react/24/outline";
+  Edit2,
+  Trash2,
+  ChevronUp,
+  ChevronDown
+} from "lucide-react";
+
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 
@@ -69,14 +70,14 @@ const ContainerTable = ({ data, onDelete, onEdit, rightAction }) => {
                             className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
                             title="Update Container"
                         >
-                            <PencilSquareIcon className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => onDelete(row.original)}
                             className="action-btn bg-red-50 text-red-600 hover:bg-red-100"
                             title="Delete Container"
                         >
-                            <TrashIcon className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                         </button>
                     </div>
                 )
@@ -138,11 +139,11 @@ const ContainerTable = ({ data, onDelete, onEdit, rightAction }) => {
                                             )}
                                             {header.column.getIsSorted() ===
                                                 "asc" && (
-                                                <ChevronUpIcon className="w-4 h-4" />
+                                                <ChevronUp className="w-4 h-4" />
                                             )}
                                             {header.column.getIsSorted() ===
                                                 "desc" && (
-                                                <ChevronDownIcon className="w-4 h-4" />
+                                                <ChevronDown className="w-4 h-4" />
                                             )}
                                         </div>
                                     </th>

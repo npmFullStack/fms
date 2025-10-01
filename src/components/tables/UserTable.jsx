@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
-  UserCircleIcon,
-  EyeIcon,
-  PencilIcon,
-  LockClosedIcon,
-  LockOpenIcon,
-  ChevronUpIcon,
-  ChevronDownIcon
-} from "@heroicons/react/24/outline";
+  UserCircle,
+  Eye,
+  Edit2,
+  Lock,
+  Unlock,
+  ChevronUp,
+  ChevronDown
+} from "lucide-react";
 import Select from "react-select";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
@@ -36,7 +36,7 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
                 className="w-10 h-10 rounded-full object-cover border-2 border-slate-200"
               />
             ) : (
-              <UserCircleIcon className="w-10 h-10 text-slate-400" />
+              <UserCircle className="w-10 h-10 text-slate-400" />
             )}
             <span className="font-medium text-slate-700">
               {row.getValue("fullName")}
@@ -91,14 +91,14 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
               className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
               title="View User"
             >
-              <EyeIcon className="w-4 h-4" />
+              <Eye className="w-4 h-4" />
             </button>
             <button
               onClick={() => onEdit(row.original.id)}
               className="action-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
               title="Edit User"
             >
-              <PencilIcon className="w-4 h-4" />
+              <Edit2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => onRestrict(row.original)}
@@ -110,9 +110,9 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
               title={row.original.is_active ? "Restrict User" : "Unrestrict User"}
             >
               {row.original.is_active ? (
-                <LockClosedIcon className="w-4 h-4" />
+                <Lock className="w-4 h-4" />
               ) : (
-                <LockOpenIcon className="w-4 h-4" />
+                <Unlock className="w-4 h-4" />
               )}
             </button>
           </div>
@@ -175,10 +175,10 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
                     <div className="flex items-center gap-2">
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getIsSorted() === "asc" && (
-                        <ChevronUpIcon className="w-4 h-4" />
+                        <ChevronUp className="w-4 h-4" />
                       )}
                       {header.column.getIsSorted() === "desc" && (
-                        <ChevronDownIcon className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4" />
                       )}
                     </div>
                   </th>
@@ -201,7 +201,7 @@ const UserTable = ({ data, onView, onEdit, onRestrict, rightAction }) => {
               <tr>
                 <td colSpan={columns.length}>
                   <div className="empty-state">
-                    <UserCircleIcon className="empty-state-icon" />
+                    <UserCircle className="empty-state-icon" />
                     <h3 className="empty-state-title">No users found</h3>
                     <p className="empty-state-description">
                       Try adjusting your search or filters.

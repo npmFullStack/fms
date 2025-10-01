@@ -6,9 +6,9 @@ import useImageUpload from "../../utils/hooks/useImageUpload";
 import useModal from "../../utils/hooks/useModal";
 import FormModal from "./FormModal";
 import {
-    PhotoIcon,
-    TrashIcon
-} from "@heroicons/react/24/outline";
+    Image,
+    Trash2
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const AddPartner = ({ isOpen, onClose, type }) => {
@@ -118,7 +118,7 @@ const AddPartner = ({ isOpen, onClose, type }) => {
                             />
                         ) : (
                             <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                                <PhotoIcon className="h-5 w-5 text-slate-400" />
+                                <Image className="h-5 w-5 text-slate-400" />
                             </div>
                         )}
                     </div>
@@ -134,7 +134,7 @@ const AddPartner = ({ isOpen, onClose, type }) => {
                             htmlFor="logo"
                             className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
                         >
-                            <PhotoIcon className="h-3 w-3" />
+                            <Image className="h-3 w-3" />
                             Choose Logo
                         </label>
                         {previewImage && (
@@ -143,7 +143,7 @@ const AddPartner = ({ isOpen, onClose, type }) => {
                                 onClick={clearSelectedImage}
                                 className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded-lg hover:bg-red-200 transition-colors"
                             >
-                                <TrashIcon className="h-3 w-3" />
+                                <Trash2 className="h-3 w-3" />
                                 Remove
                             </button>
                         )}
