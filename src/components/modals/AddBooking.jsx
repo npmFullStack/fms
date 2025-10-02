@@ -80,7 +80,6 @@ const AddBooking = ({ isOpen, onClose }) => {
   const bookingMode = watch("booking_mode");
   const skipTrucking = watch("skipTrucking");
 
-  // Fetch partners on open
   useEffect(() => {
     if (isOpen) fetchPartners();
   }, [isOpen, fetchPartners]);
@@ -93,24 +92,27 @@ const AddBooking = ({ isOpen, onClose }) => {
   const onSubmit = async data => {
     try {
       setIsLoading(true);
-      
-      // Clean empty strings to null for UUID fields
+
+      const isPortToPort = data.booking_mode === "PIER_TO_PIER";
+
       const cleanedData = {
         ...data,
-        ship_id: data.ship_id === "" ? null : data.ship_id,
-        pickup_trucker_id: data.pickup_trucker_id === "" ? null : data.pickup_trucker_id,
-        pickup_truck_id: data.pickup_truck_id === "" ? null : data.pickup_truck_id,
-        delivery_trucker_id: data.delivery_trucker_id === "" ? null : data.delivery_trucker_id,
-        delivery_truck_id: data.delivery_truck_id === "" ? null : data.delivery_truck_id,
-        // Clean address fields
-        pickup_province: data.pickup_province || null,
-        pickup_city: data.pickup_city || null,
-        pickup_barangay: data.pickup_barangay || null,
-        pickup_street: data.pickup_street || null,
-        delivery_province: data.delivery_province || null,
-        delivery_city: data.delivery_city || null,
-        delivery_barangay: data.delivery_barangay || null,
-        delivery_street: data.delivery_street || null,
+        ship_id: data.ship_id || null,
+        pickup_trucker_id: data.pickup_trucker_id || null,
+        pickup_truck_id: data.pickup_truck_id || null,
+        delivery_trucker_id: data.delivery_trucker_id || null,
+        delivery_truck_id: data.delivery_truck_id || null,
+
+        // Port-to-Port clears addresses
+        pickup_province: isPortToPort ? null : data.pickup_province || null,
+        pickup_city: isPortToPort ? null : data.pickup_city || null,
+        pickup_barangay: isPortToPort ? null : data.pickup_barangay || null,
+        pickup_street: isPortToPort ? null : data.pickup_street || null,
+        delivery_province: isPortToPort ? null : data.delivery_province || null,
+        delivery_city: isPortToPort ? null : data.delivery_city || null,
+        delivery_barangay: isPortToPort ? null : data.delivery_barangay || null,
+        delivery_street: isPortToPort ? null : data.delivery_street || null,
+
         first_name: data.first_name || null,
         last_name: data.last_name || null,
         phone: data.phone || null,
@@ -118,11 +120,10 @@ const AddBooking = ({ isOpen, onClose }) => {
         consignee_phone: data.consignee_phone || null
       };
 
-      // Remove skipTrucking before sending to backend
       delete cleanedData.skipTrucking;
 
       const result = await createBooking(cleanedData);
-      
+
       if (result.success) {
         toast.success("Booking created successfully");
         handleClose();
@@ -137,7 +138,6 @@ const AddBooking = ({ isOpen, onClose }) => {
     }
   };
 
-  // Step validation rules
   const stepValidationFields = {
     1: ["shipper", "consignee"],
     2: [
@@ -147,73 +147,44 @@ const AddBooking = ({ isOpen, onClose }) => {
       "origin_port",
       "destination_port",
       "booking_mode"
-    ],
-    3: [],
-    4: [],
-    5: [],
-    6: []
+    ]
   };
 
   const isPortToPort = bookingMode === "PIER_TO_PIER";
 
   const handleNext = async () => {
     const fieldsToValidate = stepValidationFields[currentStep];
-    
     if (fieldsToValidate?.length > 0) {
       const isValid = await trigger(fieldsToValidate);
-      
       if (!isValid) {
         toast.error("Please fill in all required fields");
         return;
       }
     }
 
-    // Navigation logic for Port-to-Port mode (skip trucking steps 3, 4, 5)
     if (currentStep === 2 && isPortToPort) {
-      setCurrentStep(6); // Skip directly to review
-    } 
-    // Navigation logic for Door-to-Door with skipTrucking (skip step 3 only)
-    else if (currentStep === 2 && skipTrucking) {
-      setCurrentStep(4); // Go to pickup address (step 4)
-    }
-    // Skip trucking selection if already skipped
-    else if (currentStep === 3 && skipTrucking) {
-      setCurrentStep(4);
-    }
-    // Normal progression
-    else {
+      setCurrentStep(6); // jump straight to review
+    } else if (currentStep === 2 && skipTrucking) {
+      setCurrentStep(4); // skip trucking company, go to pickup address
+    } else {
       setCurrentStep(s => s + 1);
     }
   };
 
   const handlePrev = () => {
-    // From review step - go back based on mode
-    if (currentStep === 6 && isPortToPort) {
-      setCurrentStep(2); // Skip back to shipping details
-    }
-    // From review step with skip trucking
-    else if (currentStep === 6 && skipTrucking) {
-      setCurrentStep(5); // Go back to delivery address
-    }
-    // From pickup address when trucking is skipped
-    else if (currentStep === 4 && skipTrucking) {
-      setCurrentStep(2); // Go back to shipping details
-    }
-    // Normal back navigation
-    else {
-      setCurrentStep(s => s - 1);
+    if (currentStep === 6) {
+      if (isPortToPort) setCurrentStep(2);
+      else if (skipTrucking) setCurrentStep(5);
+      else setCurrentStep(5);
+    } else if (currentStep === 4 && skipTrucking) {
+      setCurrentStep(2);
+    } else {
+      setCurrentStep(s => Math.max(1, s - 1));
     }
   };
 
-  // Step components
   const stepComponents = {
-    1: (
-      <BookingStep1
-        register={register}
-        control={control}
-        errors={errors}
-      />
-    ),
+    1: <BookingStep1 register={register} control={control} errors={errors} />,
     2: (
       <BookingStep2
         register={register}
@@ -230,8 +201,6 @@ const AddBooking = ({ isOpen, onClose }) => {
         control={control}
         errors={errors}
         partners={partners}
-        setValue={setValue}
-        watch={watch}
       />
     ),
     4: (
@@ -264,7 +233,6 @@ const AddBooking = ({ isOpen, onClose }) => {
     6: "Review all booking details before submission"
   };
 
-  // Footer navigation
   const footerButtons = (
     <div className="flex justify-between w-full">
       <button
@@ -282,7 +250,7 @@ const AddBooking = ({ isOpen, onClose }) => {
         className="btn-primary-modern"
       >
         {currentStep === 6
-          ? isLoading || isSubmitting
+          ? isLoading
             ? "Creating..."
             : "Create Booking"
           : "Next"}
@@ -305,9 +273,9 @@ const AddBooking = ({ isOpen, onClose }) => {
           { text: `Step ${currentStep} of 6` },
           { text: tooltips[currentStep] },
           isPortToPort
-            ? { text: "Skipping trucking steps (Port-to-Port selected)" }
+            ? { text: "Port-to-Port mode: Skipping trucking/address steps" }
             : skipTrucking
-            ? { text: "Skipping trucking selection (Direct to addresses)" }
+            ? { text: "Skipping trucking company selection" }
             : null
         ].filter(Boolean)
       }}
