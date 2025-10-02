@@ -1,17 +1,11 @@
 // components/tables/CargoMonitoringTable.jsx
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { flexRender } from "@tanstack/react-table";
-import {
-  ChevronUp,
-  ChevronDown,
-  Ship,
-  Pencil,
-  Check,
-  X
-} from "lucide-react";
-
+import { ChevronUp, ChevronDown, Ship, Calendar, Check, X } from "lucide-react";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
+import { toast } from "react-hot-toast";
+
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 import {
@@ -19,39 +13,23 @@ import {
   getStatusBadge,
   getModeBadge
 } from "../../utils/helpers/tableDataFormatters";
-import api from "../../config/axios";
+import useBookingStore from "../../utils/store/useBookingStore";
 
-const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpdate }) => {
+const CargoMonitoringTable = ({
+  data,
+  rightAction,
+  onSelectionChange
+}) => {
   const [editingCell, setEditingCell] = useState(null);
   const [tempDate, setTempDate] = useState(null);
-  const [bookingHistory, setBookingHistory] = useState({});
+  
+  const { updateBookingStatusHistory } = useBookingStore();
 
-  // Fetch history for all bookings
-  useEffect(() => {
-    const fetchAllHistories = async () => {
-      for (const booking of data) {
-        if (!bookingHistory[booking.id]) {
-          try {
-            const res = await api.get(`/bookings/${booking.id}/history`);
-            setBookingHistory(prev => ({
-              ...prev,
-              [booking.id]: res.data.history || []
-            }));
-          } catch (error) {
-            console.error(`Failed to fetch history for ${booking.id}:`, error);
-          }
-        }
-      }
-    };
-
-    if (data.length > 0) {
-      fetchAllHistories();
+  const getHistoryDate = (booking, status) => {
+    if (!booking.status_history || !Array.isArray(booking.status_history)) {
+      return "--";
     }
-  }, [data]);
-
-  const getHistoryDate = (bookingId, status) => {
-    const history = bookingHistory[bookingId] || [];
-    const entry = history.find(h => h.status === status);
+    const entry = booking.status_history.find(h => h.status === status);
     return entry ? new Date(entry.status_date).toLocaleDateString() : "--";
   };
 
@@ -70,43 +48,27 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
       const statusMap = {
         origin_pickup: "LOADED_TO_TRUCK",
         origin_port_arrival: "ARRIVED_ORIGIN_PORT",
+        stuffing_date: "LOADED_TO_SHIP",
+        atd: "IN_TRANSIT",
+        ata: "ARRIVED_DESTINATION_PORT",
         dest_port_pickup: "OUT_FOR_DELIVERY",
         dest_delivery: "DELIVERED"
       };
 
       const status = statusMap[dateType];
-      const history = bookingHistory[bookingId] || [];
-      const existingEntry = history.find(h => h.status === status);
-
-      if (existingEntry) {
-        // Update existing history entry
-        await api.patch(`/bookings/history/${existingEntry.id}`, {
-          status_date: tempDate
-        });
+      
+      const result = await updateBookingStatusHistory(bookingId, status, tempDate);
+      
+      if (result.success) {
+        toast.success("Date updated successfully");
+        setEditingCell(null);
+        setTempDate(null);
       } else {
-        // Create new history entry
-        await api.post(`/bookings/${bookingId}/history`, {
-          status,
-          status_date: tempDate
-        });
-      }
-
-      // Refresh history
-      const res = await api.get(`/bookings/${bookingId}/history`);
-      setBookingHistory(prev => ({
-        ...prev,
-        [bookingId]: res.data.history || []
-      }));
-
-      setEditingCell(null);
-      setTempDate(null);
-
-      if (onDataUpdate) {
-        onDataUpdate();
+        toast.error(result.error || "Failed to update date");
       }
     } catch (error) {
       console.error("Failed to update date:", error);
-      alert("Failed to update date");
+      toast.error("Failed to update date");
     }
   };
 
@@ -115,8 +77,10 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
     setTempDate(null);
   };
 
-  const DateCell = ({ bookingId, dateType, currentDate }) => {
-    const isEditing = editingCell?.bookingId === bookingId && editingCell?.dateType === dateType;
+  const DateCell = ({ booking, dateType, currentDate }) => {
+    const isEditing =
+      editingCell?.bookingId === booking.id &&
+      editingCell?.dateType === dateType;
 
     if (isEditing) {
       return (
@@ -132,7 +96,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
             }}
           />
           <button
-            onClick={() => handleSaveDate(bookingId, dateType)}
+            onClick={() => handleSaveDate(booking.id, dateType)}
             className="p-1 text-green-600 hover:bg-green-50 rounded"
           >
             <Check className="h-4 w-4" />
@@ -150,14 +114,12 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
     return (
       <div className="flex items-center gap-2 group">
         <span>{currentDate}</span>
-        {currentDate !== "--" && (
-          <button
-            onClick={() => handleEditDate(bookingId, dateType)}
-            className="opacity-0 group-hover:opacity-100 p-1 text-blue-600 hover:bg-blue-50 rounded transition-opacity"
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-        )}
+        <button
+          onClick={() => handleEditDate(booking.id, dateType)}
+          className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:bg-slate-50 rounded transition-opacity"
+        >
+          <Calendar className="h-4 w-4" />
+        </button>
       </div>
     );
   };
@@ -170,7 +132,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
           <input
             type="checkbox"
             checked={table.getIsAllRowsSelected?.()}
-            onChange={e => table.toggleAllRowsSelected?.(e.target.checked)}
+            onChange={e =>
+              table.toggleAllRowsSelected?.(e.target.checked)
+            }
             className="table-checkbox"
           />
         ),
@@ -196,7 +160,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         accessorKey: "shipper",
         header: "SHIPPER",
         cell: ({ row }) => (
-          <span className="table-cell">{toCaps(row.original.shipper)}</span>
+          <span className="table-cell">
+            {toCaps(row.original.shipper)}
+          </span>
         )
       },
       {
@@ -207,17 +173,24 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
           if (!containers.length)
             return <span className="table-cell">---</span>;
 
-          const containerGroups = containers.reduce((acc, container) => {
-            if (!acc[container.size]) acc[container.size] = 0;
-            acc[container.size]++;
-            return acc;
-          }, {});
+          const containerGroups = containers.reduce(
+            (acc, container) => {
+              if (!acc[container.size]) acc[container.size] = 0;
+              acc[container.size]++;
+              return acc;
+            },
+            {}
+          );
 
           const volumeText = Object.entries(containerGroups)
             .map(([size, count]) => `${count}X${toCaps(size)}`)
             .join(", ");
 
-          return <span className="table-cell font-medium">{volumeText}</span>;
+          return (
+            <span className="table-cell font-medium">
+              {volumeText}
+            </span>
+          );
         }
       },
       {
@@ -232,7 +205,10 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
             <span className="table-cell">
               <div className="flex flex-col gap-1">
                 {containers.map((container, idx) => (
-                  <div key={idx} className="text-xs font-mono">
+                  <div
+                    key={idx}
+                    className="text-xs font-mono"
+                  >
                     {toCaps(container.van_number)}
                   </div>
                 ))}
@@ -242,51 +218,97 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         }
       },
       {
-        id: "shipping_dates",
-        header: "SHIPPING DATES",
-        cell: ({ row }) => (
-          <span className="table-cell text-xs">
-            <div className="flex flex-col gap-1">
-              <div>
-                <span className="font-medium text-gray-600">ATD: </span>
-                {row.original.actual_departure
-                  ? new Date(row.original.actual_departure).toLocaleDateString()
-                  : "--"}
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">ATA: </span>
-                {row.original.actual_arrival
-                  ? new Date(row.original.actual_arrival).toLocaleDateString()
-                  : "--"}
-              </div>
-            </div>
-          </span>
-        )
-      },
-      {
         id: "origin_trucker_dates",
         header: "ORIGIN TRUCKER DATES",
         cell: ({ row }) => {
-          const pickupDate = getHistoryDate(row.original.id, "LOADED_TO_TRUCK");
-          const portArrivalDate = getHistoryDate(row.original.id, "ARRIVED_ORIGIN_PORT");
+          const pickupDate = getHistoryDate(
+            row.original,
+            "LOADED_TO_TRUCK"
+          );
+          const portArrivalDate = getHistoryDate(
+            row.original,
+            "ARRIVED_ORIGIN_PORT"
+          );
 
           return (
             <span className="table-cell text-xs">
               <div className="flex flex-col gap-1">
                 <div>
-                  <span className="font-medium text-gray-600">PICKUP: </span>
+                  <span className="font-medium text-gray-600">
+                    PICKUP:{" "}
+                  </span>
                   <DateCell
-                    bookingId={row.original.id}
+                    booking={row.original}
                     dateType="origin_pickup"
                     currentDate={pickupDate}
                   />
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">PORT ARRIVAL: </span>
+                  <span className="font-medium text-gray-600">
+                    PORT ARRIVAL:{" "}
+                  </span>
                   <DateCell
-                    bookingId={row.original.id}
+                    booking={row.original}
                     dateType="origin_port_arrival"
                     currentDate={portArrivalDate}
+                  />
+                </div>
+              </div>
+            </span>
+          );
+        }
+      },
+      {
+        id: "stuffing_date",
+        header: "STUFFING DATE",
+        cell: ({ row }) => {
+          const stuffingDate = getHistoryDate(
+            row.original,
+            "LOADED_TO_SHIP"
+          );
+
+          return (
+            <span className="table-cell text-xs">
+              <DateCell
+                booking={row.original}
+                dateType="stuffing_date"
+                currentDate={stuffingDate}
+              />
+            </span>
+          );
+        }
+      },
+      {
+        id: "shipping_dates",
+        header: "SHIPPING DATES",
+        cell: ({ row }) => {
+          const atdDate = getHistoryDate(row.original, "IN_TRANSIT");
+          const ataDate = getHistoryDate(
+            row.original,
+            "ARRIVED_DESTINATION_PORT"
+          );
+
+          return (
+            <span className="table-cell text-xs">
+              <div className="flex flex-col gap-1">
+                <div>
+                  <span className="font-medium text-gray-600">
+                    ATD:{" "}
+                  </span>
+                  <DateCell
+                    booking={row.original}
+                    dateType="atd"
+                    currentDate={atdDate}
+                  />
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">
+                    ATA:{" "}
+                  </span>
+                  <DateCell
+                    booking={row.original}
+                    dateType="ata"
+                    currentDate={ataDate}
                   />
                 </div>
               </div>
@@ -298,24 +320,34 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         id: "destination_trucker_dates",
         header: "DEST. TRUCKER DATES",
         cell: ({ row }) => {
-          const portPickupDate = getHistoryDate(row.original.id, "OUT_FOR_DELIVERY");
-          const deliveryDate = getHistoryDate(row.original.id, "DELIVERED");
+          const portPickupDate = getHistoryDate(
+            row.original,
+            "OUT_FOR_DELIVERY"
+          );
+          const deliveryDate = getHistoryDate(
+            row.original,
+            "DELIVERED"
+          );
 
           return (
             <span className="table-cell text-xs">
               <div className="flex flex-col gap-1">
                 <div>
-                  <span className="font-medium text-gray-600">PORT PICKUP: </span>
+                  <span className="font-medium text-gray-600">
+                    PORT PICKUP:{" "}
+                  </span>
                   <DateCell
-                    bookingId={row.original.id}
+                    booking={row.original}
                     dateType="dest_port_pickup"
                     currentDate={portPickupDate}
                   />
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">DELIVERY: </span>
+                  <span className="font-medium text-gray-600">
+                    DELIVERY:{" "}
+                  </span>
                   <DateCell
-                    bookingId={row.original.id}
+                    booking={row.original}
                     dateType="dest_delivery"
                     currentDate={deliveryDate}
                   />
@@ -327,14 +359,18 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
       },
       {
         id: "empty_return",
-        header: "EMPTY RETURN",
+        header: "EMPTY CONTAINER RETURN",
         cell: ({ row }) => {
           const containers = row.original.containers || [];
-          const returnedContainer = containers.find(c => c.is_returned);
-          const returnDate = returnedContainer && row.original.actual_delivery
-            ? new Date(row.original.actual_delivery).toLocaleDateString()
-            : "--";
-
+          const returnedContainer = containers.find(
+            c => c.is_returned
+          );
+          const returnDate =
+            returnedContainer && row.original.actual_delivery
+              ? new Date(
+                  row.original.actual_delivery
+                ).toLocaleDateString()
+              : "--";
           return <span className="table-cell">{returnDate}</span>;
         }
       },
@@ -344,11 +380,15 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         cell: ({ row }) => (
           <span className="table-cell text-xs">
             <div>
-              <span className="text-yellow-600 font-medium mr-1">ORIGIN:</span>
+              <span className="text-yellow-600 font-medium mr-1">
+                ORIGIN:
+              </span>
               {toCaps(row.original.origin_port)}
             </div>
             <div>
-              <span className="text-blue-600 font-medium mr-1">DEST:</span>
+              <span className="text-blue-600 font-medium mr-1">
+                DEST:
+              </span>
               {toCaps(row.original.destination_port)}
             </div>
           </span>
@@ -358,20 +398,28 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         accessorKey: "booking_mode",
         header: "MODE OF SERVICE",
         cell: ({ row }) => {
-          const { label, bg, text } = getModeBadge(row.original.booking_mode);
-          return <span className={`badge ${bg} ${text}`}>{label}</span>;
+          const { label, bg, text } = getModeBadge(
+            row.original.booking_mode
+          );
+          return (
+            <span className={`badge ${bg} ${text}`}>{label}</span>
+          );
         }
       },
       {
         accessorKey: "status",
         header: "STATUS",
         cell: ({ row }) => {
-          const { label, bg, text } = getStatusBadge(row.original.status);
-          return <span className={`badge ${bg} ${text}`}>{label}</span>;
+          const { label, bg, text } = getStatusBadge(
+            row.original.status
+          );
+          return (
+            <span className={`badge ${bg} ${text}`}>{label}</span>
+          );
         }
       }
     ],
-    [bookingHistory, editingCell, tempDate]
+    [editingCell, tempDate]
   );
 
   const { table, globalFilter, setGlobalFilter } = useTable({
@@ -380,9 +428,10 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
   });
 
   const { paginationInfo, actions } = usePagination(table, data?.length);
+
   const selectedRows = table.getSelectedRowModel().rows;
 
-  useEffect(() => {
+  useMemo(() => {
     if (onSelectionChange) {
       const selectedIds = selectedRows.map(r => r.original.id);
       onSelectionChange(selectedIds);
@@ -395,7 +444,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
         <div className="flex items-center justify-between">
           <div>
             <h2 className="table-title">Cargo Monitoring</h2>
-            <p className="table-count">Total: {paginationInfo.totalItems} records</p>
+            <p className="table-count">
+              Total: {paginationInfo.totalItems} records
+            </p>
           </div>
           {rightAction}
         </div>
@@ -427,10 +478,12 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      {header.column.getIsSorted() === "asc" && (
+                      {header.column.getIsSorted() ===
+                        "asc" && (
                         <ChevronUp className="table-sort-icon" />
                       )}
-                      {header.column.getIsSorted() === "desc" && (
+                      {header.column.getIsSorted() ===
+                        "desc" && (
                         <ChevronDown className="table-sort-icon" />
                       )}
                     </div>
@@ -444,7 +497,10 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
               table.getRowModel().rows.map(row => (
                 <tr key={row.id} className="table-row">
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="table-cell">
+                    <td
+                      key={cell.id}
+                      className="table-cell"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -458,7 +514,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
                 <td colSpan={columns.length}>
                   <div className="empty-state">
                     <Ship className="empty-state-icon" />
-                    <h3 className="empty-state-title">No cargo records found</h3>
+                    <h3 className="empty-state-title">
+                      No cargo records found
+                    </h3>
                     <p className="empty-state-description">
                       Try adjusting your search.
                     </p>
@@ -473,8 +531,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onDataUpda
       <div className="table-pagination-container">
         <div className="table-pagination-inner">
           <span className="table-pagination-info">
-            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} (
-            {paginationInfo.totalItems} total)
+            Page {paginationInfo.currentPage} of{" "}
+            {paginationInfo.totalPages} ({paginationInfo.totalItems}{" "}
+            total)
           </span>
           <div className="table-pagination-actions">
             <button

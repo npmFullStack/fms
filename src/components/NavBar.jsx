@@ -1,19 +1,29 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Menu, UserCircle } from "lucide-react";
+import { Bell, SidebarClose, UserCircle, Sidebar } from "lucide-react";
 import useAuthStore from "../utils/store/useAuthStore";
 
 const NavBar = ({ onToggleSidebar }) => {
     const { user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
+
+    const handleToggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+        onToggleSidebar();
+    };
 
     return (
         <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow-md">
             {/* Left side: Sidebar toggle */}
             <div className="flex items-center gap-3">
-                <button onClick={onToggleSidebar}>
-                    <Menu className="w-6 h-6" />
+                <button onClick={handleToggleSidebar}>
+                    {isSidebarOpen ? (
+                        <Sidebar className="w-6 h-6" />
+                    ) : (
+                        <SidebarClose className="w-6 h-6" />
+                    )}
                 </button>
                 <span className="text-lg font-semibold hidden sm:block">
                     X-TRA MILE FREIGHT FORWARDING INC.
