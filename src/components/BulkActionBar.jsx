@@ -1,5 +1,4 @@
 import { Edit2, Printer, Trash2, Download } from "lucide-react";
-
 import { useState, useEffect } from "react";
 
 const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
@@ -14,6 +13,8 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
         }
     }, [selected]);
 
+    const buttonWidth = "w-32"; 
+
     return (
         <div
             className={`
@@ -23,48 +24,54 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
         >
             {visible && (
                 <div className="flex items-center gap-4 bg-white shadow-xl rounded-3xl px-6 py-3 border border-slate-200">
+                    {/* Selected count */}
+                    <div className="text-sm font-medium">
+                        {selected.length} item{selected.length > 1 ? "s" : ""}{" "}
+                        selected
+                    </div>
+
+                    <div className="h-6 w-px bg-slate-200"></div>
+
                     {/* Edit */}
                     <button
                         onClick={() => !multiple && onEdit(selected[0])}
                         disabled={multiple}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-colors ${
-                            multiple
-                                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                                : "bg-emerald-600 text-white hover:bg-emerald-700"
-                        }`}
+                        className={`flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-colors ${buttonWidth}
+              ${
+                  multiple
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-300"
+                      : "bg-emerald-100 text-emerald-500 border border-emerald-500 hover:bg-emerald-200"
+              }`}
                     >
                         <Edit2 className="w-4 h-4" />
                         Edit
                     </button>
 
-                    <div className="h-6 w-px bg-slate-200"></div>
-
                     {/* Print */}
                     <button
                         onClick={() => onPrint(selected)}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
+                        className={`flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${buttonWidth}
+              bg-blue-100 text-blue-500 border border-blue-500 hover:bg-blue-200`}
                     >
                         <Printer className="w-4 h-4" />
                         Print
                     </button>
 
-                    <div className="h-6 w-px bg-slate-200"></div>
-
                     {/* Download */}
                     <button
                         onClick={() => onDownload(selected)}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700"
+                        className={`flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${buttonWidth}
+              bg-indigo-100 text-indigo-500 border border-indigo-500 hover:bg-indigo-200`}
                     >
                         <Download className="w-4 h-4" />
                         Download
                     </button>
 
-                    <div className="h-6 w-px bg-slate-200"></div>
-
                     {/* Delete */}
                     <button
                         onClick={() => onDelete(selected)}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                        className={`flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium ${buttonWidth}
+              bg-red-100 text-red-500 border border-red-500 hover:bg-red-200`}
                     >
                         <Trash2 className="w-4 h-4" />
                         Delete

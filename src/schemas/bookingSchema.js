@@ -56,7 +56,8 @@ export const step3Schema = z.object({
   pickup_trucker_id: z.string().uuid().optional().nullable(),
   pickup_truck_id: z.string().uuid().optional().nullable(),
   delivery_trucker_id: z.string().uuid().optional().nullable(),
-  delivery_truck_id: z.string().uuid().optional().nullable()
+  delivery_truck_id: z.string().uuid().optional().nullable(),
+  skipTrucking: z.boolean().optional().default(false)
 });
 
 
