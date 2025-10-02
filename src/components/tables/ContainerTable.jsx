@@ -1,20 +1,15 @@
 import { useMemo } from "react";
 import { flexRender } from "@tanstack/react-table";
-import {
-  Edit2,
-  Trash2,
-  ChevronUp,
-  ChevronDown
-} from "lucide-react";
+import { Edit2, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 
 const sizeColors = {
-    LCL: "bg-sky-200 text-sky-800 border-sky-300",
-    "20FT": "bg-amber-200 text-amber-800 border-amber-300",
-    "40FT": "bg-orange-200 text-orange-800 border-orange-300",
-    DEFAULT: "bg-slate-100 text-slate-800 border-slate-200"
+    LCL: "text-sky-500",
+    "20FT": "text-blue-500",
+    "40FT": "text-indigo-500",
+    DEFAULT: "text-slate-500"
 };
 
 const ContainerTable = ({ data, onDelete, onEdit, rightAction }) => {
@@ -33,18 +28,16 @@ const ContainerTable = ({ data, onDelete, onEdit, rightAction }) => {
                 accessorKey: "size",
                 header: "SIZE",
                 cell: ({ row }) => {
-                    const color =
+                    const colorClass =
                         sizeColors[row.original.size] || sizeColors.DEFAULT;
                     return (
-                        <span
-                            className={`px-2 py-1 rounded-xl text-xs
-                            font-semibold border w-fit ${color}`}
-                        >
+                        <span className={`text-sm font-semibold ${colorClass}`}>
                             {row.original.size}
                         </span>
                     );
                 }
             },
+
             {
                 accessorKey: "is_returned",
                 header: "STATUS",

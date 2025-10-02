@@ -12,7 +12,7 @@ import useImageUpload from "../../utils/hooks/useImageUpload";
 import useModal from "../../utils/hooks/useModal";
 import { toast } from "react-hot-toast";
 
-// ✅ Helper to sanitize strings for email generation
+// Helper to sanitize email
 const sanitize = str =>
     str
         .trim()
@@ -56,22 +56,19 @@ const AddUser = ({ isOpen, onClose }) => {
         }
     });
 
-    const onSubmit = async data => {
+    const onFormSubmit = async data => {
         try {
             setIsLoading(true);
 
             const formData = new FormData();
             formData.append("firstName", data.firstName);
             formData.append("lastName", data.lastName);
-
-            // ✅ Generate sanitized email
             formData.append(
                 "email",
                 `${sanitize(data.firstName)}.${sanitize(
                     data.lastName
                 )}@example.com`
             );
-
             formData.append("role", data.role);
             formData.append("password", "password");
 
@@ -82,19 +79,22 @@ const AddUser = ({ isOpen, onClose }) => {
 
             if (result.success) {
                 toast.success("User added successfully!");
+
+                // Keep loading for 1.5s, then close modal and reset form
                 setTimeout(() => {
                     handleClose();
+                    setIsLoading(false);
                 }, 1500);
             } else {
                 toast.error(
                     result.error || "Failed to add user. Please try again."
                 );
+                setIsLoading(false);
             }
         } catch (error) {
             toast.error(
                 error.message || "Failed to add user. Please try again."
             );
-        } finally {
             setIsLoading(false);
         }
     };
@@ -111,7 +111,6 @@ const AddUser = ({ isOpen, onClose }) => {
     };
 
     const fields = [
-        // Profile Picture Upload
         {
             name: "profile_picture",
             label: "Profile Picture",
@@ -158,11 +157,12 @@ const AddUser = ({ isOpen, onClose }) => {
                                 Remove
                             </button>
                         )}
+                                          {" "}
                     </div>
+                                  {" "}
                 </div>
             )
-        },
-        // First Name
+        }, // First Name
         {
             name: "firstName",
             label: "First Name",
@@ -170,8 +170,7 @@ const AddUser = ({ isOpen, onClose }) => {
             register: register("firstName"),
             error: errors.firstName?.message,
             placeholder: "Enter first name"
-        },
-        // Last Name
+        }, // Last Name
         {
             name: "lastName",
             label: "Last Name",
@@ -179,8 +178,7 @@ const AddUser = ({ isOpen, onClose }) => {
             register: register("lastName"),
             error: errors.lastName?.message,
             placeholder: "Enter last name"
-        },
-        // Phone Number
+        }, // Phone Number
         {
             name: "phone",
             label: "Phone Number",
@@ -205,8 +203,7 @@ const AddUser = ({ isOpen, onClose }) => {
                     )}
                 />
             )
-        },
-        // Role
+        }, // Role
         {
             name: "role",
             label: "Role",
@@ -269,10 +266,10 @@ const AddUser = ({ isOpen, onClose }) => {
             title="Add New User"
             isLoading={isLoading}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onFormSubmit)}
             fields={fields}
             infoBox={infoBox}
-            buttonText="Add"
+            buttonText="Add User"
         />
     );
 };
