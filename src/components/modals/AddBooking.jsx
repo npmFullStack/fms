@@ -91,9 +91,6 @@ const AddBooking = ({ isOpen, onClose }) => {
   };
 
   const onSubmit = async data => {
-    console.log("🚀 Form submitted with data:", data);
-    console.log("📝 Form errors:", errors);
-    
     try {
       setIsLoading(true);
       
@@ -124,11 +121,7 @@ const AddBooking = ({ isOpen, onClose }) => {
       // Remove skipTrucking before sending to backend
       delete cleanedData.skipTrucking;
 
-      console.log("✅ Cleaned data being sent:", cleanedData);
-
       const result = await createBooking(cleanedData);
-      
-      console.log("📦 Result from createBooking:", result);
       
       if (result.success) {
         toast.success("Booking created successfully");
@@ -137,7 +130,7 @@ const AddBooking = ({ isOpen, onClose }) => {
         toast.error(result.error || "Failed to add booking. Please try again.");
       }
     } catch (err) {
-      console.error("❌ Submit error:", err);
+      console.error("Submit error:", err);
       toast.error(err.message || "Something went wrong");
     } finally {
       setIsLoading(false);
@@ -166,12 +159,8 @@ const AddBooking = ({ isOpen, onClose }) => {
   const handleNext = async () => {
     const fieldsToValidate = stepValidationFields[currentStep];
     
-    console.log(`📍 Step ${currentStep} - Validating fields:`, fieldsToValidate);
-    
     if (fieldsToValidate?.length > 0) {
       const isValid = await trigger(fieldsToValidate);
-      console.log(`✓ Validation result for step ${currentStep}:`, isValid);
-      console.log("Current errors:", errors);
       
       if (!isValid) {
         toast.error("Please fill in all required fields");
@@ -179,22 +168,39 @@ const AddBooking = ({ isOpen, onClose }) => {
       }
     }
 
-    // Navigation logic
+    // Navigation logic for Port-to-Port mode (skip trucking steps 3, 4, 5)
     if (currentStep === 2 && isPortToPort) {
-      setCurrentStep(6);
-    } else if (currentStep === 2 && skipTrucking) {
-      setCurrentStep(6);
-    } else if (currentStep === 5) {
-      setCurrentStep(6);
-    } else {
+      setCurrentStep(6); // Skip directly to review
+    } 
+    // Navigation logic for Door-to-Door with skipTrucking (skip step 3 only)
+    else if (currentStep === 2 && skipTrucking) {
+      setCurrentStep(4); // Go to pickup address (step 4)
+    }
+    // Skip trucking selection if already skipped
+    else if (currentStep === 3 && skipTrucking) {
+      setCurrentStep(4);
+    }
+    // Normal progression
+    else {
       setCurrentStep(s => s + 1);
     }
   };
 
   const handlePrev = () => {
-    if (currentStep === 6 && (isPortToPort || skipTrucking)) {
-      setCurrentStep(2);
-    } else {
+    // From review step - go back based on mode
+    if (currentStep === 6 && isPortToPort) {
+      setCurrentStep(2); // Skip back to shipping details
+    }
+    // From review step with skip trucking
+    else if (currentStep === 6 && skipTrucking) {
+      setCurrentStep(5); // Go back to delivery address
+    }
+    // From pickup address when trucking is skipped
+    else if (currentStep === 4 && skipTrucking) {
+      setCurrentStep(2); // Go back to shipping details
+    }
+    // Normal back navigation
+    else {
       setCurrentStep(s => s - 1);
     }
   };
@@ -252,7 +258,7 @@ const AddBooking = ({ isOpen, onClose }) => {
   const tooltips = {
     1: "Enter shipper and consignee details",
     2: "Select shipping line, containers, ports, and service mode",
-    3: "Choose trucking company and truck (if applicable)",
+    3: "Choose trucking company and truck",
     4: "Set pickup location address",
     5: "Set delivery location address",
     6: "Review all booking details before submission"
@@ -300,6 +306,8 @@ const AddBooking = ({ isOpen, onClose }) => {
           { text: tooltips[currentStep] },
           isPortToPort
             ? { text: "Skipping trucking steps (Port-to-Port selected)" }
+            : skipTrucking
+            ? { text: "Skipping trucking selection (Direct to addresses)" }
             : null
         ].filter(Boolean)
       }}
