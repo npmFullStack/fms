@@ -9,6 +9,8 @@ import { Toaster } from "react-hot-toast";
 const Home = lazy(() => import("./pages/public/Home"));
 const Login = lazy(() => import("./pages/public/Login"));
 const Register = lazy(() => import("./pages/public/Register"));
+const ForgotPassword = lazy(() => import("./pages/public/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/public/ResetPassword"));
 
 // Shared Protected
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
@@ -64,7 +66,15 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route
+                            path="/forgot-password"
+                            element={<ForgotPassword />}
+                        />
+                        <Route path="/reset-password" element={<ResetPassword />} /> {/* Move here */}
+
                     </Route>
+
+
 
                     {/* Protected routes */}
                     <Route element={<ProtectedLayout />}>
@@ -132,39 +142,42 @@ function App() {
                     </Route>
                 </Routes>
             </Suspense>
-{/* TOAST */}
-<Toaster
-    position="top-center"
-    containerStyle={{
-        position: "fixed",
-        top: "1rem",
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 9999,
-    }}
-    toastOptions={{
-        duration: 1500,
-        className: `
+            {/* TOAST */}
+            <Toaster
+                position="top-center"
+                containerStyle={{
+                    position: "fixed",
+                    top: "1rem",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    zIndex: 9999
+                }}
+                toastOptions={{
+                    duration: 1500,
+                    className: `
             font-[Poppins] rounded-lg border
             shadow-lg border-l-4 px-4 py-3
         `,
-        style: {
-            minWidth: "280px",
-            maxWidth: "min(90vw, 350px)",
-            margin: "0.5rem auto",
-        },
-        success: {
-            className: "!bg-green-100 !text-green-800 !border-green-200 !border-l-green-500",
-        },
-        error: {
-            className: "!bg-red-100 !text-red-800 !border-red-200 !border-l-red-500",
-        },
-        loading: {
-            className: "!bg-blue-100 !text-blue-800 !border-blue-200 !border-l-blue-500",
-        },
-    }}
-    gutter={8}
-/>
+                    style: {
+                        minWidth: "280px",
+                        maxWidth: "min(90vw, 350px)",
+                        margin: "0.5rem auto"
+                    },
+                    success: {
+                        className:
+                            "!bg-green-100 !text-green-800 !border-green-200 !border-l-green-500"
+                    },
+                    error: {
+                        className:
+                            "!bg-red-100 !text-red-800 !border-red-200 !border-l-red-500"
+                    },
+                    loading: {
+                        className:
+                            "!bg-blue-100 !text-blue-800 !border-blue-200 !border-l-blue-500"
+                    }
+                }}
+                gutter={8}
+            />
         </Router>
     );
 }
