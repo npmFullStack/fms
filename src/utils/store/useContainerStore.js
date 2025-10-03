@@ -1,10 +1,10 @@
-// utils/store/useContainerStore
+// utils/store/useContainerStore.js
 import { create } from "zustand";
 import api from "../../config/axios";
 
 const useContainerStore = create((set, get) => ({
   containers: [],
-  allContainers: [], // New state for all containers (including in-use)
+  allContainers: [],
   loading: false,
   error: null,
   currentContainer: null,
@@ -54,18 +54,39 @@ const useContainerStore = create((set, get) => ({
     }
   },
 
-  // Update container
+  // Update container with return date tracking
   updateContainer: async (id, updatedData) => {
     set({ loading: true, error: null });
     try {
       const res = await api.put(`/containers/${id}`, updatedData);
-      // Refresh both container lists
-      await get().fetchContainersByLine(updatedData.shippingLineId);
-      await get().fetchAllContainersByLine(updatedData.shippingLineId);
+      // Refresh both container lists if shippingLineId is provided
+      if (updatedData.shippingLineId) {
+        await get().fetchContainersByLine(updatedData.shippingLineId);
+        await get().fetchAllContainersByLine(updatedData.shippingLineId);
+      }
       set({ loading: false });
       return { success: true, data: res.data };
     } catch (err) {
       const error = err.response?.data?.message || "Failed to update container";
+      set({ error, loading: false });
+      return { success: false, error };
+    }
+  },
+
+  // Mark container as returned with date
+  markContainerAsReturned: async (id, shippingLineId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.put(`/containers/${id}`, {
+        isReturned: true
+      });
+      // Refresh both container lists
+      await get().fetchContainersByLine(shippingLineId);
+      await get().fetchAllContainersByLine(shippingLineId);
+      set({ loading: false });
+      return { success: true, data: res.data };
+    } catch (err) {
+      const error = err.response?.data?.message || "Failed to mark container as returned";
       set({ error, loading: false });
       return { success: false, error };
     }
@@ -97,7 +118,7 @@ const useContainerStore = create((set, get) => ({
     currentContainer: null, 
     error: null, 
     loading: false 
-  }),
+  })
 }));
 
 export default useContainerStore;
