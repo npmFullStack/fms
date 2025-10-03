@@ -4,10 +4,11 @@ import { Ship, Truck, MapPin, CheckCircle, Loader2 } from "lucide-react";
 import Loading from "../../components/Loading";
 import CargoMonitoringTable from "../../components/tables/CargoMonitoringTable";
 import BulkActionBar from "../../components/BulkActionBar";
-import { printBookings } from "../../utils/helpers/printHelper";
+import { printCargoMonitoring } from "../../utils/helpers/printHelper";
 import StatCard from "../../components/cards/StatCard";
 import useBookingStore from "../../utils/store/useBookingStore";
 import useContainerStore from "../../utils/store/useContainerStore";
+
 
 const CargoMonitoring = () => {
     const {
@@ -186,13 +187,13 @@ const CargoMonitoring = () => {
                             const records = formattedBookings.filter(b =>
                                 ids.includes(b.id)
                             );
-                            printBookings(records, "print");
+                            printCargoMonitoring(records, "print");
                         }}
                         onDownload={ids => {
                             const records = formattedBookings.filter(b =>
                                 ids.includes(b.id)
                             );
-                            printBookings(records, "download");
+                            printCargoMonitoring(records, "download");
                         }}
                         onDelete={handleBulkDelete}
                     />

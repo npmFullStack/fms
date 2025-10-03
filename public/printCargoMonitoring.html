@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargo Monitoring 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+        
+        .table-container {
+            width: 100%;
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        .table-title {
+            background-color: #eee;
+            color: darkblue;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            padding: 8px;
+            text-transform: uppercase;
+            border: 1px solid black;
+        }
+        
+        th {
+            background-color: #7e4200;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 7px;
+            padding: 3px 2px;
+            text-align: left;
+            border-right: 1px solid #ff9d0c;
+            height: 10px;
+            text-align: center;
+            border-bottom: 7px solid #00c400;
+        }
+        
+        th:last-child {
+            border-right: none;
+        }
+        
+        td {
+            padding: 3px 2px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 6px;
+            text-transform: uppercase;
+            height: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        .green-row {
+            background-color: #4caf50;
+            height: 1px;
+        }
+        
+        .green-row td {
+            padding: 0 !important;
+            border: none;
+        }
+        
+        /* Column width adjustments */
+        th:nth-child(1), td:nth-child(1) { width: 7%; }
+        th:nth-child(2), td:nth-child(2) { width: 9%; }
+        th:nth-child(3), td:nth-child(3) { width: 6%; }
+        th:nth-child(4), td:nth-child(4) { width: 6%; }
+        th:nth-child(5), td:nth-child(5) { width: 9%; }
+        th:nth-child(6), td:nth-child(6) { width: 7%; }
+        th:nth-child(7), td:nth-child(7) { width: 7%; }
+        th:nth-child(8), td:nth-child(8) { width: 6%; }
+        th:nth-child(9), td:nth-child(9) { width: 7%; }
+        th:nth-child(10), td:nth-child(10) { width: 7%; }
+        th:nth-child(11), td:nth-child(11) { width: 7%; }
+        th:nth-child(12), td:nth-child(12) { width: 5%; }
+        th:nth-child(13), td:nth-child(13) { width: 5%; }
+        th:nth-child(14), td:nth-child(14) { width: 7%; }
+        th:nth-child(15), td:nth-child(15) { width: 6%; }
+        th:nth-child(16), td:nth-child(16) { width: 6%; }
+        th:nth-child(17), td:nth-child(17) { width: 6%; }
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="17" class="table-title">Cargo Monitoring 2025</td>
+                </tr>
+                <tr>
+                    <th>HWB No.</th>
+                    <th>Shipper</th>
+                    <th>Stuffing Date</th>
+                    <th>Container Size</th>
+                    <th>Commodity</th>
+                    <th>Shipping Line</th>
+                    <th>Booking Number</th>
+                    <th>Van Number</th>
+                    <th>Pick Up Point</th>
+                    <th>Destination</th>
+                    <th>Mode of Service</th>
+                    <th>ATD</th>
+                    <th>ATA</th>
+                    <th>Trucker Dest.</th>
+                    <th>Delivery Date</th>
+                    <th>Status</th>
+                    <th>Empty Container Return Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ HWB NO. }}</td>
+                    <td>{{ SHIPPER }}</td>
+                    <td>{{ STUFFING DATE }}</td>
+                    <td>{{ CONTAINER SIZE }}</td>
+                    <td>{{ COMMODITY }}</td>
+                    <td>{{ SHIPPING LINE }}</td>
+                    <td>{{ BOOKING NUMBER }}</td>
+                    <td>{{ VAN NUMBER }}</td>
+                    <td>{{ PICK UP POINT }}</td>
+                    <td>{{ DESTINATION }}</td>
+                    <td>{{ MODE OF SERVICE }}</td>
+                    <td>{{ ATD }}</td>
+                    <td>{{ ATA }}</td>
+                    <td>{{ TRUCKER DEST. }}</td>
+                    <td>{{ DELIVERY DATE }}</td>
+                    <td>{{ STATUS }}</td>
+                    <td>{{ EMPTY CONTAINER RETURN DATE }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
