@@ -51,9 +51,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         try {
             if (dateType === "empty_return") {
                 const result = await updateContainer(containerId, {
-                    isReturned: true
+                    isReturned: true,
+                    returnedDate: tempDate.toISOString()
                 });
-
                 if (result.success) {
                     toast.success("Container return date updated");
                 } else {
@@ -353,13 +353,19 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     return (
                         <div className="flex flex-col text-xs gap-2">
                             {containers.map((c, idx) => {
-                                // If container is returned, show updated_at as the return date
-                                const returnDate =
-                                    c.is_returned && c.updated_at
+                                // Use current date if just updated, otherwise use updated_at
+                                const returnDate = c.is_returned
+                                    ? tempDate &&
+                                      editingCell?.containerId === c.id
+                                        ? new Date(
+                                              tempDate
+                                          ).toLocaleDateString()
+                                        : c.updated_at
                                         ? new Date(
                                               c.updated_at
                                           ).toLocaleDateString()
-                                        : "--";
+                                        : new Date().toLocaleDateString()
+                                    : "--";
 
                                 return (
                                     <div
@@ -393,7 +399,8 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                                 }
                                                 className="p-1 text-green-600 hover:bg-green-50 rounded"
                                                 title="Mark as returned"
-                                            ></button>
+                                            >
+                                            </button>
                                         )}
                                     </div>
                                 );
@@ -448,7 +455,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 }
             }
         ],
-        [editingCell, tempDate]
+        [editingCell, tempDate, markContainerAsReturned]
     );
 
     const { table, globalFilter, setGlobalFilter } = useTable({
