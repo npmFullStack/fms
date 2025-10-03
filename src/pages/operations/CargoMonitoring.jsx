@@ -160,7 +160,7 @@ const CargoMonitoring = () => {
                     <div className="mb-8">
                         <h1 className="page-title">Cargo Monitoring</h1>
                         <p className="page-subtitle">
-                            Track shipments end-to-end with detailed timeline
+                            Track shipments with a timeline. Update dates and manage container return schedules.
                         </p>
                     </div>
 
