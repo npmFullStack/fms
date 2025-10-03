@@ -99,10 +99,21 @@ const AddBooking = ({ isOpen, onClose }) => {
     // Simple step validation
     const stepValidationFields = {
         1: ["shipper", "consignee"],
-        2: ["shipping_line_id", "quantity", "commodity", "origin_port", "destination_port", "booking_mode"],
+        2: [
+            "shipping_line_id",
+            "quantity",
+            "commodity",
+            "origin_port",
+            "destination_port",
+            "booking_mode"
+        ],
         3: isPortToPort ? [] : ["pickup_trucker_id", "delivery_trucker_id"],
-        4: isPortToPort ? [] : ["pickup_province", "pickup_city", "pickup_barangay"],
-        5: isPortToPort ? [] : ["delivery_province", "delivery_city", "delivery_barangay"],
+        4: isPortToPort
+            ? []
+            : ["pickup_province", "pickup_city", "pickup_barangay"],
+        5: isPortToPort
+            ? []
+            : ["delivery_province", "delivery_city", "delivery_barangay"],
         6: [] // No validation for review step
     };
 
@@ -114,20 +125,40 @@ const AddBooking = ({ isOpen, onClose }) => {
             const cleanedData = {
                 ...data,
                 ship_id: data.ship_id === "" ? null : data.ship_id,
-                pickup_trucker_id: data.pickup_trucker_id === "" ? null : data.pickup_trucker_id,
-                pickup_truck_id: data.pickup_truck_id === "" ? null : data.pickup_truck_id,
-                delivery_trucker_id: data.delivery_trucker_id === "" ? null : data.delivery_trucker_id,
-                delivery_truck_id: data.delivery_truck_id === "" ? null : data.delivery_truck_id,
-                
+                pickup_trucker_id:
+                    data.pickup_trucker_id === ""
+                        ? null
+                        : data.pickup_trucker_id,
+                pickup_truck_id:
+                    data.pickup_truck_id === "" ? null : data.pickup_truck_id,
+                delivery_trucker_id:
+                    data.delivery_trucker_id === ""
+                        ? null
+                        : data.delivery_trucker_id,
+                delivery_truck_id:
+                    data.delivery_truck_id === ""
+                        ? null
+                        : data.delivery_truck_id,
+
                 // For Port-to-Port: set all address fields to null
-                pickup_province: isPortToPort ? null : data.pickup_province || null,
+                pickup_province: isPortToPort
+                    ? null
+                    : data.pickup_province || null,
                 pickup_city: isPortToPort ? null : data.pickup_city || null,
-                pickup_barangay: isPortToPort ? null : data.pickup_barangay || null,
+                pickup_barangay: isPortToPort
+                    ? null
+                    : data.pickup_barangay || null,
                 pickup_street: isPortToPort ? null : data.pickup_street || null,
-                delivery_province: isPortToPort ? null : data.delivery_province || null,
+                delivery_province: isPortToPort
+                    ? null
+                    : data.delivery_province || null,
                 delivery_city: isPortToPort ? null : data.delivery_city || null,
-                delivery_barangay: isPortToPort ? null : data.delivery_barangay || null,
-                delivery_street: isPortToPort ? null : data.delivery_street || null,
+                delivery_barangay: isPortToPort
+                    ? null
+                    : data.delivery_barangay || null,
+                delivery_street: isPortToPort
+                    ? null
+                    : data.delivery_street || null,
 
                 // Clean contact fields
                 first_name: data.first_name || null,
@@ -148,7 +179,9 @@ const AddBooking = ({ isOpen, onClose }) => {
                 toast.success("Booking created successfully");
                 handleClose();
             } else {
-                toast.error(result.error || "Failed to add booking. Please try again.");
+                toast.error(
+                    result.error || "Failed to add booking. Please try again."
+                );
             }
         } catch (err) {
             console.error("Submit error:", err);
@@ -158,51 +191,107 @@ const AddBooking = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleNext = async () => {
-        // Validate current step
-        const fieldsToValidate = stepValidationFields[currentStep];
-        if (fieldsToValidate?.length > 0) {
-            const isValid = await trigger(fieldsToValidate);
-            if (!isValid) {
-                toast.error("Please fill in all required fields");
-                return;
-            }
+    const handleNext = async (e) => {
+    e?.preventDefault();
+    
+    console.log("Current step:", currentStep);
+    console.log("Is Port to Port:", isPortToPort);
+    
+    // Validate current step
+    const fieldsToValidate = stepValidationFields[currentStep];
+    console.log("Fields to validate:", fieldsToValidate);
+    
+    if (fieldsToValidate?.length > 0) {
+        const isValid = await trigger(fieldsToValidate);
+        console.log("Validation result:", isValid);
+        
+        if (!isValid) {
+            toast.error("Please fill in all required fields");
+            return;
         }
+    }
 
-        // Simple step progression
-        if (currentStep === 2 && isPortToPort) {
-            // Port-to-Port: skip to review
-            setCurrentStep(6);
-        } else if (currentStep < 6) {
-            // Normal progression
-            setCurrentStep(currentStep + 1);
-        }
-    };
+    // Port-to-Port: Go from step 2 directly to step 6 (confirmation)
+    if (currentStep === 2 && isPortToPort) {
+        console.log("Port-to-Port: Going to step 6");
+        setCurrentStep(6);
+        return;
+    }
+
+    // Door-to-Door: Normal progression through all steps
+    if (currentStep < 6) {
+        console.log("Moving to next step:", currentStep + 1);
+        setCurrentStep(currentStep + 1);
+    } else {
+        console.log("Already at last step");
+    }
+};
 
     const handlePrev = () => {
-        if (currentStep === 6 && isPortToPort) {
-            // From review back to step 2 for Port-to-Port
-            setCurrentStep(2);
+        // From confirmation (step 6) back to last input step
+        if (currentStep === 6) {
+            setCurrentStep(isPortToPort ? 2 : 5);
         } else if (currentStep > 1) {
-            // Normal back
             setCurrentStep(currentStep - 1);
         }
     };
 
     // Step components
     const stepComponents = {
-        1: <BookingStep1 register={register} control={control} errors={errors} />,
-        2: <BookingStep2 register={register} control={control} errors={errors} partners={partners} setValue={setValue} watch={watch} />,
-        3: <BookingStep3 register={register} control={control} errors={errors} partners={partners} setValue={setValue} watch={watch} />,
-        4: <BookingStep4PL register={register} control={control} errors={errors} setValue={setValue} getValues={getValues} />,
-        5: <BookingStep4DL register={register} control={control} errors={errors} setValue={setValue} getValues={getValues} />,
+        1: (
+            <BookingStep1
+                register={register}
+                control={control}
+                errors={errors}
+            />
+        ),
+        2: (
+            <BookingStep2
+                register={register}
+                control={control}
+                errors={errors}
+                partners={partners}
+                setValue={setValue}
+                watch={watch}
+            />
+        ),
+        3: (
+            <BookingStep3
+                register={register}
+                control={control}
+                errors={errors}
+                partners={partners}
+                setValue={setValue}
+                watch={watch}
+            />
+        ),
+        4: (
+            <BookingStep4PL
+                register={register}
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                getValues={getValues}
+            />
+        ),
+        5: (
+            <BookingStep4DL
+                register={register}
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                getValues={getValues}
+            />
+        ),
         6: <BookingStep5 control={control} partners={partners} watch={watch} />
     };
 
-    const getTotalSteps = () => isPortToPort ? 3 : 6;
+    const getTotalSteps = () => (isPortToPort ? 3 : 6);
     const getDisplayStep = () => {
         if (isPortToPort) {
-            return currentStep === 6 ? 3 : currentStep;
+            // Step 1, 2, 6 becomes display 1, 2, 3
+            if (currentStep === 6) return 3;
+            return currentStep;
         }
         return currentStep;
     };
@@ -220,9 +309,13 @@ const AddBooking = ({ isOpen, onClose }) => {
                 title: "Booking Info",
                 items: [
                     { text: `Step ${getDisplayStep()} of ${getTotalSteps()}` },
-                    isPortToPort 
-                        ? { text: "Port-to-Port mode: No trucking or addresses needed" }
-                        : { text: "Door-to-Door mode: Includes trucking and addresses" }
+                    isPortToPort
+                        ? {
+                              text: "Port-to-Port mode: No trucking or addresses needed"
+                          }
+                        : {
+                              text: "Door-to-Door mode: Includes trucking and addresses"
+                          }
                 ]
             }}
             footer={

@@ -13,7 +13,6 @@ const bookingModes = [
 
 const BookingStep2 = ({ control, register, errors, partners, setValue }) => {
   const shippingLineId = useWatch({ control, name: "shipping_line_id" });
-  const shipId = useWatch({ control, name: "ship_id" });
   const selectedContainerIds = useWatch({ control, name: "container_ids" }) || [];
   const quantity = useWatch({ control, name: "quantity" }) || 1;
 

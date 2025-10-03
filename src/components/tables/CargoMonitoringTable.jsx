@@ -41,18 +41,22 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         setEditingCell({ bookingId, dateType, containerId });
         setTempDate(null);
     };
-
-    const handleSaveDate = async (bookingId, dateType, containerId = null) => {
+    const handleSaveDate = async (
+        bookingId,
+        dateType,
+        containerId = null,
+        shippingLineId = null
+    ) => {
         if (!tempDate) {
             setEditingCell(null);
             return;
         }
-
         try {
             if (dateType === "empty_return") {
                 const result = await updateContainer(containerId, {
                     isReturned: true,
-                    returnedDate: tempDate.toISOString()
+                    returnedDate: tempDate.toISOString(),
+                    shippingLineId: shippingLineId // Use the passed parameter
                 });
                 if (result.success) {
                     toast.success("Container return date updated");
@@ -63,7 +67,6 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 setTempDate(null);
                 return;
             }
-
             const statusMap = {
                 origin_pickup: "LOADED_TO_TRUCK",
                 origin_port_arrival: "ARRIVED_ORIGIN_PORT",
@@ -126,7 +129,12 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     />
                     <button
                         onClick={() =>
-                            handleSaveDate(booking.id, dateType, containerId)
+                            handleSaveDate(
+                                booking.id,
+                                dateType,
+                                containerId,
+                                booking.shipping_line_id
+                            )
                         }
                         className="p-1 text-green-600 bg-green-100 rounded"
                     >
@@ -256,7 +264,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                 booking={row.original}
                                 dateType="origin_pickup"
                                 currentDate={pickupDate}
-                                label="PICKUPED:"
+                                label="PICKEDUP:"
                             />
                             <DateCell
                                 booking={row.original}
@@ -360,9 +368,9 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                         ? new Date(
                                               tempDate
                                           ).toLocaleDateString()
-                                        : c.updated_at
+                                        : c.returned_date
                                         ? new Date(
-                                              c.updated_at
+                                              c.returned_date
                                           ).toLocaleDateString()
                                         : new Date().toLocaleDateString()
                                     : "--";
@@ -399,8 +407,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                                 }
                                                 className="p-1 text-green-600 hover:bg-green-50 rounded"
                                                 title="Mark as returned"
-                                            >
-                                            </button>
+                                            ></button>
                                         )}
                                     </div>
                                 );
