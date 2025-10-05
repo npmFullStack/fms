@@ -62,21 +62,16 @@ const usePartnerStore = create((set, get) => ({
         }
     },
 
-    // Fetch success booking by partner
-    fetchSuccessBookings: async (id, type) => {
-        try {
-            const endpoint =
-                type === "shipping"
-                    ? `/shipping-lines/${id}/success-bookings`
-                    : `/trucking-companies/${id}/success-bookings`;
-
-            const res = await api.get(endpoint);
-            return res.data.totalSuccess;
-        } catch (err) {
-            console.error("Failed to fetch success bookings:", err);
-            return 0;
-        }
-    },
+ // Fetch success bookings by trucking company
+fetchSuccessBookings: async (id) => {
+    try {
+        const res = await api.get(`/trucking-companies/${id}/success-bookings`);
+        return res.data.totalSuccess;
+    } catch (err) {
+        console.error("Failed to fetch success bookings:", err);
+        return 0;
+    }
+},
 
     // Add new partner
     addPartner: async (partnerData, type) => {

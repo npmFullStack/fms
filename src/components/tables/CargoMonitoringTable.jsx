@@ -52,15 +52,16 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         if (dateType === "empty_return") {
             const result = await updateContainer(containerId, {
                 isReturned: true,
-                returnedDate: tempDate.toISOString(),
-                shippingLineId: shippingLineId
+                returnedDate: new Date(tempDate).toISOString(), // ensure selected date is used
+                shippingLineId
             });
-            
+
             if (result.success) {
                 toast.success("Container return date updated");
             } else {
                 toast.error(result.error || "Failed to update return date");
             }
+
             setEditingCell(null);
             setTempDate(null);
             return;
@@ -81,11 +82,12 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
 
         if (result.success) {
             toast.success("Date updated successfully");
-            setEditingCell(null);
-            setTempDate(null);
         } else {
             toast.error(result.error || "Failed to update date");
         }
+
+        setEditingCell(null);
+        setTempDate(null);
     } catch (error) {
         console.error("Failed to update date:", error);
         toast.error("Failed to update date");

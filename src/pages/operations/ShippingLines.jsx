@@ -6,9 +6,9 @@ import {
     ArrowLeft,
     Ship,
     Cuboid,
-    AlertTriangle,
-    PackageCheck
+    AlertTriangle
 } from "lucide-react";
+
 
 import Loading from "../../components/Loading";
 import ShipTable from "../../components/tables/ShipTable";
@@ -33,14 +33,12 @@ const ShippingLines = () => {
     const [isDeleteShipOpen, setIsDeleteShipOpen] = useState(false);
     const [isAddContainerOpen, setIsAddContainerOpen] = useState(false);
     const [selectedShip, setSelectedShip] = useState(null);
-    const [successBookings, setSuccessBookings] = useState(0);
 
     // 🔹 Stores
     const {
         currentPartner,
         fetchPartnerById,
         clearCurrentPartner,
-        fetchSuccessBookings,
         loading: partnerLoading
     } = usePartnerStore();
 
@@ -70,13 +68,7 @@ const ShippingLines = () => {
             fetchAllShips();
             fetchContainersByLine(id);
             fetchAllContainersByLine(id);
-
-            // Fetch success deliveries
-            const fetchSuccess = async () => {
-                const total = await fetchSuccessBookings(id);
-                setSuccessBookings(total);
-            };
-            fetchSuccess();
+            
         }
         return () => {
             clearCurrentPartner();
@@ -89,8 +81,8 @@ const ShippingLines = () => {
         fetchAllShips,
         clearCurrentShip,
         fetchContainersByLine,
-        fetchAllContainersByLine,
-        fetchSuccessBookings
+        fetchAllContainersByLine
+        
     ]);
 
     // 🔹 Stats Config
@@ -131,16 +123,9 @@ const ShippingLines = () => {
                 value: inUseContainers,
                 color: "bg-gradient-to-br from-red-500 to-red-600 text-white",
                 icon: AlertTriangle
-            },
-            {
-                key: "SUCCESS",
-                title: "Successful Deliveries",
-                value: successBookings,
-                color: "bg-gradient-to-br from-green-500 to-green-600 text-white",
-                icon: PackageCheck
             }
         ];
-    }, [ships, allContainers, id, successBookings]);
+    }, [ships, allContainers, id]);
 
     // 🔹 CRUD handlers (ships)
     const handleAddShip = async shipData => {
