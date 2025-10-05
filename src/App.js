@@ -16,7 +16,8 @@ const ResetPassword = lazy(() => import("./pages/public/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
 // Customer
-const Bookings = lazy(() => import("./pages/booking/Bookings"));
+const CustomerBookings = lazy(() => import("./pages/booking/CustomerBookings"));
+
 const BookingLogs = lazy(() => import("./pages/booking/BookingLogs"));
 const TrackOrder = lazy(() => import("./pages/booking/TrackOrder"));
 
@@ -33,7 +34,7 @@ const HouseWaybill = lazy(() => import("./pages/operations/HouseWaybill"));
 const IncidentReports = lazy(() =>
     import("./pages/operations/IncidentReports")
 );
-
+const Bookings = lazy(() => import("./pages/booking/Bookings"));
 // Admin Finance
 const AccountsReceivable = lazy(() =>
     import("./pages/finance/AccountsReceivable")
@@ -81,7 +82,7 @@ function App() {
                         <Route path="/dashboard" element={<Dashboard />} />
 
                         {/* Customer */}
-                        <Route path="/bookings" element={<Bookings />} />
+                        <Route path="/booking" element={<CustomerBookings />} />
                         <Route path="/booking/logs" element={<BookingLogs />} />
                         <Route path="/track-order" element={<TrackOrder />} />
 
