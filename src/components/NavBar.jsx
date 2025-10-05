@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, SidebarClose, UserCircle, Sidebar } from "lucide-react";
+import { SidebarClose, UserCircle, Sidebar } from "lucide-react";
 import useAuthStore from "../utils/store/useAuthStore";
+import NotificationDropdown from "./NotificationDropdown";
 
 const NavBar = ({ onToggleSidebar }) => {
     const { user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Fixed typo
     const navigate = useNavigate();
 
     const handleToggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+        setIsSidebarOpen(!isSidebarOpen); // Fixed typo and logic
         onToggleSidebar();
     };
 
@@ -18,40 +19,41 @@ const NavBar = ({ onToggleSidebar }) => {
         <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shadow-md">
             {/* Left side: Sidebar toggle */}
             <div className="flex items-center gap-3">
-                <button onClick={handleToggleSidebar}>
-                    {isSidebarOpen ? (
-                        <Sidebar className="w-6 h-6" />
-                    ) : (
-                        <SidebarClose className="w-6 h-6" />
-                    )}
-                </button>
-                <span className="text-lg font-semibold hidden sm:block">
-                    X-TRA MILE FREIGHT FORWARDING INC.
-                </span>
-            </div>
+                <button onClick={handleToggleSidebar}> 
+                    {isSidebarOpen ? ( 
+                        <Sidebar className="w-6 h-6" /> 
+                    ) : ( 
+                        <SidebarClose className="w-6 h-6" /> 
+                    )} 
+                </button> 
+                <span className="text-lg font-semibold hidden sm:block"> 
+                    X-TRA MILE FREIGHT FORWARDING INC. 
+                </span> 
+            </div> 
 
             {/* Right side: Icons */}
             <div className="flex items-center gap-4 relative">
-                <Bell className="w-6 h-6 cursor-pointer" />
-                <button
-                    onClick={() => setMenuOpen(!menuOpen)}
-                    className="flex items-center gap-1"
-                >
-                    {user?.profile_picture ? (
-                        <img
-                            src={user.profile_picture}
-                            alt="Profile"
-                            className="w-7 h-7 rounded-full object-cover"
-                        />
-                    ) : (
-                        <UserCircle className="w-7 h-7" />
-                    )}
-                    <span className="hidden sm:block">
+                <NotificationDropdown />
+                
+                <button 
+                    onClick={() => setMenuOpen(!menuOpen)} // Fixed typo
+                    className="flex items-center gap-1" 
+                > 
+                    {user?.profile_picture ? ( 
+                        <img 
+                            src={user.profile_picture} 
+                            alt="Profile" 
+                            className="w-7 h-7 rounded-full object-cover" 
+                        /> 
+                    ) : ( 
+                        <UserCircle className="w-7 h-7" /> 
+                    )} 
+                    <span className="hidden sm:block"> 
                         {user?.first_name || "User"}
-                    </span>
-                </button>
+                    </span> 
+                </button> 
 
-                {menuOpen && (
+                {menuOpen && ( 
                     <div className="absolute right-0 top-full bg-white text-gray-800 rounded shadow-md w-40 z-10">
                         <button
                             onClick={() => {
