@@ -41,61 +41,56 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         setEditingCell({ bookingId, dateType, containerId });
         setTempDate(null);
     };
-    const handleSaveDate = async (
-        bookingId,
-        dateType,
-        containerId = null,
-        shippingLineId = null
-    ) => {
-        if (!tempDate) {
+    
+    const handleSaveDate = async (bookingId, dateType, containerId = null, shippingLineId = null) => {
+    if (!tempDate) {
+        setEditingCell(null);
+        return;
+    }
+
+    try {
+        if (dateType === "empty_return") {
+            const result = await updateContainer(containerId, {
+                isReturned: true,
+                returnedDate: tempDate.toISOString(),
+                shippingLineId: shippingLineId
+            });
+            
+            if (result.success) {
+                toast.success("Container return date updated");
+            } else {
+                toast.error(result.error || "Failed to update return date");
+            }
             setEditingCell(null);
+            setTempDate(null);
             return;
         }
-        try {
-            if (dateType === "empty_return") {
-                const result = await updateContainer(containerId, {
-                    isReturned: true,
-                    returnedDate: tempDate.toISOString(),
-                    shippingLineId: shippingLineId // Use the passed parameter
-                });
-                if (result.success) {
-                    toast.success("Container return date updated");
-                } else {
-                    toast.error(result.error || "Failed to update return date");
-                }
-                setEditingCell(null);
-                setTempDate(null);
-                return;
-            }
-            const statusMap = {
-                origin_pickup: "LOADED_TO_TRUCK",
-                origin_port_arrival: "ARRIVED_ORIGIN_PORT",
-                stuffing_date: "LOADED_TO_SHIP",
-                atd: "IN_TRANSIT",
-                ata: "ARRIVED_DESTINATION_PORT",
-                dest_port_pickup: "OUT_FOR_DELIVERY",
-                dest_delivery: "DELIVERED"
-            };
 
-            const status = statusMap[dateType];
-            const result = await updateBookingStatusHistory(
-                bookingId,
-                status,
-                tempDate
-            );
+        const statusMap = {
+            origin_pickup: "LOADED_TO_TRUCK",
+            origin_port_arrival: "ARRIVED_ORIGIN_PORT",
+            stuffing_date: "LOADED_TO_SHIP",
+            atd: "IN_TRANSIT",
+            ata: "ARRIVED_DESTINATION_PORT",
+            dest_port_pickup: "OUT_FOR_DELIVERY",
+            dest_delivery: "DELIVERED"
+        };
 
-            if (result.success) {
-                toast.success("Date updated successfully");
-                setEditingCell(null);
-                setTempDate(null);
-            } else {
-                toast.error(result.error || "Failed to update date");
-            }
-        } catch (error) {
-            console.error("Failed to update date:", error);
-            toast.error("Failed to update date");
+        const status = statusMap[dateType];
+        const result = await updateBookingStatusHistory(bookingId, status, tempDate);
+
+        if (result.success) {
+            toast.success("Date updated successfully");
+            setEditingCell(null);
+            setTempDate(null);
+        } else {
+            toast.error(result.error || "Failed to update date");
         }
-    };
+    } catch (error) {
+        console.error("Failed to update date:", error);
+        toast.error("Failed to update date");
+    }
+};
 
     const handleCancelEdit = () => {
         setEditingCell(null);
@@ -361,19 +356,16 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     return (
                         <div className="flex flex-col text-xs gap-2">
                             {containers.map((c, idx) => {
-                                // Use current date if just updated, otherwise use updated_at
-                                const returnDate = c.is_returned
-                                    ? tempDate &&
-                                      editingCell?.containerId === c.id
-                                        ? new Date(
-                                              tempDate
-                                          ).toLocaleDateString()
-                                        : c.returned_date
-                                        ? new Date(
-                                              c.returned_date
-                                          ).toLocaleDateString()
-                                        : new Date().toLocaleDateString()
-                                    : "--";
+
+                                const returnDate =
+  c.is_returned
+    ? editingCell?.containerId === c.id && tempDate
+      ? new Date(tempDate).toLocaleDateString()
+      : c.returned_date
+      ? new Date(c.returned_date).toLocaleDateString()
+      : "--"
+    : "--";
+
 
                                 return (
                                     <div

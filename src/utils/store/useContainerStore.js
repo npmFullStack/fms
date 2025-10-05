@@ -23,19 +23,26 @@ const useContainerStore = create((set, get) => ({
     }
   },
 
-  // Fetch ALL containers by shipping line (both returned and in-use - for management table)
-  fetchAllContainersByLine: async (shippingLineId) => {
-    set({ loading: true, error: null });
-    try {
-      const res = await api.get(`/containers/line/${shippingLineId}/all`);
-      set({ allContainers: res.data, loading: false });
-      return { success: true, data: res.data };
-    } catch (err) {
-      const error = err.response?.data?.message || "Failed to fetch all containers";
-      set({ error, loading: false, allContainers: [] });
-      return { success: false, error };
-    }
-  },
+// Fetch ALL containers by shipping line (both returned and in-use - for management table)
+fetchAllContainersByLine: async (shippingLineId) => {
+  set({ loading: true, error: null });
+  try {
+    const res = await api.get(`/containers/line/${shippingLineId}/all`);
+    set({
+      allContainers: Array.isArray(res.data) ? res.data : [],
+      loading: false
+    });
+    return {
+      success: true,
+      data: Array.isArray(res.data) ? res.data : []
+    };
+  } catch (err) {
+    const error =
+      err.response?.data?.message || "Failed to fetch all containers";
+    set({ error, loading: false, allContainers: [] });
+    return { success: false, error };
+  }
+},
 
   // Add new container
   addContainer: async (containerData) => {
@@ -58,8 +65,14 @@ const useContainerStore = create((set, get) => ({
   updateContainer: async (id, updatedData) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.put(`/containers/${id}`, updatedData);
-      // Refresh both container lists if shippingLineId is provided
+      const payload = {
+     size: updatedData.size ?? null,
+     van_number: updatedData.vanNumber ?? null,
+     is_returned: updatedData.isReturned ?? null,
+    returned_date: updatedData.returnedDate ?? null,
+    shipping_line_id: updatedData.shippingLineId ?? null
+  };
+   const res = await api.put(`/containers/${id}`, payload);
       if (updatedData.shippingLineId) {
         await get().fetchContainersByLine(updatedData.shippingLineId);
         await get().fetchAllContainersByLine(updatedData.shippingLineId);
@@ -73,24 +86,33 @@ const useContainerStore = create((set, get) => ({
     }
   },
 
-  // Mark container as returned with date
-  markContainerAsReturned: async (id, shippingLineId) => {
-    set({ loading: true, error: null });
-    try {
-      const res = await api.put(`/containers/${id}`, {
-        isReturned: true
-      });
-      // Refresh both container lists
-      await get().fetchContainersByLine(shippingLineId);
-      await get().fetchAllContainersByLine(shippingLineId);
-      set({ loading: false });
-      return { success: true, data: res.data };
-    } catch (err) {
-      const error = err.response?.data?.message || "Failed to mark container as returned";
-      set({ error, loading: false });
-      return { success: false, error };
+
+markContainerAsReturned: async (id, shippingLineId, returnedDate = null) => {
+  set({ loading: true, error: null });
+  try {
+    const payload = {
+      isReturned: true
+    };
+    
+    // If a date is provided, include it
+    if (returnedDate) {
+      payload.returnedDate = returnedDate;
     }
-  },
+    
+    const res = await api.put(`/containers/${id}`, payload);
+    
+    // Refresh both container lists
+    await get().fetchContainersByLine(shippingLineId);
+    await get().fetchAllContainersByLine(shippingLineId);
+    
+    set({ loading: false });
+    return { success: true, data: res.data };
+  } catch (err) {
+    const error = err.response?.data?.message || "Failed to mark container as returned";
+    set({ error, loading: false });
+    return { success: false, error };
+  }
+},
 
   // Remove container
   removeContainer: async (id, shippingLineId) => {

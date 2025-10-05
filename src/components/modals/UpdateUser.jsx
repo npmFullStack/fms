@@ -88,9 +88,7 @@ const UpdateUser = ({ isOpen, onClose, user, onSubmit }) => {
             // Handle role - send just the value to backend
             formData.append("role", data.role.value);
 
-            if (data.phone) {
-                formData.append("phone", data.phone);
-            }
+            formData.append("phone", data.phone || "");
 
             if (selectedFile) {
                 formData.append("profile_picture", selectedFile);

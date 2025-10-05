@@ -13,7 +13,7 @@ const useUserStore = create((set, get) => ({
         set({ loading: true, error: null });
         try {
             const res = await api.get("/users");
-            set({ users: res.data.rows || [], loading: false });
+            set({ users: res.data.users || [], loading: false });
             return { success: true };
         } catch (err) {
             const error =

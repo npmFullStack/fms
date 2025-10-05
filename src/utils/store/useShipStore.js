@@ -47,8 +47,8 @@ fetchShipsByLine: async (lineId) => {
   set({ loading: true, error: null });
   try {
     const res = await api.get(`/ships/by-line/${lineId}`);
-    set({ ships: res.data.ships, loading: false });
-    return { success: true, data: res.data.ships };
+    set({ ships: Array.isArray(res.data) ? res.data : [], loading: false });
+  return { success: true, data: Array.isArray(res.data) ? res.data : [] };
   } catch (err) {
     const error = err.response?.data?.message || "Failed to fetch ships";
     set({ error, loading: false, ships: [] });
