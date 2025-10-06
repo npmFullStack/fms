@@ -198,7 +198,7 @@
     }
 
     .table-header {
-        @apply px-3 py-4 text-left text-xs font-semibold uppercase text-slate-700 
+        @apply px-3 py-4 text-left text-sm font-semibold uppercase text-slate-700 
            cursor-pointer select-none hover:bg-slate-100/50 transition-colors;
         @apply whitespace-nowrap;
     }
@@ -208,11 +208,15 @@
     }
 
     .table-row {
-        @apply hover:bg-white/70 transition-all duration-200;
+        @apply hover:bg-white/70 transition-all duration-200
+       
+        ;
     }
 
 .table-cell {
-  @apply px-3 py-4 text-xs text-slate-700 text-left align-top whitespace-nowrap;
+  @apply px-3 py-4 text-sm text-slate-700 text-left align-top whitespace-nowrap
+  font-normal
+  ;
   position: relative;
   z-index: 1;
 }
@@ -221,7 +225,7 @@
 }
 
     .table-cell-stack {
-        @apply text-xs;
+        @apply text-sm;
     }
 
     .table-text-bold {
