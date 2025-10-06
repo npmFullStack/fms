@@ -390,7 +390,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                             }
                                         />
 
-                                        {!c.is_returned && (
+                                        {!c.returned_date && (
                                             <button
                                                 onClick={() =>
                                                     markContainerAsReturned(

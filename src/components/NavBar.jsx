@@ -1,3 +1,4 @@
+// components/NavBar
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarClose, UserCircle, Sidebar } from "lucide-react";
@@ -7,11 +8,11 @@ import NotificationDropdown from "./NotificationDropdown";
 const NavBar = ({ onToggleSidebar }) => {
     const { user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Fixed typo
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
     const navigate = useNavigate();
 
     const handleToggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen); // Fixed typo and logic
+        setIsSidebarOpen(!isSidebarOpen); 
         onToggleSidebar();
     };
 
