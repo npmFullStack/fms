@@ -61,13 +61,13 @@ const AccountsPayable = () => {
         freight_voucher: "",
 
         // Trucking Origin
-        trucking_origin_payee: booking.pickup_trucker_name || "-",
+        trucking_origin_payee: booking.pickup_trucker || "-",
         trucking_origin_amount: 0,
         trucking_origin_check_date: null,
         trucking_origin_voucher: "",
 
         // Trucking Destination
-        trucking_dest_payee: booking.delivery_trucker_name || "-",
+        trucking_dest_payee: booking.delivery_trucker || "-",
         trucking_dest_amount: 0,
         trucking_dest_check_date: null,
         trucking_dest_voucher: "",

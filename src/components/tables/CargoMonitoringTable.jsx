@@ -120,7 +120,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         dateFormat="MM/DD/YYYY"
                         timeFormat={false}
                         inputProps={{
-                            className: "border rounded px-2 py-1 text-xs w-28",
+                            className: "border rounded px-2 py-1   w-28",
                             placeholder: "Select date"
                         }}
                     />
@@ -235,7 +235,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     return (
                         <div className="flex flex-col gap-1">
                             {containers.map((c, idx) => (
-                                <div key={idx} className="text-xs font-mono">
+                                <div key={idx} className="  font-mono">
                                     {toCaps(c.van_number)}
                                 </div>
                             ))}
@@ -256,7 +256,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "ARRIVED_ORIGIN_PORT"
                     );
                     return (
-                        <div className="flex flex-col text-xs gap-1">
+                        <div className="flex flex-col   gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="origin_pickup"
@@ -301,7 +301,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "ARRIVED_DESTINATION_PORT"
                     );
                     return (
-                        <div className="flex flex-col text-xs gap-1">
+                        <div className="flex flex-col   gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="atd"
@@ -331,7 +331,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "DELIVERED"
                     );
                     return (
-                        <div className="flex flex-col text-xs gap-1">
+                        <div className="flex flex-col   gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="dest_port_pickup"
@@ -356,7 +356,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     if (!containers.length) return <span>--</span>;
 
                     return (
-                        <div className="flex flex-col text-xs gap-2">
+                        <div className="flex flex-col   gap-2">
                             {containers.map((c, idx) => {
 
                                 const returnDate =
@@ -415,7 +415,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 accessorKey: "route",
                 header: "ROUTE",
                 cell: ({ row }) => (
-                    <div className="text-xs">
+                    <div>
                         <div>
                             <span className="text-yellow-600 font-medium mr-1">
                                 ORIGIN:

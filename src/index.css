@@ -204,7 +204,7 @@
     }
 
     .table-body {
-        @apply divide-y text-left divide-slate-200/50 text-xs;
+        @apply divide-y text-left divide-slate-200/50 text-sm;
     }
 
     .table-row {
@@ -229,7 +229,7 @@
     }
 
     .table-text-bold {
-        @apply font-medium text-xs text-slate-800;
+        @apply font-medium text-sm text-slate-800;
     }
 
     .table-subtext {

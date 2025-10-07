@@ -13,7 +13,7 @@ const useFinanceStore = create((set, get) => ({
   fetchAR: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get("/api/finance/accounts-receivable");
+      const response = await api.get("/finance/accounts-receivable");
       set({ arRecords: response.data.data || [], loading: false });
     } catch (error) {
       set({
@@ -27,7 +27,7 @@ const useFinanceStore = create((set, get) => ({
   fetchAP: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get("/api/finance/accounts-payable");
+      const response = await api.get("/finance/accounts-payable");
       set({ apRecords: response.data.data || [], loading: false });
     } catch (error) {
       set({
@@ -42,7 +42,7 @@ const useFinanceStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.put(
-        `/api/finance/accounts-receivable/${id}`,
+        `/finance/accounts-receivable/${id}`,
         data
       );
       
@@ -67,7 +67,7 @@ const useFinanceStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.put(
-        `/api/finance/accounts-payable/${id}`,
+        `/finance/accounts-payable/${id}`,
         data
       );
       
