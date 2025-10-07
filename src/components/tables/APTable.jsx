@@ -1,24 +1,38 @@
 // components/tables/APTable.jsx
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { flexRender } from "@tanstack/react-table";
 import { ChevronUp, ChevronDown, Receipt } from "lucide-react";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 import { toCaps } from "../../utils/helpers/tableDataFormatters";
 
-const APTable = ({ data, activeTab }) => {
-  // Base columns (always visible)
+const APTable = ({ data, activeTab, onSelectionChange }) => {
   const baseColumns = [
     {
-      accessorKey: "date",
-      header: "Date",
+      id: "select",
+      header: ({ table }) => (
+        <input
+          type="checkbox"
+          checked={table.getIsAllRowsSelected?.()}
+          onChange={e => table.toggleAllRowsSelected?.(e.target.checked)}
+          className="table-checkbox"
+        />
+      ),
       cell: ({ row }) => (
-        <span className="table-text">
-          {new Date(row.original.date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-          })}
+        <input
+          type="checkbox"
+          checked={row.getIsSelected?.()}
+          onChange={row.getToggleSelectedHandler?.()}
+          className="table-checkbox"
+        />
+      )
+    },
+    {
+      accessorKey: "booking_number",
+      header: "Booking #",
+      cell: ({ row }) => (
+        <span className="table-text-bold">
+          {toCaps(row.original.booking_number)}
         </span>
       )
     },
@@ -32,43 +46,38 @@ const APTable = ({ data, activeTab }) => {
       )
     },
     {
-      accessorKey: "client",
-      header: "Client",
+      accessorKey: "origin_port",
+      header: "Origin",
       cell: ({ row }) => (
-        <span className="table-text-bold">{toCaps(row.original.client)}</span>
+        <span className="table-text">{toCaps(row.original.origin_port)}</span>
       )
     },
     {
-      accessorKey: "mode",
+      accessorKey: "destination_port",
+      header: "Destination",
+      cell: ({ row }) => (
+        <span className="table-text">{toCaps(row.original.destination_port)}</span>
+      )
+    },
+    {
+      accessorKey: "commodity",
+      header: "Commodity",
+      cell: ({ row }) => (
+        <span className="table-text">{toCaps(row.original.commodity)}</span>
+      )
+    },
+    {
+      accessorKey: "quantity",
+      header: "Qty",
+      cell: ({ row }) => (
+        <span className="table-text">{row.original.quantity}</span>
+      )
+    },
+    {
+      accessorKey: "booking_mode",
       header: "Mode",
       cell: ({ row }) => (
-        <span className="table-text">{row.original.mode}</span>
-      )
-    },
-    {
-      accessorKey: "route",
-      header: "Route",
-      cell: ({ row }) => (
-        <span className="table-text">{toCaps(row.original.route)}</span>
-      )
-    },
-    {
-      accessorKey: "volume",
-      header: "Volume",
-      cell: ({ row }) => (
-        <span className="table-text">{row.original.volume}</span>
-      )
-    },
-    {
-      accessorKey: "gross_revenue",
-      header: "Gross Revenue",
-      cell: ({ row }) => (
-        <span className="table-text-bold">
-          ₱{row.original.gross_revenue.toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
-        </span>
+        <span className="table-text">{row.original.booking_mode}</span>
       )
     }
   ];
@@ -79,7 +88,7 @@ const APTable = ({ data, activeTab }) => {
       accessorKey: `${prefix}_payee`,
       header: `${label} - Payee`,
       cell: ({ row }) => (
-        <span className="table-text">{toCaps(row.original[`${prefix}_payee`])}</span>
+        <span className="table-text">{toCaps(row.original[`${prefix}_payee`] || "-")}</span>
       )
     },
     {
@@ -87,7 +96,7 @@ const APTable = ({ data, activeTab }) => {
       header: `${label} - Amount`,
       cell: ({ row }) => (
         <span className="table-text">
-          ₱{row.original[`${prefix}_amount`].toLocaleString("en-PH", {
+          ₱{(row.original[`${prefix}_amount`] || 0).toLocaleString("en-PH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}
@@ -131,31 +140,7 @@ const APTable = ({ data, activeTab }) => {
       header: "Total Expenses",
       cell: ({ row }) => (
         <span className="table-text-bold">
-          ₱{row.original.total_expenses.toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
-        </span>
-      )
-    },
-    {
-      accessorKey: "bir",
-      header: "BIR",
-      cell: ({ row }) => (
-        <span className="table-text">
-          ₱{row.original.bir.toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
-        </span>
-      )
-    },
-    {
-      accessorKey: "total_expenses_with_bir",
-      header: "Total w/ BIR",
-      cell: ({ row }) => (
-        <span className="table-text-bold">
-          ₱{row.original.total_expenses_with_bir.toLocaleString("en-PH", {
+          ₱{(row.original.total_expenses || 0).toLocaleString("en-PH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}
@@ -166,7 +151,7 @@ const APTable = ({ data, activeTab }) => {
       accessorKey: "net_revenue",
       header: "Net Revenue",
       cell: ({ row }) => {
-        const netRevenue = row.original.net_revenue;
+        const netRevenue = row.original.net_revenue || 0;
         const colorClass = netRevenue >= 0 ? "text-green-600" : "text-red-600";
         return (
           <span className={`table-text-bold ${colorClass}`}>
@@ -191,26 +176,20 @@ const APTable = ({ data, activeTab }) => {
       case "TRUCKING":
         expenseColumns = createDualExpenseColumns("trucking", "Trucking");
         break;
-      case "CRAINAGE":
-        expenseColumns = createExpenseColumns("crainage", "Crainage");
+      case "PORT_CHARGES":
+        expenseColumns = [
+          ...createExpenseColumns("crainage", "Crainage"),
+          ...createDualExpenseColumns("arrastre", "Arrastre"),
+          ...createDualExpenseColumns("wharfage", "Wharfage"),
+          ...createDualExpenseColumns("labor", "Labor")
+        ];
         break;
-      case "ARRASTRE":
-        expenseColumns = createDualExpenseColumns("arrastre", "Arrastre");
-        break;
-      case "WHARFAGE":
-        expenseColumns = createDualExpenseColumns("wharfage", "Wharfage");
-        break;
-      case "LABOR":
-        expenseColumns = createDualExpenseColumns("labor", "Labor");
-        break;
-      case "REBATES":
-        expenseColumns = createExpenseColumns("rebates", "Rebates/DENR");
-        break;
-      case "STORAGE":
-        expenseColumns = createExpenseColumns("storage", "Storage");
-        break;
-      case "FACILITATION":
-        expenseColumns = createExpenseColumns("facilitation", "Facilitation");
+      case "MISC_CHARGES":
+        expenseColumns = [
+          ...createExpenseColumns("rebates", "Rebates/DENR"),
+          ...createExpenseColumns("storage", "Storage"),
+          ...createExpenseColumns("facilitation", "Facilitation")
+        ];
         break;
       case "ALL":
       default:
@@ -239,6 +218,15 @@ const APTable = ({ data, activeTab }) => {
 
   const { paginationInfo, actions } = usePagination(table, data?.length);
 
+  const selectedRows = table.getSelectedRowModel().rows;
+  
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedIds = selectedRows.map(r => r.original.ap_id);
+      onSelectionChange(selectedIds);
+    }
+  }, [selectedRows, onSelectionChange]);
+
   return (
     <div className="table-wrapper">
       {/* Header */}
@@ -246,7 +234,7 @@ const APTable = ({ data, activeTab }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="table-title">
-              {activeTab === "ALL" ? "All Expenses" : `${activeTab.charAt(0) + activeTab.slice(1).toLowerCase()} Expenses`}
+              {activeTab === "ALL" ? "All Accounts Payable" : `${activeTab.replace('_', ' ')} Expenses`}
             </h2>
             <p className="table-count">Total: {paginationInfo.totalItems} records</p>
           </div>

@@ -27,8 +27,8 @@ const useFinanceStore = create((set, get) => ({
   fetchAP: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get("/finance/accounts-payable");
-      set({ apRecords: response.data.data || [], loading: false });
+      const response = await api.get("/ap");
+      set({ apRecords: response.data.apSummaries || [], loading: false });
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch AP records",
@@ -37,43 +37,32 @@ const useFinanceStore = create((set, get) => ({
     }
   },
 
-  // Update AR record
-  updateARRecord: async (id, data) => {
+  // Get AP by ID
+  getAPById: async (apId) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.put(
-        `/finance/accounts-receivable/${id}`,
-        data
-      );
-      
-      // Update local state
-      const updatedRecords = get().arRecords.map(record =>
-        record.id === id ? { ...record, ...response.data.data } : record
-      );
-      
-      set({ arRecords: updatedRecords, loading: false });
-      return response.data;
+      const response = await api.get(`/ap/${apId}`);
+      return response.data.apSummary;
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Failed to update AR record",
+        error: error.response?.data?.message || "Failed to fetch AP record",
         loading: false
       });
       throw error;
+    } finally {
+      set({ loading: false });
     }
   },
 
   // Update AP record
-  updateAPRecord: async (id, data) => {
+  updateAPRecord: async (apId, data) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.put(
-        `/finance/accounts-payable/${id}`,
-        data
-      );
+      const response = await api.put(`/ap/${apId}`, data);
       
       // Update local state
       const updatedRecords = get().apRecords.map(record =>
-        record.id === id ? { ...record, ...response.data.data } : record
+        record.id === apId ? { ...record, ...response.data.apRecord } : record
       );
       
       set({ apRecords: updatedRecords, loading: false });
@@ -81,6 +70,119 @@ const useFinanceStore = create((set, get) => ({
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to update AP record",
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Add freight charge
+  addFreight: async (apId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/ap/${apId}/freight`, data);
+      
+      // Update local state
+      const updatedRecords = get().apRecords.map(record =>
+        record.id === apId ? { ...record, ...response.data.freight } : record
+      );
+      
+      set({ apRecords: updatedRecords, loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to add freight charge",
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Update freight charge
+  updateFreight: async (freightId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.put(`/ap/freight/${freightId}`, data);
+      
+      // Update local state
+      const updatedRecords = get().apRecords.map(record => {
+        if (record.freight_id === freightId) {
+          return { ...record, ...response.data.freight };
+        }
+        return record;
+      });
+      
+      set({ apRecords: updatedRecords, loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to update freight charge",
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Add trucking charge
+  addTrucking: async (apId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/ap/${apId}/trucking`, data);
+      
+      // Update local state
+      const updatedRecords = get().apRecords.map(record =>
+        record.id === apId ? { ...record, ...response.data.trucking } : record
+      );
+      
+      set({ apRecords: updatedRecords, loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to add trucking charge",
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Add port charge
+  addPortCharge: async (apId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/ap/${apId}/port-charges`, data);
+      
+      // Update local state
+      const updatedRecords = get().apRecords.map(record =>
+        record.id === apId ? { ...record, ...response.data.portCharge } : record
+      );
+      
+      set({ apRecords: updatedRecords, loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to add port charge",
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Add misc charge
+  addMiscCharge: async (apId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post(`/ap/${apId}/misc-charges`, data);
+      
+      // Update local state
+      const updatedRecords = get().apRecords.map(record =>
+        record.id === apId ? { ...record, ...response.data.miscCharge } : record
+      );
+      
+      set({ apRecords: updatedRecords, loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to add misc charge",
         loading: false
       });
       throw error;

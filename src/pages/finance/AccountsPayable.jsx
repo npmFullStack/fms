@@ -13,15 +13,25 @@ import {
   Users,
   FileText,
   Warehouse,
-  Settings
+  Settings,
+  PlusCircle,
+  Edit2,
+  Printer,
+  Download,
+  Trash2
 } from "lucide-react";
 import Loading from "../../components/Loading";
 import APTable from "../../components/tables/APTable";
+import UpdateAP from "../../components/modals/UpdateAP";
+import BulkActionBar from "../../components/BulkActionBar";
 import StatCard from "../../components/cards/StatCard";
 
 const AccountsPayable = () => {
   const { bookings, fetchBookings, loading, error, clearError } = useBookingStore();
   const [activeTab, setActiveTab] = useState("ALL");
+  const [selectedAP, setSelectedAP] = useState([]);
+  const [isUpdateAPModalOpen, setIsUpdateAPModalOpen] = useState(false);
+  const [activeAPId, setActiveAPId] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -45,9 +55,18 @@ const AccountsPayable = () => {
 
       // Placeholder expense data - this should come from your pricing/expense logic
       return {
-        id: booking.id,
-        date: booking.created_at,
-        hwb_number: booking.hwb_number || "-",
+        ap_id: booking.id, // Use booking ID as ap_id for selection
+        booking_id: booking.id,
+        booking_number: booking.booking_number,
+        hwb_number: booking.hwb_number,
+        origin_port: booking.origin_port,
+        destination_port: booking.destination_port,
+        commodity: booking.commodity,
+        quantity: booking.quantity,
+        booking_mode: booking.booking_mode,
+        created_at: booking.created_at,
+
+        // Client info
         client: booking.shipper || "-",
         mode: booking.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
         route: `${booking.origin_port || "-"}–${booking.destination_port || "-"}`,
@@ -56,87 +75,87 @@ const AccountsPayable = () => {
 
         // Freight expenses
         freight_payee: booking.shipping_line_name || "-",
-        freight_amount: 0,
+        freight_amount: 15000, // Example amount
         freight_check_date: null,
         freight_voucher: "",
 
         // Trucking Origin
         trucking_origin_payee: booking.pickup_trucker || "-",
-        trucking_origin_amount: 0,
+        trucking_origin_amount: 5000, // Example amount
         trucking_origin_check_date: null,
         trucking_origin_voucher: "",
 
         // Trucking Destination
         trucking_dest_payee: booking.delivery_trucker || "-",
-        trucking_dest_amount: 0,
+        trucking_dest_amount: 5000, // Example amount
         trucking_dest_check_date: null,
         trucking_dest_voucher: "",
 
         // Crainage Charges
-        crainage_payee: "-",
-        crainage_amount: 0,
+        crainage_payee: "Port Authority",
+        crainage_amount: 2000,
         crainage_check_date: null,
         crainage_voucher: "",
 
         // Arrastre Origin
-        arrastre_origin_payee: "-",
-        arrastre_origin_amount: 0,
+        arrastre_origin_payee: "Origin Port",
+        arrastre_origin_amount: 1500,
         arrastre_origin_check_date: null,
         arrastre_origin_voucher: "",
 
         // Arrastre Destination
-        arrastre_dest_payee: "-",
-        arrastre_dest_amount: 0,
+        arrastre_dest_payee: "Destination Port",
+        arrastre_dest_amount: 1500,
         arrastre_dest_check_date: null,
         arrastre_dest_voucher: "",
 
         // Wharfage Origin
-        wharfage_origin_payee: "-",
-        wharfage_origin_amount: 0,
+        wharfage_origin_payee: "Origin Port",
+        wharfage_origin_amount: 1000,
         wharfage_origin_check_date: null,
         wharfage_origin_voucher: "",
 
         // Wharfage Destination
-        wharfage_dest_payee: "-",
-        wharfage_dest_amount: 0,
+        wharfage_dest_payee: "Destination Port",
+        wharfage_dest_amount: 1000,
         wharfage_dest_check_date: null,
         wharfage_dest_voucher: "",
 
         // Labor Origin
-        labor_origin_payee: "-",
-        labor_origin_amount: 0,
+        labor_origin_payee: "Origin Labor",
+        labor_origin_amount: 800,
         labor_origin_check_date: null,
         labor_origin_voucher: "",
 
         // Labor Destination
-        labor_dest_payee: "-",
-        labor_dest_amount: 0,
+        labor_dest_payee: "Destination Labor",
+        labor_dest_amount: 800,
         labor_dest_check_date: null,
         labor_dest_voucher: "",
 
         // Rebates/DENR
-        rebates_payee: "-",
-        rebates_amount: 0,
+        rebates_payee: "DENR",
+        rebates_amount: 500,
         rebates_check_date: null,
         rebates_voucher: "",
 
         // Storage
-        storage_payee: "-",
-        storage_amount: 0,
+        storage_payee: "Storage Facility",
+        storage_amount: 1200,
         storage_check_date: null,
         storage_voucher: "",
 
         // Facilitation
-        facilitation_payee: "-",
-        facilitation_amount: 0,
+        facilitation_payee: "Facilitator",
+        facilitation_amount: 1000,
         facilitation_check_date: null,
         facilitation_voucher: "",
 
         // Totals
-        total_expenses: 0,
-        bir: 0,
-        total_expenses_with_bir: 0,
-        net_revenue: 0,
+        total_expenses: 32400, // Sum of all example amounts
+        bir: 3888, // 12% of total expenses
+        total_expenses_with_bir: 36288,
+        net_revenue: (booking.gross_revenue || 50000) - 36288, // Example calculation
 
         remarks: booking.remarks || ""
       };
@@ -193,14 +212,40 @@ const AccountsPayable = () => {
     { key: "ALL", label: "All Expenses", icon: FileText },
     { key: "FREIGHT", label: "Freight", icon: Ship },
     { key: "TRUCKING", label: "Trucking", icon: Truck },
-    { key: "CRAINAGE", label: "Crainage", icon: Package },
-    { key: "ARRASTRE", label: "Arrastre", icon: Anchor },
-    { key: "WHARFAGE", label: "Wharfage", icon: Warehouse },
-    { key: "LABOR", label: "Labor", icon: Users },
-    { key: "REBATES", label: "Rebates/DENR", icon: FileText },
-    { key: "STORAGE", label: "Storage", icon: Warehouse },
-    { key: "FACILITATION", label: "Facilitation", icon: Settings }
+    { key: "PORT_CHARGES", label: "Port Charges", icon: Anchor },
+    { key: "MISC_CHARGES", label: "Misc Charges", icon: Settings }
   ];
+
+  // Handlers
+  const handleEditAP = (id) => {
+    setActiveAPId(id);
+    setIsUpdateAPModalOpen(true);
+  };
+
+  const handleBulkEdit = (ids) => {
+    if (ids.length === 1) {
+      handleEditAP(ids[0]);
+    }
+  };
+
+  const handleBulkPrint = (ids) => {
+    const records = apRecords.filter(r => ids.includes(r.ap_id));
+    console.log("Print records:", records);
+    // Add your print logic here
+  };
+
+  const handleBulkDownload = (ids) => {
+    const records = apRecords.filter(r => ids.includes(r.ap_id));
+    console.log("Download records:", records);
+    // Add your download logic here
+  };
+
+  const handleBulkDelete = (ids) => {
+    if (window.confirm(`Delete ${ids.length} AP record(s)?`)) {
+      console.log("Delete records:", ids);
+      // Add your delete logic here
+    }
+  };
 
   if (loading) return <Loading />;
 
@@ -267,7 +312,27 @@ const AccountsPayable = () => {
           </div>
 
           {/* AP Table */}
-          <APTable data={apRecords} activeTab={activeTab} />
+          <APTable 
+            data={apRecords} 
+            activeTab={activeTab}
+            onSelectionChange={setSelectedAP}
+          />
+
+          {/* Bulk Actions */}
+          <BulkActionBar
+            selected={selectedAP}
+            onEdit={handleBulkEdit}
+            onPrint={handleBulkPrint}
+            onDownload={handleBulkDownload}
+            onDelete={handleBulkDelete}
+          />
+
+          {/* Update AP Modal */}
+          <UpdateAP
+            isOpen={isUpdateAPModalOpen}
+            onClose={() => setIsUpdateAPModalOpen(false)}
+            apId={activeAPId}
+          />
         </div>
       </div>
     </div>
