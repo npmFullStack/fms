@@ -1,26 +1,27 @@
 // components/tables/CargoMonitoringTable.jsx
 import { useMemo, useState } from "react";
-import { flexRender } from "@tanstack/react-table";
-import {
-    ChevronUp,
-    ChevronDown,
-    Ship,
-    CalendarPlus2,
-    Check,
-    X
-} from "lucide-react";
+import { CalendarPlus2, Check, X, Ship } from "lucide-react";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import { toast } from "react-hot-toast";
+
+// Custom Hooks
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
+
+// Utils
 import {
     toCaps,
     getStatusBadge,
     getModeBadge
 } from "../../utils/helpers/tableDataFormatters";
+
+// Stores
 import useBookingStore from "../../utils/store/useBookingStore";
 import useContainerStore from "../../utils/store/useContainerStore";
+
+// Components
+import DataTable from "./DataTable";
 
 const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
     const [editingCell, setEditingCell] = useState(null);
@@ -29,6 +30,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
     const { updateBookingStatusHistory } = useBookingStore();
     const { updateContainer, markContainerAsReturned } = useContainerStore();
 
+    // Helper function to get history date
     const getHistoryDate = (booking, status) => {
         if (!booking.status_history || !Array.isArray(booking.status_history)) {
             return "--";
@@ -37,68 +39,70 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         return entry ? new Date(entry.status_date).toLocaleDateString() : "--";
     };
 
+    // Date editing handlers
     const handleEditDate = (bookingId, dateType, containerId = null) => {
         setEditingCell({ bookingId, dateType, containerId });
         setTempDate(null);
     };
     
     const handleSaveDate = async (bookingId, dateType, containerId = null, shippingLineId = null) => {
-    if (!tempDate) {
-        setEditingCell(null);
-        return;
-    }
+        if (!tempDate) {
+            setEditingCell(null);
+            return;
+        }
 
-    try {
-        if (dateType === "empty_return") {
-            const result = await updateContainer(containerId, {
-                isReturned: true,
-                returnedDate: new Date(tempDate).toISOString(), // ensure selected date is used
-                shippingLineId
-            });
+        try {
+            if (dateType === "empty_return") {
+                const result = await updateContainer(containerId, {
+                    isReturned: true,
+                    returnedDate: new Date(tempDate).toISOString(),
+                    shippingLineId
+                });
+
+                if (result.success) {
+                    toast.success("Container return date updated");
+                } else {
+                    toast.error(result.error || "Failed to update return date");
+                }
+
+                setEditingCell(null);
+                setTempDate(null);
+                return;
+            }
+
+            const statusMap = {
+                origin_pickup: "LOADED_TO_TRUCK",
+                origin_port_arrival: "ARRIVED_ORIGIN_PORT",
+                stuffing_date: "LOADED_TO_SHIP",
+                atd: "IN_TRANSIT",
+                ata: "ARRIVED_DESTINATION_PORT",
+                dest_port_pickup: "OUT_FOR_DELIVERY",
+                dest_delivery: "DELIVERED"
+            };
+
+            const status = statusMap[dateType];
+            const result = await updateBookingStatusHistory(bookingId, status, tempDate);
 
             if (result.success) {
-                toast.success("Container return date updated");
+                toast.success("Date updated successfully");
             } else {
-                toast.error(result.error || "Failed to update return date");
+                toast.error(result.error || "Failed to update date");
             }
 
             setEditingCell(null);
             setTempDate(null);
-            return;
+        } catch (error) {
+            console.error("Failed to update date:", error);
+            toast.error("Failed to update date");
         }
-
-        const statusMap = {
-            origin_pickup: "LOADED_TO_TRUCK",
-            origin_port_arrival: "ARRIVED_ORIGIN_PORT",
-            stuffing_date: "LOADED_TO_SHIP",
-            atd: "IN_TRANSIT",
-            ata: "ARRIVED_DESTINATION_PORT",
-            dest_port_pickup: "OUT_FOR_DELIVERY",
-            dest_delivery: "DELIVERED"
-        };
-
-        const status = statusMap[dateType];
-        const result = await updateBookingStatusHistory(bookingId, status, tempDate);
-
-        if (result.success) {
-            toast.success("Date updated successfully");
-        } else {
-            toast.error(result.error || "Failed to update date");
-        }
-
-        setEditingCell(null);
-        setTempDate(null);
-    } catch (error) {
-        console.error("Failed to update date:", error);
-        toast.error("Failed to update date");
-    }
-};
+    };
 
     const handleCancelEdit = () => {
         setEditingCell(null);
         setTempDate(null);
     };
 
+    // Date Cell Component
     const DateCell = ({
         booking,
         dateType,
@@ -120,7 +124,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         dateFormat="MM/DD/YYYY"
                         timeFormat={false}
                         inputProps={{
-                            className: "border rounded px-2 py-1   w-28",
+                            className: "border rounded px-2 py-1 w-28",
                             placeholder: "Select date"
                         }}
                     />
@@ -164,6 +168,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
         );
     };
 
+    // Table Columns Definition
     const columns = useMemo(
         () => [
             {
@@ -235,7 +240,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     return (
                         <div className="flex flex-col gap-1">
                             {containers.map((c, idx) => (
-                                <div key={idx} className="  font-mono">
+                                <div key={idx} className="font-mono">
                                     {toCaps(c.van_number)}
                                 </div>
                             ))}
@@ -256,7 +261,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "ARRIVED_ORIGIN_PORT"
                     );
                     return (
-                        <div className="flex flex-col   gap-1">
+                        <div className="flex flex-col gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="origin_pickup"
@@ -301,7 +306,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "ARRIVED_DESTINATION_PORT"
                     );
                     return (
-                        <div className="flex flex-col   gap-1">
+                        <div className="flex flex-col gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="atd"
@@ -331,7 +336,7 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                         "DELIVERED"
                     );
                     return (
-                        <div className="flex flex-col   gap-1">
+                        <div className="flex flex-col gap-1">
                             <DateCell
                                 booking={row.original}
                                 dateType="dest_port_pickup"
@@ -356,24 +361,18 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     if (!containers.length) return <span>--</span>;
 
                     return (
-                        <div className="flex flex-col   gap-2">
+                        <div className="flex flex-col gap-2">
                             {containers.map((c, idx) => {
-
-                                const returnDate =
-  c.is_returned
-    ? editingCell?.containerId === c.id && tempDate
-      ? new Date(tempDate).toLocaleDateString()
-      : c.returned_date
-      ? new Date(c.returned_date).toLocaleDateString()
-      : "--"
-    : "--";
-
+                                const returnDate = c.is_returned
+                                    ? editingCell?.containerId === c.id && tempDate
+                                        ? new Date(tempDate).toLocaleDateString()
+                                        : c.returned_date
+                                        ? new Date(c.returned_date).toLocaleDateString()
+                                        : "--"
+                                    : "--";
 
                                 return (
-                                    <div
-                                        key={idx}
-                                        className="flex items-start gap-2"
-                                    >
+                                    <div key={idx} className="flex items-start gap-2">
                                         <DateCell
                                             booking={row.original}
                                             dateType="empty_return"
@@ -389,20 +388,6 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                                                 </div>
                                             }
                                         />
-
-                                        {!c.returned_date && (
-                                            <button
-                                                onClick={() =>
-                                                    markContainerAsReturned(
-                                                        c.id,
-                                                        row.original
-                                                            .shipping_line_id
-                                                    )
-                                                }
-                                                className="p-1 text-green-600 hover:bg-green-50 rounded"
-                                                title="Mark as returned"
-                                            ></button>
-                                        )}
                                     </div>
                                 );
                             })}
@@ -410,7 +395,6 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                     );
                 }
             },
-
             {
                 accessorKey: "route",
                 header: "ROUTE",
@@ -456,139 +440,30 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange }) => {
                 }
             }
         ],
-        [editingCell, tempDate, markContainerAsReturned]
+        [editingCell, tempDate]
     );
 
+    // Use custom hooks
     const { table, globalFilter, setGlobalFilter } = useTable({
         data,
         columns
     });
     const { paginationInfo, actions } = usePagination(table, data?.length);
 
-    const selectedRows = table.getSelectedRowModel().rows;
-    useMemo(() => {
-        if (onSelectionChange) {
-            const selectedIds = selectedRows.map(r => r.original.id);
-            onSelectionChange(selectedIds);
-        }
-    }, [selectedRows, onSelectionChange]);
-
     return (
-        <div className="table-wrapper">
-            <div className="table-header-container">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="table-title">Cargo Monitoring</h2>
-                        <p className="table-count">
-                            Total: {paginationInfo.totalItems} records
-                        </p>
-                    </div>
-                    {rightAction}
-                </div>
-            </div>
-
-            <div className="filter-bar">
-                <input
-                    type="text"
-                    value={globalFilter ?? ""}
-                    onChange={e => setGlobalFilter(e.target.value)}
-                    placeholder="Search cargo records..."
-                    className="filter-input"
-                />
-            </div>
-
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead className="table-thead">
-                        {table.getHeaderGroups().map(hg => (
-                            <tr key={hg.id}>
-                                {hg.headers.map(header => (
-                                    <th
-                                        key={header.id}
-                                        onClick={header.column.getToggleSortingHandler()}
-                                        className="table-header"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                            {header.column.getIsSorted() ===
-                                                "asc" && (
-                                                <ChevronUp className="table-sort-icon" />
-                                            )}
-                                            {header.column.getIsSorted() ===
-                                                "desc" && (
-                                                <ChevronDown className="table-sort-icon" />
-                                            )}
-                                        </div>
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody className="table-body">
-                        {table.getRowModel().rows.length > 0 ? (
-                            table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="table-row">
-                                    {row.getVisibleCells().map(cell => (
-                                        <td
-                                            key={cell.id}
-                                            className="table-cell"
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length}>
-                                    <div className="empty-state">
-                                        <Ship className="empty-state-icon" />
-                                        <h3 className="empty-state-title">
-                                            No cargo records found
-                                        </h3>
-                                        <p className="empty-state-description">
-                                            Try adjusting your search.
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="table-pagination-container">
-                <div className="table-pagination-inner">
-                    <span className="table-pagination-info">
-                        Page {paginationInfo.currentPage} of{" "}
-                        {paginationInfo.totalPages} ({paginationInfo.totalItems}{" "}
-                        total)
-                    </span>
-                    <div className="table-pagination-actions">
-                        <button
-                            onClick={actions.previousPage}
-                            disabled={!actions.canPrevious}
-                            className="table-pagination-button"
-                        >
-                            Previous
-                        </button>
-                        <button
-                            onClick={actions.nextPage}
-                            disabled={!actions.canNext}
-                            className="table-pagination-button"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <DataTable
+            table={table}
+            columns={columns}
+            data={data}
+            title="Cargo Monitoring"
+            rightAction={rightAction}
+            searchPlaceholder="Search cargo records..."
+            onSelectionChange={onSelectionChange}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            paginationInfo={paginationInfo}
+            paginationActions={actions}
+        />
     );
 };
 

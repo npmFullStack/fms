@@ -1,211 +1,414 @@
 // components/modals/UpdateAP.jsx
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { updateAPFormSchema } from "../../schemas/apSchema";
+import useFinanceStore from "../../utils/store/useFinanceStore";
+import useModal from "../../utils/hooks/useModal";
+import FormModal from "./FormModal";
+import { toast } from "react-hot-toast";
 
-const UpdateAP = ({ isOpen, onClose, apId }) => {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    // Freight
-    freight_amount: "",
-    freight_check_date: "",
-    freight_voucher: "",
-    
-    // Trucking Origin
-    trucking_origin_amount: "",
-    trucking_origin_check_date: "",
-    trucking_origin_voucher: "",
-    
-    // Trucking Destination
-    trucking_dest_amount: "",
-    trucking_dest_check_date: "",
-    trucking_dest_voucher: "",
-    
-    // Port Charges
-    crainage_amount: "",
-    crainage_check_date: "",
-    crainage_voucher: "",
-    
-    arrastre_origin_amount: "",
-    arrastre_origin_check_date: "",
-    arrastre_origin_voucher: "",
-    
-    arrastre_dest_amount: "",
-    arrastre_dest_check_date: "",
-    arrastre_dest_voucher: "",
-    
-    wharfage_origin_amount: "",
-    wharfage_origin_check_date: "",
-    wharfage_origin_voucher: "",
-    
-    wharfage_dest_amount: "",
-    wharfage_dest_check_date: "",
-    wharfage_dest_voucher: "",
-    
-    labor_origin_amount: "",
-    labor_origin_check_date: "",
-    labor_origin_voucher: "",
-    
-    labor_dest_amount: "",
-    labor_dest_check_date: "",
-    labor_dest_voucher: "",
-    
-    // Misc Charges
-    rebates_amount: "",
-    rebates_check_date: "",
-    rebates_voucher: "",
-    
-    storage_amount: "",
-    storage_check_date: "",
-    storage_voucher: "",
-    
-    facilitation_amount: "",
-    facilitation_check_date: "",
-    facilitation_voucher: ""
-  });
+// Steps
+import APStep1 from "./ap/APStep1";
+import APStep2 from "./ap/APStep2";
+import APStep3 from "./ap/APStep3";
+import APStep4 from "./ap/APStep4";
+import APStep5 from "./ap/APStep5";
 
-  useEffect(() => {
-    if (apId && isOpen) {
-      fetchAPData(apId);
-    }
-  }, [apId, isOpen]);
+const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
+    const [currentStep, setCurrentStep] = useState(1);
+    const { updateAPRecord, loading: financeLoading } = useFinanceStore();
 
-  const fetchAPData = async (id) => {
-    try {
-      setLoading(true);
-      // Add your API call here
-      // const response = await getAPById(id);
-      // setFormData(response.data);
-    } catch (error) {
-      console.error("Error fetching AP data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const {
+        isLoading,
+        setIsLoading,
+        handleClose: modalClose
+    } = useModal(() => {
+        reset();
+        setCurrentStep(1);
+    });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      // Add your update API call here
-      // await updateAP(apId, formData);
-      onClose();
-    } catch (error) {
-      console.error("Error updating AP:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        setValue,
+        watch,
+        getValues,
+        trigger,
+        formState: { errors, isSubmitting }
+    } = useForm({
+        resolver: zodResolver(updateAPFormSchema),
+        mode: "onChange",
+        defaultValues: {
+            // Freight
+            freight_amount: 0,
+            freight_check_date: "",
+            freight_voucher: "",
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+            // Trucking Origin
+            trucking_origin_amount: 0,
+            trucking_origin_check_date: "",
+            trucking_origin_voucher: "",
 
-  const renderExpenseSection = (title, fields) => (
-    <div className="space-y-4 p-4 border border-slate-200 rounded-lg">
-      <h3 className="text-lg font-semibold text-slate-700">{title}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fields.map(field => (
-          <div key={field.name}>
-            <label className="form-label">{field.label}</label>
-            <input
-              type={field.type}
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
-              className="form-input"
-              step={field.type === "number" ? "0.01" : undefined}
+            // Trucking Destination
+            trucking_dest_amount: 0,
+            trucking_dest_check_date: "",
+            trucking_dest_voucher: "",
+
+            // Port Charges
+            crainage_amount: 0,
+            crainage_check_date: "",
+            crainage_voucher: "",
+
+            arrastre_origin_amount: 0,
+            arrastre_origin_check_date: "",
+            arrastre_origin_voucher: "",
+
+            arrastre_dest_amount: 0,
+            arrastre_dest_check_date: "",
+            arrastre_dest_voucher: "",
+
+            wharfage_origin_amount: 0,
+            wharfage_origin_check_date: "",
+            wharfage_origin_voucher: "",
+
+            wharfage_dest_amount: 0,
+            wharfage_dest_check_date: "",
+            wharfage_dest_voucher: "",
+
+            labor_origin_amount: 0,
+            labor_origin_check_date: "",
+            labor_origin_voucher: "",
+
+            labor_dest_amount: 0,
+            labor_dest_check_date: "",
+            labor_dest_voucher: "",
+
+            // Misc Charges
+            rebates_amount: 0,
+            rebates_check_date: "",
+            rebates_voucher: "",
+
+            storage_amount: 0,
+            storage_check_date: "",
+            storage_voucher: "",
+
+            facilitation_amount: 0,
+            facilitation_check_date: "",
+            facilitation_voucher: ""
+        }
+    });
+
+    // Populate form with existing data when modal opens or record changes
+    useEffect(() => {
+        if (apRecord && isOpen) {
+            const formData = {
+                // Freight
+                freight_amount: apRecord.freight_amount || 0,
+                freight_check_date: apRecord.freight_check_date || "",
+                freight_voucher: apRecord.freight_voucher || "",
+
+                // Trucking Origin
+                trucking_origin_amount: apRecord.trucking_origin_amount || 0,
+                trucking_origin_check_date: apRecord.trucking_origin_check_date || "",
+                trucking_origin_voucher: apRecord.trucking_origin_voucher || "",
+
+                // Trucking Destination
+                trucking_dest_amount: apRecord.trucking_dest_amount || 0,
+                trucking_dest_check_date: apRecord.trucking_dest_check_date || "",
+                trucking_dest_voucher: apRecord.trucking_dest_voucher || "",
+
+                // Port Charges
+                crainage_amount: apRecord.crainage_amount || 0,
+                crainage_check_date: apRecord.crainage_check_date || "",
+                crainage_voucher: apRecord.crainage_voucher || "",
+
+                arrastre_origin_amount: apRecord.arrastre_origin_amount || 0,
+                arrastre_origin_check_date: apRecord.arrastre_origin_check_date || "",
+                arrastre_origin_voucher: apRecord.arrastre_origin_voucher || "",
+
+                arrastre_dest_amount: apRecord.arrastre_dest_amount || 0,
+                arrastre_dest_check_date: apRecord.arrastre_dest_check_date || "",
+                arrastre_dest_voucher: apRecord.arrastre_dest_voucher || "",
+
+                wharfage_origin_amount: apRecord.wharfage_origin_amount || 0,
+                wharfage_origin_check_date: apRecord.wharfage_origin_check_date || "",
+                wharfage_origin_voucher: apRecord.wharfage_origin_voucher || "",
+
+                wharfage_dest_amount: apRecord.wharfage_dest_amount || 0,
+                wharfage_dest_check_date: apRecord.wharfage_dest_check_date || "",
+                wharfage_dest_voucher: apRecord.wharfage_dest_voucher || "",
+
+                labor_origin_amount: apRecord.labor_origin_amount || 0,
+                labor_origin_check_date: apRecord.labor_origin_check_date || "",
+                labor_origin_voucher: apRecord.labor_origin_voucher || "",
+
+                labor_dest_amount: apRecord.labor_dest_amount || 0,
+                labor_dest_check_date: apRecord.labor_dest_check_date || "",
+                labor_dest_voucher: apRecord.labor_dest_voucher || "",
+
+                // Misc Charges
+                rebates_amount: apRecord.rebates_amount || 0,
+                rebates_check_date: apRecord.rebates_check_date || "",
+                rebates_voucher: apRecord.rebates_voucher || "",
+
+                storage_amount: apRecord.storage_amount || 0,
+                storage_check_date: apRecord.storage_check_date || "",
+                storage_voucher: apRecord.storage_voucher || "",
+
+                facilitation_amount: apRecord.facilitation_amount || 0,
+                facilitation_check_date: apRecord.facilitation_check_date || "",
+                facilitation_voucher: apRecord.facilitation_voucher || ""
+            };
+
+            // Set all form values
+            Object.entries(formData).forEach(([key, value]) => {
+                setValue(key, value);
+            });
+        }
+    }, [apRecord, isOpen, setValue]);
+
+    const handleClose = () => {
+        reset();
+        setCurrentStep(1);
+        modalClose();
+        onClose();
+    };
+
+    // Step validation fields
+    const stepValidationFields = {
+        1: ["freight_amount", "freight_voucher"],
+        2: ["trucking_origin_amount", "trucking_dest_amount"],
+        3: [
+            "crainage_amount",
+            "arrastre_origin_amount",
+            "arrastre_dest_amount",
+            "wharfage_origin_amount",
+            "wharfage_dest_amount",
+            "labor_origin_amount",
+            "labor_dest_amount"
+        ],
+        4: ["rebates_amount", "storage_amount", "facilitation_amount"],
+        5: [] // No validation for review step
+    };
+
+    const onSubmit = async (data) => {
+        try {
+            setIsLoading(true);
+
+            console.log("Submitting AP data:", data);
+
+            // Format data for API
+            const formattedData = {
+                // Convert empty strings to null for dates
+                freight_check_date: data.freight_check_date || null,
+                trucking_origin_check_date: data.trucking_origin_check_date || null,
+                trucking_dest_check_date: data.trucking_dest_check_date || null,
+                crainage_check_date: data.crainage_check_date || null,
+                arrastre_origin_check_date: data.arrastre_origin_check_date || null,
+                arrastre_dest_check_date: data.arrastre_dest_check_date || null,
+                wharfage_origin_check_date: data.wharfage_origin_check_date || null,
+                wharfage_dest_check_date: data.wharfage_dest_check_date || null,
+                labor_origin_check_date: data.labor_origin_check_date || null,
+                labor_dest_check_date: data.labor_dest_check_date || null,
+                rebates_check_date: data.rebates_check_date || null,
+                storage_check_date: data.storage_check_date || null,
+                facilitation_check_date: data.facilitation_check_date || null,
+
+                // Convert empty strings to null for vouchers
+                freight_voucher: data.freight_voucher || null,
+                trucking_origin_voucher: data.trucking_origin_voucher || null,
+                trucking_dest_voucher: data.trucking_dest_voucher || null,
+                crainage_voucher: data.crainage_voucher || null,
+                arrastre_origin_voucher: data.arrastre_origin_voucher || null,
+                arrastre_dest_voucher: data.arrastre_dest_voucher || null,
+                wharfage_origin_voucher: data.wharfage_origin_voucher || null,
+                wharfage_dest_voucher: data.wharfage_dest_voucher || null,
+                labor_origin_voucher: data.labor_origin_voucher || null,
+                labor_dest_voucher: data.labor_dest_voucher || null,
+                rebates_voucher: data.rebates_voucher || null,
+                storage_voucher: data.storage_voucher || null,
+                facilitation_voucher: data.facilitation_voucher || null,
+
+                // Keep amounts as numbers
+                freight_amount: data.freight_amount,
+                trucking_origin_amount: data.trucking_origin_amount,
+                trucking_dest_amount: data.trucking_dest_amount,
+                crainage_amount: data.crainage_amount,
+                arrastre_origin_amount: data.arrastre_origin_amount,
+                arrastre_dest_amount: data.arrastre_dest_amount,
+                wharfage_origin_amount: data.wharfage_origin_amount,
+                wharfage_dest_amount: data.wharfage_dest_amount,
+                labor_origin_amount: data.labor_origin_amount,
+                labor_dest_amount: data.labor_dest_amount,
+                rebates_amount: data.rebates_amount,
+                storage_amount: data.storage_amount,
+                facilitation_amount: data.facilitation_amount
+            };
+
+            const result = await updateAPRecord(apId, formattedData);
+
+            if (result.success) {
+                toast.success("Accounts Payable updated successfully");
+                handleClose();
+            } else {
+                toast.error(result.error || "Failed to update AP. Please try again.");
+            }
+        } catch (err) {
+            console.error("Submit error:", err);
+            toast.error(err.message || "Something went wrong");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleNext = async (e) => {
+        e?.preventDefault();
+
+        // Validate current step
+        const fieldsToValidate = stepValidationFields[currentStep];
+        
+        if (fieldsToValidate?.length > 0) {
+            const isValid = await trigger(fieldsToValidate);
+            
+            if (!isValid) {
+                toast.error("Please fill in all required fields correctly");
+                return;
+            }
+        }
+
+        if (currentStep < 5) {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
+    const handlePrev = () => {
+        if (currentStep > 1) {
+            setCurrentStep(currentStep - 1);
+        }
+    };
+
+    // Step components
+    const stepComponents = {
+        1: (
+            <APStep1
+                register={register}
+                control={control}
+                errors={errors}
+                apRecord={apRecord}
             />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+        ),
+        2: (
+            <APStep2
+                register={register}
+                control={control}
+                errors={errors}
+                apRecord={apRecord}
+            />
+        ),
+        3: (
+            <APStep3
+                register={register}
+                control={control}
+                errors={errors}
+                apRecord={apRecord}
+            />
+        ),
+        4: (
+            <APStep4
+                register={register}
+                control={control}
+                errors={errors}
+                apRecord={apRecord}
+            />
+        ),
+        5: (
+            <APStep5
+                control={control}
+                watch={watch}
+                apRecord={apRecord}
+            />
+        )
+    };
 
-  if (!isOpen) return null;
+    const getStepTitle = () => {
+        const titles = {
+            1: "Freight Charges",
+            2: "Trucking Charges",
+            3: "Port Charges",
+            4: "Miscellaneous Charges",
+            5: "Review & Update"
+        };
+        return titles[currentStep];
+    };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white">
-          <h2 className="text-xl font-bold text-slate-800">
-            Update Accounts Payable
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    const getStepDescription = () => {
+        const descriptions = {
+            1: "Update freight expenses and payment details",
+            2: "Update origin and destination trucking charges",
+            3: "Update all port-related charges and fees",
+            4: "Update miscellaneous expenses and other charges",
+            5: "Review all changes before updating"
+        };
+        return descriptions[currentStep];
+    };
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Freight Section */}
-          {renderExpenseSection("Freight Charges", [
-            { name: "freight_amount", label: "Amount", type: "number" },
-            { name: "freight_check_date", label: "Check Date", type: "date" },
-            { name: "freight_voucher", label: "Voucher", type: "text" }
-          ])}
+    return (
+        <FormModal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title={`Update Accounts Payable - ${getStepTitle()}`}
+            isLoading={isLoading}
+            isSubmitting={isSubmitting}
+            onSubmit={handleSubmit(onSubmit)}
+            fields={[]}
+            infoBox={{
+                title: "AP Update Info",
+                items: [
+                    { text: `Step ${currentStep} of 5` },
+                    { text: getStepDescription() },
+                    apRecord && { 
+                        text: `Booking: ${apRecord.booking_number} | HWB: ${apRecord.hwb_number}` 
+                    }
+                ]
+            }}
+            footer={
+                <div className="flex justify-between w-full">
+                    <button
+                        type="button"
+                        onClick={handlePrev}
+                        disabled={currentStep === 1 || isLoading}
+                        className="btn-secondary-modern"
+                    >
+                        Previous
+                    </button>
 
-          {/* Trucking Origin Section */}
-          {renderExpenseSection("Trucking - Origin", [
-            { name: "trucking_origin_amount", label: "Amount", type: "number" },
-            { name: "trucking_origin_check_date", label: "Check Date", type: "date" },
-            { name: "trucking_origin_voucher", label: "Voucher", type: "text" }
-          ])}
-
-          {/* Trucking Destination Section */}
-          {renderExpenseSection("Trucking - Destination", [
-            { name: "trucking_dest_amount", label: "Amount", type: "number" },
-            { name: "trucking_dest_check_date", label: "Check Date", type: "date" },
-            { name: "trucking_dest_voucher", label: "Voucher", type: "text" }
-          ])}
-
-          {/* Port Charges Sections */}
-          {renderExpenseSection("Crainage", [
-            { name: "crainage_amount", label: "Amount", type: "number" },
-            { name: "crainage_check_date", label: "Check Date", type: "date" },
-            { name: "crainage_voucher", label: "Voucher", type: "text" }
-          ])}
-
-          {renderExpenseSection("Arrastre - Origin", [
-            { name: "arrastre_origin_amount", label: "Amount", type: "number" },
-            { name: "arrastre_origin_check_date", label: "Check Date", type: "date" },
-            { name: "arrastre_origin_voucher", label: "Voucher", type: "text" }
-          ])}
-
-          {renderExpenseSection("Arrastre - Destination", [
-            { name: "arrastre_dest_amount", label: "Amount", type: "number" },
-            { name: "arrastre_dest_check_date", label: "Check Date", type: "date" },
-            { name: "arrastre_dest_voucher", label: "Voucher", type: "text" }
-          ])}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 sticky bottom-0 bg-white">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-            >
-              {loading ? "Updating..." : "Update AP"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+                    {currentStep === 5 ? (
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="btn-primary-modern"
+                        >
+                            {isLoading ? "Updating..." : "Update AP"}
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={handleNext}
+                            disabled={isLoading}
+                            className="btn-primary-modern"
+                        >
+                            Next
+                        </button>
+                    )}
+                </div>
+            }
+        >
+            {stepComponents[currentStep]}
+        </FormModal>
+    );
 };
 
 export default UpdateAP;

@@ -1,7 +1,6 @@
 // components/tables/BookingTable.jsx
 import { useMemo, useEffect } from "react";
-import { flexRender } from "@tanstack/react-table";
-import { ChevronUp, ChevronDown, Clipboard } from "lucide-react";
+import { Clipboard } from "lucide-react";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 import {
@@ -9,6 +8,7 @@ import {
     getStatusBadge,
     getModeBadge
 } from "../../utils/helpers/tableDataFormatters";
+import DataTable from "./DataTable";
 
 const BookingTable = ({ data, rightAction, onSelectionChange }) => {
     const columns = useMemo(
@@ -53,6 +53,15 @@ const BookingTable = ({ data, rightAction, onSelectionChange }) => {
                 )
             },
             {
+                accessorKey: "created_at",
+                header: "Booking Date",
+                cell: ({ row }) => (
+                    <span className="table-text">
+                        {new Date(row.original.created_at).toLocaleDateString()}
+                    </span>
+                )
+            },
+            {
                 accessorKey: "shipper",
                 header: "Shipper",
                 cell: ({ row }) => (
@@ -60,9 +69,9 @@ const BookingTable = ({ data, rightAction, onSelectionChange }) => {
                         <div className="table-text-bold">
                             {toCaps(row.original.shipper)}
                         </div>
-                        {row.original.phone && (
+                        {row.original.shipper_phone && (
                             <div className="table-subtext">
-                                {toCaps(row.original.phone)}
+                                {toCaps(row.original.shipper_phone)}
                             </div>
                         )}
                     </div>
@@ -127,125 +136,19 @@ const BookingTable = ({ data, rightAction, onSelectionChange }) => {
     }, [selectedRows, onSelectionChange]);
 
     return (
-        <div className="table-wrapper">
-            {/* Header */}
-            <div className="table-header-container">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="table-title">Bookings</h2>
-                        <p className="table-count">
-                            Total: {paginationInfo.totalItems} bookings
-                        </p>
-                    </div>
-                    {rightAction}
-                </div>
-            </div>
-
-            {/* Filter Bar */}
-            <div className="filter-bar">
-                <input
-                    type="text"
-                    value={globalFilter ?? ""}
-                    onChange={e => setGlobalFilter(e.target.value)}
-                    placeholder="Search bookings..."
-                    className="filter-input"
-                />
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead className="table-thead">
-                        {table.getHeaderGroups().map(hg => (
-                            <tr key={hg.id}>
-                                {hg.headers.map(header => (
-                                    <th
-                                        key={header.id}
-                                        onClick={header.column.getToggleSortingHandler()}
-                                        className="table-header"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                            {header.column.getIsSorted() ===
-                                                "asc" && (
-                                                <ChevronUp className="table-sort-icon" />
-                                            )}
-                                            {header.column.getIsSorted() ===
-                                                "desc" && (
-                                                <ChevronDown className="table-sort-icon" />
-                                            )}
-                                        </div>
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody className="table-body">
-                        {table.getRowModel().rows.length > 0 ? (
-                            table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="table-row">
-                                    {row.getVisibleCells().map(cell => (
-                                        <td
-                                            key={cell.id}
-                                            className="table-cell"
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length}>
-                                    <div className="empty-state">
-                                        <Clipboard className="empty-state-icon" />
-                                        <h3 className="empty-state-title">
-                                            No bookings found
-                                        </h3>
-                                        <p className="empty-state-description">
-                                            Try adjusting your search.
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="table-pagination-container">
-                <div className="table-pagination-inner">
-                    <span className="table-pagination-info">
-                        Page {paginationInfo.currentPage} of{" "}
-                        {paginationInfo.totalPages} ({paginationInfo.totalItems}{" "}
-                        total)
-                    </span>
-                    <div className="table-pagination-actions">
-                        <button
-                            onClick={actions.previousPage}
-                            disabled={!actions.canPrevious}
-                            className="table-pagination-button"
-                        >
-                            Previous
-                        </button>
-                        <button
-                            onClick={actions.nextPage}
-                            disabled={!actions.canNext}
-                            className="table-pagination-button"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <DataTable
+            table={table}
+            columns={columns}
+            data={data}
+            title="Bookings"
+            rightAction={rightAction}
+            searchPlaceholder="Search bookings..."
+            onSelectionChange={onSelectionChange}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            paginationInfo={paginationInfo}
+            paginationActions={actions}
+        />
     );
 };
 
