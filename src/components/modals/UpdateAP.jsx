@@ -359,7 +359,7 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
         <FormModal
             isOpen={isOpen}
             onClose={handleClose}
-            title={`Update Accounts Payable - ${getStepTitle()}`}
+            title="Update Booking"
             isLoading={isLoading}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit(onSubmit)}
