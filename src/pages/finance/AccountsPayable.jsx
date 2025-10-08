@@ -49,154 +49,163 @@ const AccountsPayable = () => {
         [apRecords]
     );
 
-    // Format AP records for table - use real AP data instead of placeholder
-    const apRecordsForTable = useMemo(() => {
-        if (safeAPRecords.length > 0) {
-            // Use real AP data from database
-            return safeAPRecords.map(ap => ({
-                ap_id: ap.ap_id,
-                booking_id: ap.booking_id,
-                booking_number: ap.booking_number,
-                hwb_number: ap.hwb_number,
-                origin_port: ap.origin_port,
-                destination_port: ap.destination_port,
-                commodity: ap.commodity,
-                quantity: ap.quantity,
-                booking_mode: ap.booking_mode,
-                created_at: ap.created_at,
 
-                // Client info
-                client: ap.consignee || "-",
-                mode: ap.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
-                route: `${ap.origin_port || "-"} → ${ap.destination_port || "-"}`,
-                volume: `${ap.quantity || 1}${ap.container_size || "LCL"}`,
-
-                // Freight expenses (from real data)
-                freight_payee: ap.freight_payee || "-",
-                freight_amount: parseFloat(ap.freight_amount) || 0,
-                freight_check_date: ap.freight_check_date,
-                freight_voucher: ap.freight_voucher || "",
-
-                // Trucking Origin
-                trucking_origin_payee: ap.trucking_origin_payee || "-",
-                trucking_origin_amount: parseFloat(ap.trucking_origin_amount) || 0,
-                trucking_origin_check_date: ap.trucking_origin_check_date,
-                trucking_origin_voucher: ap.trucking_origin_voucher || "",
-
-                // Trucking Destination
-                trucking_dest_payee: ap.trucking_dest_payee || "-",
-                trucking_dest_amount: parseFloat(ap.trucking_dest_amount) || 0,
-                trucking_dest_check_date: ap.trucking_dest_check_date,
-                trucking_dest_voucher: ap.trucking_dest_voucher || "",
-
-                // Port Charges (from JSON arrays)
-                ...parsePortCharges(ap.port_charges),
-                ...parseMiscCharges(ap.misc_charges),
-
-                // Calculate totals from real data
-                total_expenses: calculateTotalExpenses(ap),
-                bir: calculateBIR(ap),
-                total_expenses_with_bir: calculateTotalWithBIR(ap),
-                net_revenue: calculateNetRevenue(ap),
-
-                remarks: ap.remarks || "",
-            }));
-        } else {
-            // Fallback to booking data if no AP records exist
-            return safeBookings.map(booking => ({
-                ap_id: booking.id,
-                booking_id: booking.id,
-                booking_number: booking.booking_number,
-                hwb_number: booking.hwb_number,
-                origin_port: booking.origin_port,
-                destination_port: booking.destination_port,
-                commodity: booking.commodity,
-                quantity: booking.quantity,
-                booking_mode: booking.booking_mode,
-                created_at: booking.created_at,
-
-                // Default values for new AP records
-                client: booking.shipper || "-",
-                mode: booking.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
-                route: `${booking.origin_port || "-"} → ${booking.destination_port || "-"}`,
-                volume: `${booking.quantity || 1}${booking.container_size || "LCL"}`,
-
-                // Initialize with zero values
-                freight_payee: "-",
-                freight_amount: 0,
-                freight_check_date: null,
-                freight_voucher: "",
-
-                trucking_origin_payee: "-",
-                trucking_origin_amount: 0,
-                trucking_origin_check_date: null,
-                trucking_origin_voucher: "",
-
-                trucking_dest_payee: "-",
-                trucking_dest_amount: 0,
-                trucking_dest_check_date: null,
-                trucking_dest_voucher: "",
-
-                // Initialize all charge types with zero values
-                crainage_payee: "-",
-                crainage_amount: 0,
-                crainage_check_date: null,
-                crainage_voucher: "",
-
-                arrastre_origin_payee: "-",
-                arrastre_origin_amount: 0,
-                arrastre_origin_check_date: null,
-                arrastre_origin_voucher: "",
-
-                arrastre_dest_payee: "-",
-                arrastre_dest_amount: 0,
-                arrastre_dest_check_date: null,
-                arrastre_dest_voucher: "",
-
-                wharfage_origin_payee: "-",
-                wharfage_origin_amount: 0,
-                wharfage_origin_check_date: null,
-                wharfage_origin_voucher: "",
-
-                wharfage_dest_payee: "-",
-                wharfage_dest_amount: 0,
-                wharfage_dest_check_date: null,
-                wharfage_dest_voucher: "",
-
-                labor_origin_payee: "-",
-                labor_origin_amount: 0,
-                labor_origin_check_date: null,
-                labor_origin_voucher: "",
-
-                labor_dest_payee: "-",
-                labor_dest_amount: 0,
-                labor_dest_check_date: null,
-                labor_dest_voucher: "",
-
-                rebates_payee: "-",
-                rebates_amount: 0,
-                rebates_check_date: null,
-                rebates_voucher: "",
-
-                storage_payee: "-",
-                storage_amount: 0,
-                storage_check_date: null,
-                storage_voucher: "",
-
-                facilitation_payee: "-",
-                facilitation_amount: 0,
-                facilitation_check_date: null,
-                facilitation_voucher: "",
-
-                total_expenses: 0,
-                bir: 0,
-                total_expenses_with_bir: 0,
-                net_revenue: 0,
-
-                remarks: "",
-            }));
-        }
-    }, [safeBookings, safeAPRecords]);
+const apRecordsForTable = useMemo(() => {
+  if (safeAPRecords.length > 0) {
+    // Use real AP data from database
+    return safeAPRecords.map(ap => {
+      console.log('AP Record:', ap); // DEBUG: Check what data is coming from backend
+      
+      return {
+        ap_id: ap.ap_id,
+        booking_id: ap.booking_id,
+        booking_number: ap.booking_number,
+        hwb_number: ap.hwb_number,
+        origin_port: ap.origin_port,
+        destination_port: ap.destination_port,
+        commodity: ap.commodity,
+        quantity: ap.quantity,
+        booking_mode: ap.booking_mode,
+        created_at: ap.created_at,
+        
+        // Client info
+        client: ap.consignee || "-",
+        mode: ap.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
+        route: `${ap.origin_port || "-"} → ${ap.destination_port || "-"}`,
+        volume: `${ap.quantity || 1}${ap.container_size || "LCL"}`,
+        
+        // Freight expenses - COMES FROM AP_SUMMARY VIEW
+        freight_payee: ap.freight_payee || "-",
+        freight_amount: parseFloat(ap.freight_amount) || 0,
+        freight_check_date: ap.freight_check_date,
+        freight_voucher: ap.freight_voucher || "",
+        
+        // Trucking Origin - COMES FROM AP_SUMMARY VIEW
+        trucking_origin_payee: ap.trucking_origin_payee || "-",
+        trucking_origin_amount: parseFloat(ap.trucking_origin_amount) || 0,
+        trucking_origin_check_date: ap.trucking_origin_check_date,
+        trucking_origin_voucher: ap.trucking_origin_voucher || "",
+        
+        // Trucking Destination - COMES FROM AP_SUMMARY VIEW
+        trucking_dest_payee: ap.trucking_dest_payee || "-",
+        trucking_dest_amount: parseFloat(ap.trucking_dest_amount) || 0,
+        trucking_dest_check_date: ap.trucking_dest_check_date,
+        trucking_dest_voucher: ap.trucking_dest_voucher || "",
+        
+        // Port Charges (from JSON arrays)
+        ...parsePortCharges(ap.port_charges),
+        ...parseMiscCharges(ap.misc_charges),
+        
+        // Calculate totals from real data
+        total_expenses: calculateTotalExpenses(ap),
+        bir: calculateBIR(ap),
+        total_expenses_with_bir: calculateTotalWithBIR(ap),
+        net_revenue: calculateNetRevenue(ap),
+        remarks: ap.remarks || "",
+      };
+    });
+  } else {
+    // Fallback: If no AP records exist, create from bookings
+    // This should only happen when AP records haven't been created yet
+    console.log('No AP records found, using bookings'); // DEBUG
+    
+    return safeBookings.map(booking => {
+      console.log('Booking:', booking); // DEBUG: Check booking data
+      
+      return {
+        ap_id: booking.id,
+        booking_id: booking.id,
+        booking_number: booking.booking_number,
+        hwb_number: booking.hwb_number,
+        origin_port: booking.origin_port,
+        destination_port: booking.destination_port,
+        commodity: booking.commodity,
+        quantity: booking.quantity,
+        booking_mode: booking.booking_mode,
+        created_at: booking.created_at,
+        
+        // Default values for new AP records
+        client: booking.shipper || "-",
+        mode: booking.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
+        route: `${booking.origin_port || "-"} → ${booking.destination_port || "-"}`,
+        volume: `${booking.quantity || 1}${booking.container_size || "LCL"}`,
+        
+        // Get payees from booking data
+        freight_payee: booking.shipping_line_name || "-",
+        freight_amount: 0,
+        freight_check_date: null,
+        freight_voucher: "",
+        
+        trucking_origin_payee: booking.pickup_trucker || "-",
+        trucking_origin_amount: 0,
+        trucking_origin_check_date: null,
+        trucking_origin_voucher: "",
+        
+        trucking_dest_payee: booking.delivery_trucker || "-",
+        trucking_dest_amount: 0,
+        trucking_dest_check_date: null,
+        trucking_dest_voucher: "",
+        
+        // Initialize all charge types with zero values
+        crainage_payee: "-",
+        crainage_amount: 0,
+        crainage_check_date: null,
+        crainage_voucher: "",
+        
+        arrastre_origin_payee: "-",
+        arrastre_origin_amount: 0,
+        arrastre_origin_check_date: null,
+        arrastre_origin_voucher: "",
+        
+        arrastre_dest_payee: "-",
+        arrastre_dest_amount: 0,
+        arrastre_dest_check_date: null,
+        arrastre_dest_voucher: "",
+        
+        wharfage_origin_payee: "-",
+        wharfage_origin_amount: 0,
+        wharfage_origin_check_date: null,
+        wharfage_origin_voucher: "",
+        
+        wharfage_dest_payee: "-",
+        wharfage_dest_amount: 0,
+        wharfage_dest_check_date: null,
+        wharfage_dest_voucher: "",
+        
+        labor_origin_payee: "-",
+        labor_origin_amount: 0,
+        labor_origin_check_date: null,
+        labor_origin_voucher: "",
+        
+        labor_dest_payee: "-",
+        labor_dest_amount: 0,
+        labor_dest_check_date: null,
+        labor_dest_voucher: "",
+        
+        rebates_payee: "-",
+        rebates_amount: 0,
+        rebates_check_date: null,
+        rebates_voucher: "",
+        
+        storage_payee: "-",
+        storage_amount: 0,
+        storage_check_date: null,
+        storage_voucher: "",
+        
+        facilitation_payee: "-",
+        facilitation_amount: 0,
+        facilitation_check_date: null,
+        facilitation_voucher: "",
+        
+        total_expenses: 0,
+        bir: 0,
+        total_expenses_with_bir: 0,
+        net_revenue: 0,
+        remarks: "",
+      };
+    });
+  }
+}, [safeBookings, safeAPRecords]);
 
     // Helper functions for calculations
     const calculateTotalExpenses = (ap) => {

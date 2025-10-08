@@ -220,9 +220,7 @@
   position: relative;
   z-index: 1;
 }
-.table-cell:has(.rdtPicker) {
-  z-index: 100000 !important;
-}
+
 
     .table-cell-stack {
         @apply text-sm;
@@ -360,16 +358,5 @@
 
 .animate-rock {
   animation: rock 0.5s ease-in-out infinite;
-}
-
-.rdtPicker {
-  position: absolute !important;
-  z-index: 99999 !important;
-  top: 100%;
-  left: 0;
-  background: white;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
 }
 

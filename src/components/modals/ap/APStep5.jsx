@@ -1,4 +1,6 @@
 // components/modals/ap/APStep5.jsx
+import { FileText, CheckCircle, Calculator } from "lucide-react";
+
 const APStep5 = ({ watch, apRecord }) => {
   const formData = watch();
 
@@ -97,15 +99,13 @@ const APStep5 = ({ watch, apRecord }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="info-box-modern">
-        <div className="flex items-start gap-3">
-          <div className="p-1.5 bg-emerald-100 rounded-lg">
-            <span className="text-emerald-600 text-sm font-semibold">i</span>
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-semibold text-slate-800 mb-1">Review & Confirm</h4>
-            <p className="text-xs text-slate-600">
-              Please review all details before submitting the Accounts Payable update.
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-blue-600" />
+          <div>
+            <h3 className="font-semibold text-slate-800">Review Accounts Payable</h3>
+            <p className="text-sm text-slate-600">
+              Review all expense details before finalizing.
             </p>
           </div>
         </div>
@@ -113,64 +113,87 @@ const APStep5 = ({ watch, apRecord }) => {
 
       {/* Booking Info */}
       {apRecord && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
-          <h4 className="font-semibold text-slate-800 mb-2">Booking Information</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-blue-600" />
+            <h4 className="font-semibold text-slate-800">Booking Information</h4>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-slate-600">Booking #:</span>
-              <p className="font-medium">{apRecord.booking_number}</p>
+              <p className="font-medium text-slate-800">{apRecord.booking_number}</p>
             </div>
             <div>
               <span className="text-slate-600">HWB #:</span>
-              <p className="font-medium">{apRecord.hwb_number}</p>
+              <p className="font-medium text-slate-800">{apRecord.hwb_number}</p>
             </div>
             <div>
               <span className="text-slate-600">Route:</span>
-              <p className="font-medium">{apRecord.route}</p>
+              <p className="font-medium text-slate-800">{apRecord.route}</p>
             </div>
             <div>
               <span className="text-slate-600">Commodity:</span>
-              <p className="font-medium">{apRecord.commodity}</p>
+              <p className="font-medium text-slate-800">{apRecord.commodity}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Charge Groups */}
-      {groups.map((group, idx) => (
-        <div key={idx} className="border border-slate-200 rounded-xl">
-          <div className="bg-slate-100 px-4 py-2 border-b border-slate-200">
-            <h4 className="text-sm font-semibold text-slate-800">{group.title}</h4>
+      {/* Expense Groups */}
+      <div className="space-y-4">
+        {groups.map((group, idx) => (
+          <div key={idx} className="border border-slate-200 rounded-xl">
+            <div className="bg-slate-100 px-4 py-3 border-b border-slate-200">
+              <h4 className="font-semibold text-slate-800">{group.title}</h4>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {group.charges.map((charge, i) => (
+                <div key={i} className="px-4 py-3">
+                  <div className="mb-2">
+                    <span className="font-medium text-slate-800">{charge.label}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mb-2">
+                    <div>
+                      <span className="font-medium">Payee:</span> {charge.payee || "—"}
+                    </div>
+                    <div>
+                      <span className="font-medium">Check Date:</span> {formatDate(charge.date)}
+                    </div>
+                    <div>
+                      <span className="font-medium">Voucher:</span> {charge.voucher || "—"}
+                    </div>
+                  </div>
+                  <div className="border-t border-slate-100 pt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-slate-600">Amount:</span>
+                      <span className="font-bold text-slate-800">{formatCurrency(charge.amount)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="divide-y divide-slate-100 text-sm">
-            {group.charges.map((c, i) => (
-              <div key={i} className="px-4 py-2 grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="font-medium text-slate-800">{c.label}</div>
-                <div className="text-slate-700">{c.payee || "—"}</div>
-                <div>{formatCurrency(c.amount)}</div>
-                <div className="text-slate-600">{formatDate(c.date)}</div>
-                <div className="text-slate-600">{c.voucher || "No voucher"}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      {/* Totals */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm">
-        <h4 className="font-semibold text-blue-800 mb-2">Financial Summary</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <span className="text-blue-700">Total Expenses:</span>
-            <p className="font-bold text-blue-800 text-lg">{formatCurrency(total)}</p>
+      {/* Financial Summary */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Calculator className="w-4 h-4 text-blue-600" />
+          <h4 className="font-semibold text-slate-800">Financial Summary</h4>
+        </div>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-slate-600">Total Expenses:</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(total)}</span>
           </div>
-          <div>
-            <span className="text-blue-700">BIR (12%):</span>
-            <p className="font-bold text-blue-800 text-lg">{formatCurrency(bir)}</p>
+          <div className="flex justify-between">
+            <span className="text-slate-600">BIR Tax (12%):</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(bir)}</span>
           </div>
-          <div>
-            <span className="text-blue-700">Total with BIR:</span>
-            <p className="font-bold text-blue-800 text-lg">{formatCurrency(grandTotal)}</p>
+          <div className="flex justify-between border-t border-blue-200 pt-2">
+            <span className="font-semibold text-slate-800">Grand Total:</span>
+            <span className="font-bold text-slate-800 text-lg">{formatCurrency(grandTotal)}</span>
           </div>
         </div>
       </div>

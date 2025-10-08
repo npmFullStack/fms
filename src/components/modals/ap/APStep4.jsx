@@ -2,6 +2,8 @@
 import { Controller } from "react-hook-form";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
+import { Info, Calendar } from "lucide-react";
+import { NumericFormat } from "react-number-format";
 
 const APStep4 = ({ register, control, errors }) => {
   const miscCharges = [
@@ -12,20 +14,29 @@ const APStep4 = ({ register, control, errors }) => {
 
   const getColorIconClass = (color) => {
     const map = {
-      yellow: "bg-yellow-100 text-yellow-600",
-      orange: "bg-orange-100 text-orange-600",
-      red: "bg-red-100 text-red-600",
+      yellow: "bg-blue-100",
+      orange: "bg-blue-100",
+      red: "bg-blue-100",
     };
-    return map[color] || "bg-slate-100 text-slate-600";
+    return map[color] || "bg-slate-100";
+  };
+
+  const getIconColorClass = (color) => {
+    const map = {
+      yellow: "text-blue-600",
+      orange: "text-blue-600",
+      red: "text-blue-600",
+    };
+    return map[color] || "text-slate-600";
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-3">
       {/* 🧰 Header */}
       <div className="info-box-modern">
         <div className="flex items-start gap-3">
-          <div className="p-1.5 bg-yellow-100 rounded-lg">
-            <span className="text-yellow-600 text-sm font-semibold">i</span>
+          <div className="p-1.5 bg-blue-100 rounded-lg">
+            <Info className="w-4 h-4 text-blue-600" />
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-semibold text-slate-800 mb-1">
@@ -45,7 +56,7 @@ const APStep4 = ({ register, control, errors }) => {
           <div className="info-box-modern">
             <div className="flex items-start gap-3">
               <div className={`p-1.5 rounded-lg ${getColorIconClass(charge.color)}`}>
-                <span className="text-sm font-semibold">i</span>
+                <Info className={`w-4 h-4 ${getIconColorClass(charge.color)}`} />
               </div>
               <div className="flex-1">
                 <h4 className="text-sm font-semibold text-slate-800 mb-1">
@@ -58,7 +69,7 @@ const APStep4 = ({ register, control, errors }) => {
             </div>
           </div>
 
-          {/* Payee - now editable */}
+          {/* Payee */}
           <div className="input-container">
             <label className="input-label-modern">Payee</label>
             <input
@@ -81,14 +92,31 @@ const APStep4 = ({ register, control, errors }) => {
             {/* Amount */}
             <div className="input-container">
               <label className="input-label-modern">Amount *</label>
-              <input
-                type="number"
-                step="0.01"
-                {...register(`${charge.key}_amount`, { valueAsNumber: true })}
-                placeholder="0.00"
-                className={`input-field-modern ${
-                  errors[`${charge.key}_amount`] ? "input-error" : ""
-                }`}
+              <Controller
+                control={control}
+                name={`${charge.key}_amount`}
+                render={({ field }) => (
+                  <NumericFormat
+                    value={
+                      field.value === "" || field.value === null || field.value === 0
+                        ? ""
+                        : field.value
+                    }
+                    thousandSeparator
+                    prefix="₱ "
+                    decimalScale={2}
+                    allowNegative={false}
+                    placeholder="₱ 0.00"
+                    className={`input-field-modern ${
+                      errors[`${charge.key}_amount`] ? "input-error" : ""
+                    }`}
+                    onValueChange={(values) => {
+                      const val = values.value;
+                      field.onChange(val === "" ? "" : Number(val));
+                    }}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               {errors[`${charge.key}_amount`] && (
                 <p className="error-message">
@@ -100,24 +128,29 @@ const APStep4 = ({ register, control, errors }) => {
             {/* Check Date */}
             <div className="input-container">
               <label className="input-label-modern">Check Date</label>
-              <Controller
-                control={control}
-                name={`${charge.key}_check_date`}
-                render={({ field }) => (
-                  <Datetime
-                    {...field}
-                    timeFormat={false}
-                    dateFormat="YYYY-MM-DD"
-                    className="input-field-modern"
-                    onChange={(val) =>
-                      field.onChange(
-                        val && val.format ? val.format("YYYY-MM-DD") : ""
-                      )
-                    }
-                    value={field.value || ""}
-                  />
-                )}
-              />
+              <div className="relative">
+                <Controller
+                  control={control}
+                  name={`${charge.key}_check_date`}
+                  render={({ field }) => (
+                    <Datetime
+                      {...field}
+                      timeFormat={false}
+                      dateFormat="YYYY-MM-DD"
+                      closeOnSelect={true}
+                      inputProps={{
+                        className: "input-field-modern pr-10 cursor-pointer",
+                        placeholder: "Select date",
+                      }}
+                      onChange={(val) =>
+                        field.onChange(val && val.format ? val.format("YYYY-MM-DD") : "")
+                      }
+                      value={field.value || ""}
+                    />
+                  )}
+                />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
+              </div>
             </div>
           </div>
 
