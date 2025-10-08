@@ -213,18 +213,27 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
         return [...baseColumns, ...expenseColumns, ...summaryColumns];
     }, [activeTab]);
 
+    // Prepare data for DataTable - add 'id' field that DataTable expects
+    const tableData = useMemo(() => {
+        return data.map(item => ({
+            ...item,
+            id: item.ap_id // Add 'id' field that DataTable expects
+        }));
+    }, [data]);
+
     const { table, globalFilter, setGlobalFilter } = useTable({
-        data,
+        data: tableData, // Use the prepared data
         columns
     });
 
-    const { paginationInfo, actions } = usePagination(table, data?.length);
+    const { paginationInfo, actions } = usePagination(table, tableData?.length);
 
     const selectedRows = table.getSelectedRowModel().rows;
 
     useEffect(() => {
         if (onSelectionChange) {
-            const selectedIds = selectedRows.map(r => r.original.ap_id);
+            // DataTable will now pass ap_id as id, so we can use it directly
+            const selectedIds = selectedRows.map(r => r.original.id);
             onSelectionChange(selectedIds);
         }
     }, [selectedRows, onSelectionChange]);
@@ -233,7 +242,7 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
         <DataTable
             table={table}
             columns={columns}
-            data={data}
+            data={tableData}
             title={activeTab === "ALL" ? "All Accounts Payable" : `${activeTab.replace("_", " ")} Expenses`}
             searchPlaceholder="Search payables..."
             onSelectionChange={onSelectionChange}

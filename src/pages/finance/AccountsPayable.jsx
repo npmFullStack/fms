@@ -1,3 +1,4 @@
+// pages/finance/AccountsPayable.jsx
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
 import useFinanceStore from "../../utils/store/useFinanceStore";
@@ -38,6 +39,39 @@ const AccountsPayable = () => {
     fetchAP();
   }, [fetchBookings, fetchAP]);
 
+  // 🔸 Helper functions for calculations - MOVE THESE BEFORE useMemo
+  const calculateTotalExpenses = (ap) => {
+    return (parseFloat(ap.freight_amount) || 0) +
+           (parseFloat(ap.trucking_origin_amount) || 0) +
+           (parseFloat(ap.trucking_dest_amount) || 0) +
+           (parseFloat(ap.crainage_amount) || 0) +
+           (parseFloat(ap.arrastre_origin_amount) || 0) +
+           (parseFloat(ap.arrastre_dest_amount) || 0) +
+           (parseFloat(ap.wharfage_origin_amount) || 0) +
+           (parseFloat(ap.wharfage_dest_amount) || 0) +
+           (parseFloat(ap.labor_origin_amount) || 0) +
+           (parseFloat(ap.labor_dest_amount) || 0) +
+           (parseFloat(ap.rebates_amount) || 0) +
+           (parseFloat(ap.storage_amount) || 0) +
+           (parseFloat(ap.facilitation_amount) || 0);
+  };
+
+  const calculateBIR = (ap) => {
+    const totalExpenses = calculateTotalExpenses(ap);
+    return totalExpenses * 0.12;
+  };
+
+  const calculateTotalWithBIR = (ap) => {
+    return calculateTotalExpenses(ap) + calculateBIR(ap);
+  };
+
+  const calculateNetRevenue = (ap) => {
+    // For now, using a placeholder calculation
+    // You might want to fetch actual revenue data from your backend
+    const grossRevenue = 50000; // placeholder
+    return grossRevenue - calculateTotalWithBIR(ap);
+  };
+
   // Safe arrays
   const safeBookings = useMemo(() => (Array.isArray(bookings) ? bookings : []), [bookings]);
   const safeAPRecords = useMemo(() => (Array.isArray(apRecords) ? apRecords : []), [apRecords]);
@@ -54,6 +88,16 @@ const AccountsPayable = () => {
         freight_amount: parseFloat(ap.freight_amount) || 0,
         trucking_origin_amount: parseFloat(ap.trucking_origin_amount) || 0,
         trucking_dest_amount: parseFloat(ap.trucking_dest_amount) || 0,
+        crainage_amount: parseFloat(ap.crainage_amount) || 0,
+        arrastre_origin_amount: parseFloat(ap.arrastre_origin_amount) || 0,
+        arrastre_dest_amount: parseFloat(ap.arrastre_dest_amount) || 0,
+        wharfage_origin_amount: parseFloat(ap.wharfage_origin_amount) || 0,
+        wharfage_dest_amount: parseFloat(ap.wharfage_dest_amount) || 0,
+        labor_origin_amount: parseFloat(ap.labor_origin_amount) || 0,
+        labor_dest_amount: parseFloat(ap.labor_dest_amount) || 0,
+        rebates_amount: parseFloat(ap.rebates_amount) || 0,
+        storage_amount: parseFloat(ap.storage_amount) || 0,
+        facilitation_amount: parseFloat(ap.facilitation_amount) || 0,
         total_expenses: calculateTotalExpenses(ap),
         bir: calculateBIR(ap),
         total_expenses_with_bir: calculateTotalWithBIR(ap),
@@ -62,7 +106,7 @@ const AccountsPayable = () => {
     } else {
       // fallback from bookings if AP empty
       return safeBookings.map(booking => ({
-        ap_id: booking.id,
+        ap_id: booking.id, // Use booking ID as temporary AP ID
         booking_id: booking.id,
         booking_number: booking.booking_number,
         hwb_number: booking.hwb_number,
@@ -82,6 +126,16 @@ const AccountsPayable = () => {
         trucking_origin_amount: 0,
         trucking_dest_payee: booking.delivery_trucker || "-",
         trucking_dest_amount: 0,
+        crainage_amount: 0,
+        arrastre_origin_amount: 0,
+        arrastre_dest_amount: 0,
+        wharfage_origin_amount: 0,
+        wharfage_dest_amount: 0,
+        labor_origin_amount: 0,
+        labor_dest_amount: 0,
+        rebates_amount: 0,
+        storage_amount: 0,
+        facilitation_amount: 0,
         total_expenses: 0,
         bir: 0,
         total_expenses_with_bir: 0,
@@ -91,58 +145,56 @@ const AccountsPayable = () => {
     }
   }, [safeBookings, safeAPRecords]);
 
-  // 🔸 Helper functions for calculations
-  const calculateTotalExpenses = (ap) => {
-    return (parseFloat(ap.freight_amount) || 0) +
-           (parseFloat(ap.trucking_origin_amount) || 0) +
-           (parseFloat(ap.trucking_dest_amount) || 0) +
-           calculatePortChargesTotal(ap.port_charges) +
-           calculateMiscChargesTotal(ap.misc_charges);
-  };
-
-  const calculateBIR = (ap) => {
-    const totalExpenses = calculateTotalExpenses(ap);
-    return totalExpenses * 0.12;
-  };
-
-  const calculateTotalWithBIR = (ap) => {
-    return calculateTotalExpenses(ap) + calculateBIR(ap);
-  };
-
-  const calculateNetRevenue = (ap) => {
-    const grossRevenue = parseFloat(ap.gross_revenue) || 50000; // fallback example
-    return grossRevenue - calculateTotalWithBIR(ap);
-  };
-
-  const calculatePortChargesTotal = (portCharges) => {
-    if (!portCharges || !Array.isArray(portCharges)) return 0;
-    return portCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
-  };
-
-  const calculateMiscChargesTotal = (miscCharges) => {
-    if (!miscCharges || !Array.isArray(miscCharges)) return 0;
-    return miscCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
-  };
-
   // 🔸 Stats
   const stats = useMemo(() => {
-    const totalPayable = apRecordsForTable.reduce((sum, r) => sum + r.total_expenses_with_bir, 0);
-    const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + r.total_expenses, 0);
-    const pendingCount = apRecordsForTable.filter(r =>
-      !r.freight_check_date &&
-      !r.trucking_origin_check_date &&
+    const totalPayable = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses_with_bir || 0), 0);
+    const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses || 0), 0);
+    
+    // Simple logic to determine pending/paid - you might want to improve this
+    const pendingCount = apRecordsForTable.filter(r => 
+      !r.freight_check_date && 
+      !r.trucking_origin_check_date && 
       !r.trucking_dest_check_date
     ).length;
     const paidCount = apRecordsForTable.length - pendingCount;
 
-    return { total: totalPayable, expenses: totalExpenses, pending: pendingCount, paid: paidCount };
+    return { 
+      total: totalPayable, 
+      expenses: totalExpenses, 
+      pending: pendingCount, 
+      paid: paidCount 
+    };
   }, [apRecordsForTable]);
 
   const statsConfig = [
-    { key: "TOTAL", title: "Total Payable", value: `₱${stats.total.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, color: "bg-gradient-to-br from-red-500 to-red-600 text-white", icon: TrendingDown },
-    { key: "EXPENSES", title: "Total Expenses", value: `₱${stats.expenses.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white", icon: DollarSign },
-    { key: "PENDING", title: "Pending", value: stats.pending, color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white", icon: Clock },
-    { key: "PAID", title: "Paid", value: stats.paid, color: "bg-gradient-to-br from-green-500 to-green-600 text-white", icon: CheckCircle },
+    { 
+      key: "TOTAL", 
+      title: "Total Payable", 
+      value: `₱${stats.total.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, 
+      color: "bg-gradient-to-br from-red-500 to-red-600 text-white", 
+      icon: TrendingDown 
+    },
+    { 
+      key: "EXPENSES", 
+      title: "Total Expenses", 
+      value: `₱${stats.expenses.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, 
+      color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white", 
+      icon: DollarSign 
+    },
+    { 
+      key: "PENDING", 
+      title: "Pending", 
+      value: stats.pending, 
+      color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white", 
+      icon: Clock 
+    },
+    { 
+      key: "PAID", 
+      title: "Paid", 
+      value: stats.paid, 
+      color: "bg-gradient-to-br from-green-500 to-green-600 text-white", 
+      icon: CheckCircle 
+    },
   ];
 
   const tabs = [
@@ -160,13 +212,12 @@ const AccountsPayable = () => {
   };
 
   const handleBulkEdit = (ids) => {
-  if (ids.length !== 1) {
-    alert("Please select exactly one record to edit.");
-    return;
-  }
-  handleEditAP(ids[0]);
-};
-
+    if (ids.length !== 1) {
+      alert("Please select exactly one record to edit.");
+      return;
+    }
+    handleEditAP(ids[0]);
+  };
 
   const handleBulkDelete = (ids) => {
     if (window.confirm(`Delete ${ids.length} AP record(s)?`)) {
@@ -234,6 +285,7 @@ const AccountsPayable = () => {
             data={apRecordsForTable}
             activeTab={activeTab}
             onSelectionChange={setSelectedAP}
+            onEdit={handleEditAP}
           />
 
           {/* Bulk Actions */}
@@ -246,21 +298,15 @@ const AccountsPayable = () => {
           />
 
           {/* Update AP Modal */}
-<UpdateAP
-  isOpen={isUpdateAPModalOpen}
-  onClose={() => {
-    setIsUpdateAPModalOpen(false);
-    setActiveAPId(null);
-  }}
-  apId={activeAPId}
-  apRecord={apRecordsForTable.find(r => r.ap_id === activeAPId)}
-  onSave={async (apId, formData) => {
-    await updateAPRecord(apId, formData); 
-    setIsUpdateAPModalOpen(false);
-    setActiveAPId(null);
-  }}
-/>
-
+          <UpdateAP
+            isOpen={isUpdateAPModalOpen}
+            onClose={() => {
+              setIsUpdateAPModalOpen(false);
+              setActiveAPId(null);
+            }}
+            apId={activeAPId}
+            apRecord={apRecordsForTable.find(r => r.ap_id === activeAPId)}
+          />
         </div>
       </div>
     </div>
