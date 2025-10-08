@@ -55,26 +55,24 @@ const useFinanceStore = create((set, get) => ({
   },
 
   // Update AP record
-  updateAPRecord: async (apId, data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await api.put(`/ap/${apId}`, data);
-      
-      // Update local state
-      const updatedRecords = get().apRecords.map(record =>
-        record.id === apId ? { ...record, ...response.data.apRecord } : record
-      );
-      
-      set({ apRecords: updatedRecords, loading: false });
-      return response.data;
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to update AP record",
-        loading: false
-      });
-      throw error;
-    }
-  },
+updateAPRecord: async (apId, data) => {
+  set({ loading: true, error: null });
+  try {
+    const response = await api.put(`/ap/${apId}`, data);
+    
+    // Update local state
+    const updatedRecords = get().apRecords.map(record => 
+      record.ap_id === apId ? { ...record, ...response.data.apRecord } : record
+    );
+    
+    set({ apRecords: updatedRecords, loading: false });
+    return { success: true, data: response.data };
+  } catch (error) {
+    const errorMsg = error.response?.data?.message || "Failed to update AP record";
+    set({ error: errorMsg, loading: false });
+    return { success: false, error: errorMsg };
+  }
+},
 
   // Add freight charge
   addFreight: async (apId, data) => {

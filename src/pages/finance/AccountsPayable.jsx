@@ -71,7 +71,7 @@ const apRecordsForTable = useMemo(() => {
         // Client info
         client: ap.consignee || "-",
         mode: ap.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
-        route: `${ap.origin_port || "-"} → ${ap.destination_port || "-"}`,
+        route: `${ap.origin_port || "-"} -> ${ap.destination_port || "-"}`,
         volume: `${ap.quantity || 1}${ap.container_size || "LCL"}`,
         
         // Freight expenses - COMES FROM AP_SUMMARY VIEW
@@ -259,15 +259,18 @@ const apRecordsForTable = useMemo(() => {
         return result;
     };
 
-    const calculatePortChargesTotal = (portCharges) => {
-        if (!portCharges || !Array.isArray(portCharges)) return 0;
-        return portCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
-    };
+    // Page 6: Fix reduce functions
+const calculatePortChargesTotal = (portCharges) => {
+  if (!portCharges || !Array.isArray(portCharges)) return 0;
+  return portCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
+};
 
-    const calculateMiscChargesTotal = (miscCharges) => {
-        if (!miscCharges || !Array.isArray(miscCharges)) return 0;
-        return miscCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
-    };
+const calculateMiscChargesTotal = (miscCharges) => {
+  if (!miscCharges || !Array.isArray(miscCharges)) return 0;
+  return miscCharges.reduce((sum, charge) => sum + (parseFloat(charge.amount) || 0), 0);
+};
+
+
 
     // Calculate statistics from real data
     const stats = useMemo(() => {
@@ -275,17 +278,17 @@ const apRecordsForTable = useMemo(() => {
         const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + r.total_expenses, 0);
         
         // Count pending (no check date) vs paid (has check date)
-        const pendingCount = apRecordsForTable.filter(r => 
-            !r.freight_check_date && 
-            !r.trucking_origin_check_date && 
-            !r.trucking_dest_check_date
-        ).length;
-        
-        const paidCount = apRecordsForTable.filter(r => 
-            r.freight_check_date || 
-            r.trucking_origin_check_date || 
-            r.trucking_dest_check_date
-        ).length;
+        const pendingCount = apRecordsForTable.filter(r =>
+  !r.freight_check_date &&
+  !r.trucking_origin_check_date && 
+  !r.trucking_dest_check_date
+).length;
+
+const paidCount = apRecordsForTable.filter(r =>
+  r.freight_check_date ||
+  r.trucking_origin_check_date ||
+  r.trucking_dest_check_date
+).length;
 
         return {
             total: totalPayable,
