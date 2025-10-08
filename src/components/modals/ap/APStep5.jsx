@@ -1,32 +1,14 @@
 // components/modals/ap/APStep5.jsx
-import { FileText, CheckCircle, Calculator } from "lucide-react";
+import { useState } from "react";
+import { Info, FileText, Calculator } from "lucide-react";
 
 const APStep5 = ({ watch, apRecord }) => {
-  const formData = watch();
+  // ✅ Safely call watch only if it's a function
+  const formData = typeof watch === "function" ? watch() : {};
 
-  const calculateTotal = () => {
-    const amounts = [
-      formData.freight_amount,
-      formData.trucking_origin_amount,
-      formData.trucking_dest_amount,
-      formData.crainage_amount,
-      formData.arrastre_origin_amount,
-      formData.arrastre_dest_amount,
-      formData.wharfage_origin_amount,
-      formData.wharfage_dest_amount,
-      formData.labor_origin_amount,
-      formData.labor_dest_amount,
-      formData.rebates_amount,
-      formData.storage_amount,
-      formData.facilitation_amount,
-    ].map((a) => a || 0);
-    return amounts.reduce((sum, n) => sum + n, 0);
-  };
+  const [activeTab, setActiveTab] = useState("Freight Charges");
 
-  const total = calculateTotal();
-  const bir = total * 0.12;
-  const grandTotal = total + bir;
-
+  // ✅ Currency formatter
   const formatCurrency = (num) =>
     `₱${(num || 0).toLocaleString("en-PH", {
       minimumFractionDigits: 2,
@@ -42,6 +24,30 @@ const APStep5 = ({ watch, apRecord }) => {
     });
   };
 
+  // ✅ Total calculation with fallbacks
+  const calculateTotal = () => {
+    const amounts = [
+      formData.freight_amount,
+      formData.trucking_origin_amount,
+      formData.trucking_dest_amount,
+      formData.crainage_amount,
+      formData.arrastre_origin_amount,
+      formData.arrastre_dest_amount,
+      formData.wharfage_origin_amount,
+      formData.wharfage_dest_amount,
+      formData.labor_origin_amount,
+      formData.labor_dest_amount,
+      formData.rebates_amount,
+      formData.storage_amount,
+      formData.facilitation_amount,
+    ];
+    return amounts.reduce((sum, val) => sum + (Number(val) || 0), 0);
+  };
+
+  const total = calculateTotal();
+  const bir = total * 0.12;
+  const grandTotal = total + bir;
+
   const groups = [
     {
       title: "Freight Charges",
@@ -56,7 +62,7 @@ const APStep5 = ({ watch, apRecord }) => {
       ],
     },
     {
-      title: "Trucking",
+      title: "Trucking Charges",
       charges: [
         {
           label: "Origin Trucking",
@@ -87,7 +93,7 @@ const APStep5 = ({ watch, apRecord }) => {
       ],
     },
     {
-      title: "Miscellaneous",
+      title: "Miscellaneous Charges",
       charges: [
         { label: "Rebates/DENR", payee: formData.rebates_payee, amount: formData.rebates_amount, date: formData.rebates_check_date, voucher: formData.rebates_voucher },
         { label: "Storage", payee: formData.storage_payee, amount: formData.storage_amount, date: formData.storage_check_date, voucher: formData.storage_voucher },
@@ -98,16 +104,16 @@ const APStep5 = ({ watch, apRecord }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <div className="flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-blue-600" />
-          <div>
-            <h3 className="font-semibold text-slate-800">Review Accounts Payable</h3>
-            <p className="text-sm text-slate-600">
-              Review all expense details before finalizing.
-            </p>
-          </div>
+      {/* Info Box */}
+      <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 p-4 rounded-lg">
+        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+        <div className="text-sm text-slate-700">
+          <p className="font-medium text-slate-800 mb-1">
+            Please review all charge details carefully.
+          </p>
+          <p>
+            Make sure that payee, amounts, dates, and vouchers are correct before finalizing.
+          </p>
         </div>
       </div>
 
@@ -139,41 +145,58 @@ const APStep5 = ({ watch, apRecord }) => {
         </div>
       )}
 
-      {/* Expense Groups */}
-      <div className="space-y-4">
-        {groups.map((group, idx) => (
-          <div key={idx} className="border border-slate-200 rounded-xl">
-            <div className="bg-slate-100 px-4 py-3 border-b border-slate-200">
-              <h4 className="font-semibold text-slate-800">{group.title}</h4>
-            </div>
-            <div className="divide-y divide-slate-100">
-              {group.charges.map((charge, i) => (
-                <div key={i} className="px-4 py-3">
-                  <div className="mb-2">
-                    <span className="font-medium text-slate-800">{charge.label}</span>
+      {/* Tabs */}
+      <div>
+        <div className="flex border-b border-blue-100 mb-4">
+          {groups.map((g) => (
+            <button
+              key={g.title}
+              type="button" // ✅ Prevent submit
+              onClick={() => setActiveTab(g.title)}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === g.title
+                  ? "text-blue-700 border-b-2 border-blue-600"
+                  : "text-slate-600 hover:text-blue-600"
+              }`}
+            >
+              {g.title}
+            </button>
+          ))}
+        </div>
+
+        {groups.map(
+          (group) =>
+            activeTab === group.title && (
+              <div key={group.title} className="space-y-4">
+                {group.charges.map((charge, i) => (
+                  <div
+                    key={i}
+                    className="border border-blue-100 rounded-lg p-4 bg-blue-50/30"
+                  >
+                    <p className="font-semibold text-slate-800 mb-2">{charge.label}</p>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                      <div>
+                        <p className="text-slate-600">Payee</p>
+                        <p className="text-slate-800 font-medium">{charge.payee || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-600">Check Date</p>
+                        <p className="text-slate-800 font-medium">{formatDate(charge.date)}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-600">Voucher</p>
+                        <p className="text-slate-800 font-medium">{charge.voucher || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-600">Amount</p>
+                        <p className="text-slate-800 font-semibold">{formatCurrency(charge.amount)}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mb-2">
-                    <div>
-                      <span className="font-medium">Payee:</span> {charge.payee || "—"}
-                    </div>
-                    <div>
-                      <span className="font-medium">Check Date:</span> {formatDate(charge.date)}
-                    </div>
-                    <div>
-                      <span className="font-medium">Voucher:</span> {charge.voucher || "—"}
-                    </div>
-                  </div>
-                  <div className="border-t border-slate-100 pt-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-slate-600">Amount:</span>
-                      <span className="font-bold text-slate-800">{formatCurrency(charge.amount)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+                ))}
+              </div>
+            )
+        )}
       </div>
 
       {/* Financial Summary */}
@@ -193,7 +216,7 @@ const APStep5 = ({ watch, apRecord }) => {
           </div>
           <div className="flex justify-between border-t border-blue-200 pt-2">
             <span className="font-semibold text-slate-800">Grand Total:</span>
-            <span className="font-bold text-slate-800 text-lg">{formatCurrency(grandTotal)}</span>
+            <span className="font-semibold text-slate-800 text-lg">{formatCurrency(grandTotal)}</span>
           </div>
         </div>
       </div>
