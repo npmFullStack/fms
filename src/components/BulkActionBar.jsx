@@ -39,7 +39,7 @@ const BulkActionBar = ({ selected, onEdit, onPrint, onDownload, onDelete }) => {
                     <div className="grid grid-cols-4 sm:flex sm:flex-row gap-2 w-full sm:w-auto">
                         {/* Edit */}
                         <button
-                            onClick={() => !multiple && onEdit(selected[0])}
+                            onClick={() => !multiple && onEdit(selected)}
                             disabled={multiple}
                             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors text-center
                 ${

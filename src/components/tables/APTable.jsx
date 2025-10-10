@@ -217,7 +217,7 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
     const tableData = useMemo(() => {
         return data.map(item => ({
             ...item,
-            id: item.ap_id // Add 'id' field that DataTable expects
+            id: item.ap_id
         }));
     }, [data]);
 
@@ -232,7 +232,6 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
 
     useEffect(() => {
         if (onSelectionChange) {
-            // DataTable will now pass ap_id as id, so we can use it directly
             const selectedIds = selectedRows.map(r => r.original.id);
             onSelectionChange(selectedIds);
         }
