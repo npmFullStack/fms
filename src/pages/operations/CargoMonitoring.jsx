@@ -3,204 +3,233 @@ import { useEffect, useState, useMemo } from "react";
 import { Ship, Truck, MapPin, CheckCircle, Loader2 } from "lucide-react";
 import Loading from "../../components/Loading";
 import CargoMonitoringTable from "../../components/tables/CargoMonitoringTable";
+import UpdateCargo from "../../components/modals/UpdateCargo";
 import BulkActionBar from "../../components/BulkActionBar";
 import { printCargoMonitoring } from "../../utils/helpers/printHelper";
 import StatCard from "../../components/cards/StatCard";
 import useBookingStore from "../../utils/store/useBookingStore";
 import useContainerStore from "../../utils/store/useContainerStore";
 
-
 const CargoMonitoring = () => {
-    const {
-        bookings,
-        fetchBookings,
-        loading,
-        error,
-        clearError,
-        deleteBooking
-    } = useBookingStore();
+  const {
+    bookings,
+    fetchBookings,
+    loading,
+    error,
+    clearError,
+    deleteBooking
+  } = useBookingStore();
 
-    // Initialize container store
-    const { fetchAllContainersByLine, allContainers } = useContainerStore();
+  // Initialize container store
+  const { fetchAllContainersByLine, allContainers } = useContainerStore();
+  
+  const [selectedBookings, setSelectedBookings] = useState([]);
+  const [isUpdateCargoModalOpen, setIsUpdateCargoModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedDateType, setSelectedDateType] = useState(null);
+  const [selectedContainerId, setSelectedContainerId] = useState(null);
 
-    const [selectedBookings, setSelectedBookings] = useState([]);
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
-    useEffect(() => {
-        fetchBookings();
-    }, [fetchBookings]);
-
-    // Fetch containers when bookings are loaded
-    useEffect(() => {
-        if (bookings && bookings.length > 0) {
-            // Extract unique shipping line IDs from bookings
-            const shippingLineIds = [
-                ...new Set(
-                    bookings
-                        .filter(b => b.shipping_line_id)
-                        .map(b => b.shipping_line_id)
-                )
-            ];
-
-            // Fetch containers for each shipping line
-            shippingLineIds.forEach(lineId => {
-                fetchAllContainersByLine(lineId);
-            });
-        }
-    }, [bookings, fetchAllContainersByLine]);
-
-    const safeBookings = useMemo(
-        () => (Array.isArray(bookings) ? bookings : []),
-        [bookings]
-    );
-
-    const formattedBookings = useMemo(() => {
-        return safeBookings.map(b => ({
-            ...b,
-            route: `${b.origin_port ?? "-"} -> ${b.destination_port ?? "-"}`,
-            // Add container data to each booking
-            containers:
-                b.containers?.map(container => {
-                    const containerDetails = allContainers.find(
-                        c => c.id === container.container_id
-                    );
-                    return {
-                        ...container,
-                        ...containerDetails
-                    };
-                }) || []
-        }));
-    }, [safeBookings, allContainers]);
-
-    const countByStatus = status =>
-        safeBookings.filter(b => b.status === status).length;
-
-    const statsConfig = [
-        {
-            key: "PICKUP_SCHEDULED",
-            title: "Pickup",
-            value: countByStatus("PICKUP_SCHEDULED"),
-            color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
-            icon: Truck
-        },
-        {
-            key: "LOADED_TO_TRUCK",
-            title: "Loaded Truck",
-            value: countByStatus("LOADED_TO_TRUCK"),
-            color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
-            icon: Truck
-        },
-        {
-            key: "ARRIVED_ORIGIN_PORT",
-            title: "Origin Port",
-            value: countByStatus("ARRIVED_ORIGIN_PORT"),
-            color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
-            icon: MapPin
-        },
-        {
-            key: "LOADED_TO_SHIP",
-            title: "Loaded Ship",
-            value: countByStatus("LOADED_TO_SHIP"),
-            color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
-            icon: Ship
-        },
-        {
-            key: "IN_TRANSIT",
-            title: "Transit",
-            value: countByStatus("IN_TRANSIT"),
-            color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
-            icon: Loader2
-        },
-        {
-            key: "ARRIVED_DESTINATION_PORT",
-            title: "Dest. Port",
-            value: countByStatus("ARRIVED_DESTINATION_PORT"),
-            color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
-            icon: MapPin
-        },
-        {
-            key: "OUT_FOR_DELIVERY",
-            title: "Delivery",
-            value: countByStatus("OUT_FOR_DELIVERY"),
-            color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
-            icon: Truck
-        },
-        {
-            key: "DELIVERED",
-            title: "Delivered",
-            value: countByStatus("DELIVERED"),
-            color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
-            icon: CheckCircle
-        }
-    ];
-
-    const handleBulkDelete = ids => {
-        ids.forEach(async id => {
-            await deleteBooking(id);
-        });
-    };
-
-    if (loading) return <Loading />;
-    if (error) {
-        return (
-            <div className="page-container">
-                <div className="max-w-md mx-auto">
-                    <div className="error-message">{error}</div>
-                    <button onClick={clearError} className="btn-primary mt-4">
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
+  // Fetch containers when bookings are loaded
+  useEffect(() => {
+    if (bookings && bookings.length > 0) {
+      // Extract unique shipping line IDs from bookings
+      const shippingLineIds = [
+        ...new Set(
+          bookings
+            .filter(b => b.shipping_line_id)
+            .map(b => b.shipping_line_id)
+        )
+      ];
+      // Fetch containers for each shipping line
+      shippingLineIds.forEach(lineId => {
+        fetchAllContainersByLine(lineId);
+      });
     }
+  }, [bookings, fetchAllContainersByLine]);
 
+  const safeBookings = useMemo(
+    () => (Array.isArray(bookings) ? bookings : []),
+    [bookings]
+  );
+
+  const formattedBookings = useMemo(() => {
+    return safeBookings.map(b => ({
+      ...b,
+      route: `${b.origin_port ?? "-"} -> ${b.destination_port ?? "-"}`,
+      // Add container data to each booking
+      containers:
+        b.containers?.map(container => {
+          const containerDetails = allContainers.find(
+            c => c.id === container.container_id
+          );
+          return {
+            ...container,
+            ...containerDetails
+          };
+        }) || []
+    }));
+  }, [safeBookings, allContainers]);
+
+  const countByStatus = status =>
+    safeBookings.filter(b => b.status === status).length;
+
+  const statsConfig = [
+    {
+      key: "PICKUP_SCHEDULED",
+      title: "Pickup",
+      value: countByStatus("PICKUP_SCHEDULED"),
+      color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white",
+      icon: Truck
+    },
+    {
+      key: "LOADED_TO_TRUCK",
+      title: "Loaded Truck",
+      value: countByStatus("LOADED_TO_TRUCK"),
+      color: "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
+      icon: Truck
+    },
+    {
+      key: "ARRIVED_ORIGIN_PORT",
+      title: "Origin Port",
+      value: countByStatus("ARRIVED_ORIGIN_PORT"),
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white",
+      icon: MapPin
+    },
+    {
+      key: "LOADED_TO_SHIP",
+      title: "Loaded Ship",
+      value: countByStatus("LOADED_TO_SHIP"),
+      color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
+      icon: Ship
+    },
+    {
+      key: "IN_TRANSIT",
+      title: "Transit",
+      value: countByStatus("IN_TRANSIT"),
+      color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
+      icon: Loader2
+    },
+    {
+      key: "ARRIVED_DESTINATION_PORT",
+      title: "Dest. Port",
+      value: countByStatus("ARRIVED_DESTINATION_PORT"),
+      color: "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
+      icon: MapPin
+    },
+    {
+      key: "OUT_FOR_DELIVERY",
+      title: "Delivery",
+      value: countByStatus("OUT_FOR_DELIVERY"),
+      color: "bg-gradient-to-br from-teal-500 to-teal-600 text-white",
+      icon: Truck
+    },
+    {
+      key: "DELIVERED",
+      title: "Delivered",
+      value: countByStatus("DELIVERED"),
+      color: "bg-gradient-to-br from-green-500 to-emerald-600 text-white",
+      icon: CheckCircle
+    }
+  ];
+
+  // Handle opening UpdateCargo modal
+  const handleEditDate = (booking, dateType, containerId = null) => {
+    setSelectedBooking(booking);
+    setSelectedDateType(dateType);
+    setSelectedContainerId(containerId);
+    setIsUpdateCargoModalOpen(true);
+  };
+
+  // Handle closing UpdateCargo modal
+  const handleCloseUpdateCargo = () => {
+    setIsUpdateCargoModalOpen(false);
+    setSelectedBooking(null);
+    setSelectedDateType(null);
+    setSelectedContainerId(null);
+  };
+
+  const handleBulkDelete = ids => {
+    if (window.confirm(`Delete ${ids.length} booking(s)?`)) {
+      ids.forEach(async id => {
+        await deleteBooking(id);
+      });
+    }
+  };
+
+  if (loading) return <Loading />;
+
+  if (error) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-            <div className="relative z-10 p-6">
-                <div className="max-w-7xl mx-auto">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="page-title">Cargo Monitoring</h1>
-                        <p className="page-subtitle">
-                            Track shipments with a timeline. Update dates and manage container return schedules.
-                        </p>
-                    </div>
-
-                    {/* Stat Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {statsConfig.map(stat => (
-                            <StatCard key={stat.key} {...stat} />
-                        ))}
-                    </div>
-
-                    {/* Table */}
-                    <CargoMonitoringTable
-                        data={formattedBookings}
-                        onSelectionChange={setSelectedBookings}
-                        rightAction={null}
-                    />
-
-                    {/* Bulk Action Bar */}
-                    <BulkActionBar
-                        selected={selectedBookings}
-                        onEdit={id => console.log("Edit", id)}
-                        onPrint={ids => {
-                            const records = formattedBookings.filter(b =>
-                                ids.includes(b.id)
-                            );
-                            printCargoMonitoring(records, "print");
-                        }}
-                        onDownload={ids => {
-                            const records = formattedBookings.filter(b =>
-                                ids.includes(b.id)
-                            );
-                            printCargoMonitoring(records, "download");
-                        }}
-                        onDelete={handleBulkDelete}
-                    />
-                </div>
-            </div>
+      <div className="page-container">
+        <div className="max-w-md mx-auto">
+          <div className="error-message">{error}</div>
+          <button onClick={clearError} className="btn-primary mt-4">
+            Try Again
+          </button>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="relative z-10 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="page-title">Cargo Monitoring</h1>
+            <p className="page-subtitle">
+              Track shipments with a timeline. Update dates and manage container
+              return schedules.
+            </p>
+          </div>
+
+          {/* Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {statsConfig.map(stat => (
+              <StatCard key={stat.key} {...stat} />
+            ))}
+          </div>
+
+          {/* Table */}
+          <CargoMonitoringTable
+            data={formattedBookings}
+            onSelectionChange={setSelectedBookings}
+            onEditDate={handleEditDate}
+            rightAction={null}
+          />
+
+          {/* Bulk Action Bar */}
+          <BulkActionBar
+            selected={selectedBookings}
+            onEdit={id => console.log("Edit", id)}
+            onPrint={ids => {
+              const records = formattedBookings.filter(b => ids.includes(b.id));
+              printCargoMonitoring(records, "print");
+            }}
+            onDownload={ids => {
+              const records = formattedBookings.filter(b => ids.includes(b.id));
+              printCargoMonitoring(records, "download");
+            }}
+            onDelete={handleBulkDelete}
+          />
+
+          {/* Update Cargo Modal */}
+          <UpdateCargo
+            isOpen={isUpdateCargoModalOpen}
+            onClose={handleCloseUpdateCargo}
+            booking={selectedBooking}
+            dateType={selectedDateType}
+            containerId={selectedContainerId}
+          />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CargoMonitoring;
