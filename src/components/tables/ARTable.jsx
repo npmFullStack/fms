@@ -1,14 +1,32 @@
 // components/tables/ARTable.jsx
-import { useMemo } from "react";
-import { flexRender } from "@tanstack/react-table";
-import { ChevronUp, ChevronDown, Receipt } from "lucide-react";
+import { useMemo, useEffect } from "react";
 import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 import { toCaps } from "../../utils/helpers/tableDataFormatters";
+import DataTable from "./DataTable";
 
-const ARTable = ({ data }) => {
+const ARTable = ({ data, onSelectionChange }) => {
   const columns = useMemo(
     () => [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <input
+            type="checkbox"
+            checked={table.getIsAllRowsSelected?.()}
+            onChange={e => table.toggleAllRowsSelected?.(e.target.checked)}
+            className="table-checkbox"
+          />
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            checked={row.getIsSelected?.()}
+            onChange={row.getToggleSelectedHandler?.()}
+            className="table-checkbox"
+          />
+        )
+      },
       {
         accessorKey: "date",
         header: "Date",
@@ -30,20 +48,6 @@ const ARTable = ({ data }) => {
         )
       },
       {
-        accessorKey: "description",
-        header: "Desc.",
-        cell: ({ row }) => (
-          <span className="table-text">{row.original.description}</span>
-        )
-      },
-      {
-        accessorKey: "remarks",
-        header: "Remarks",
-        cell: ({ row }) => (
-          <span className="table-text">{row.original.remarks || "-"}</span>
-        )
-      },
-      {
         accessorKey: "hwb_number",
         header: "HWB #",
         cell: ({ row }) => (
@@ -61,7 +65,7 @@ const ARTable = ({ data }) => {
       },
       {
         accessorKey: "volume",
-        header: "Vol.",
+        header: "Volume",
         cell: ({ row }) => (
           <span className="table-text">{row.original.volume}</span>
         )
@@ -135,141 +139,48 @@ const ARTable = ({ data }) => {
             {row.original.net_revenue_percent.toFixed(2)}%
           </span>
         )
-      },
-      {
-        accessorKey: "payment_status",
-        header: "Status",
-        cell: ({ row }) => {
-          const status = row.original.payment_status;
-          const statusConfig = {
-            PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
-            PAID: { bg: "bg-green-100", text: "text-green-800", label: "Paid" },
-            OVERDUE: { bg: "bg-red-100", text: "text-red-800", label: "Overdue" }
-          };
-          const { bg, text, label } = statusConfig[status] || statusConfig.PENDING;
-          return <span className={`badge ${bg} ${text}`}>{label}</span>;
-        }
       }
     ],
     []
   );
 
+  // Prepare data for DataTable - add 'id' field that DataTable expects
+  const tableData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      id: item.id
+    }));
+  }, [data]);
+
   const { table, globalFilter, setGlobalFilter } = useTable({
-    data,
+    data: tableData,
     columns
   });
 
-  const { paginationInfo, actions } = usePagination(table, data?.length);
+  const { paginationInfo, actions } = usePagination(table, tableData?.length);
+
+  const selectedRows = table.getSelectedRowModel().rows;
+
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedIds = selectedRows.map(r => r.original.id);
+      onSelectionChange(selectedIds);
+    }
+  }, [selectedRows, onSelectionChange]);
 
   return (
-    <div className="table-wrapper">
-      {/* Header */}
-      <div className="table-header-container">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="table-title">Receivables</h2>
-            <p className="table-count">Total: {paginationInfo.totalItems} records</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="filter-bar">
-        <input
-          type="text"
-          value={globalFilter ?? ""}
-          onChange={e => setGlobalFilter(e.target.value)}
-          placeholder="Search receivables..."
-          className="filter-input"
-        />
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="table-thead">
-            {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id}>
-                {hg.headers.map(header => (
-                  <th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    className="table-header"
-                  >
-                    <div className="flex items-center gap-2">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.column.getIsSorted() === "asc" && (
-                        <ChevronUp className="table-sort-icon" />
-                      )}
-                      {header.column.getIsSorted() === "desc" && (
-                        <ChevronDown className="table-sort-icon" />
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="table-body">
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="table-row">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="table-cell">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length}>
-                  <div className="empty-state">
-                    <Receipt className="empty-state-icon" />
-                    <h3 className="empty-state-title">No receivables found</h3>
-                    <p className="empty-state-description">
-                      Try adjusting your search.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="table-pagination-container">
-        <div className="table-pagination-inner">
-          <span className="table-pagination-info">
-            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} (
-            {paginationInfo.totalItems} total)
-          </span>
-          <div className="table-pagination-actions">
-            <button
-              onClick={actions.previousPage}
-              disabled={!actions.canPrevious}
-              className="table-pagination-button"
-            >
-              Previous
-            </button>
-            <button
-              onClick={actions.nextPage}
-              disabled={!actions.canNext}
-              className="table-pagination-button"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DataTable
+      table={table}
+      columns={columns}
+      data={tableData}
+      title="Receivables"
+      searchPlaceholder="Search receivables..."
+      onSelectionChange={onSelectionChange}
+      globalFilter={globalFilter}
+      setGlobalFilter={setGlobalFilter}
+      paginationInfo={paginationInfo}
+      paginationActions={actions}
+    />
   );
 };
 
