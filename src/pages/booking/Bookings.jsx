@@ -53,7 +53,7 @@ const Bookings = () => {
         }));
     }, [safeBookings]);
 
-    // Count by status (enum-based)
+    //  by status (enum-based)
     const countByBookingMode = booking_mode =>
         safeBookings.filter(b => b.booking_mode === booking_mode).length;
 
