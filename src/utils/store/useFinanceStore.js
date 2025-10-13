@@ -80,21 +80,6 @@ const useFinanceStore = create((set, get) => ({
     }
   },
 
-  // Create missing AR records
-  createMissingARRecords: async () => {
-    set({ loading: true, error: null });
-    try {
-      const response = await api.get("/ar/missing");
-      set({ loading: false });
-      return response.data;
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to create missing AR records",
-        loading: false
-      });
-      throw error;
-    }
-  },
 
   // Get AP by ID
   getAPById: async (apId) => {
@@ -127,22 +112,6 @@ const useFinanceStore = create((set, get) => ({
       const errorMsg = error.response?.data?.message || "Failed to update AP record";
       set({ error: errorMsg, loading: false });
       return { success: false, error: errorMsg };
-    }
-  },
-
-  // Create missing AP records
-  createMissingAPRecords: async () => {
-    set({ loading: true, error: null });
-    try {
-      const response = await api.post("/ap/create-missing");
-      set({ loading: false });
-      return response.data;
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to create missing AP records",
-        loading: false
-      });
-      throw error;
     }
   },
 

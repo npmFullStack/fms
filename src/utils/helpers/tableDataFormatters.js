@@ -95,3 +95,31 @@ export const getModeBadge = mode => {
         }
     );
 };
+
+
+// New function to get route abbreviation (3 letters only)
+export const getRouteAbbreviation = (originPort, destinationPort) => {
+    const portAbbreviations = {
+        'Manila': 'MLA',
+        'Subic': 'SBC',
+        'Batangas': 'BTG',
+        'Cebu': 'CEB',
+        'Iloilo': 'ILO',
+        'Bacolod': 'BCD',
+        'Davao': 'DVO',
+        'Cagayan-de-Oro': 'CDO',
+        'General-Santos': 'GES',
+        'Zamboanga': 'ZAM'
+    };
+    
+    const origin = portAbbreviations[originPort] || '---';
+    const destination = portAbbreviations[destinationPort] || '---';
+    
+    return `${origin}-${destination}`;
+};
+
+// New function to format volume (quantity X size)
+export const formatVolume = (quantity, size) => {
+    if (!quantity || !size) return "---";
+    return `${quantity}X${size}`;
+};
