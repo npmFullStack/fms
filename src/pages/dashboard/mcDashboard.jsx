@@ -213,7 +213,7 @@ const McDashboard = () => {
         {/* Booking Trends Chart */}
         <div className="lg:col-span-2 bg-white border border-slate-50 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Booking Trends</h3>
+            <h2 className="font-semibold text-slate-900">Booking Trends</h2>
             <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
               Last 12 months
             </span>
@@ -253,7 +253,7 @@ const McDashboard = () => {
 
         {/* Performance Overview */}
         <div className="bg-white border border-slate-50 rounded-xl p-5 shadow-sm flex flex-col items-center justify-center">
-          <h3 className="font-semibold text-slate-900 mb-4">Delivery Performance</h3>
+          <h2 className="font-semibold text-slate-900 mb-4">Delivery Performance</h2>
           <div className="w-32 h-32 mb-3">
             <CircularProgressbar
               value={dashboardData.deliveryRate}
@@ -277,62 +277,51 @@ const McDashboard = () => {
       </div>
 
 {/* Recent Activity */}
-<div className="bg-white border border-blue-100 rounded-xl shadow-sm overflow-hidden">
-  <div className="flex items-center gap-2 p-4 border-b border-blue-100 bg-blue-50">
-    <Bell className="w-5 h-5 text-blue-600" />
-    <h3 className="font-semibold text-blue-900">Recent Activity</h3>
-    <span className="text-xs text-blue-600 bg-white px-2 py-1 rounded-full ml-auto border border-blue-200">
-      Latest {Math.min(5, bookings.length)} updates
+<div className="bg-white border border-slate-50 rounded-xl shadow-sm overflow-hidden">
+  <div className="flex items-center justify-between p-4 bg-blue-500">
+    <h2 className="font-semibold text-white">Recent Activity</h2>
+    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+      Last Updates
     </span>
   </div>
 
-  <div className="p-2">
+  <div className="p-3">
     {recentActivities.length > 0 ? (
       <div className="space-y-2">
         {recentActivities.map((activity, index) => (
           <motion.div
             key={activity.id}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: index * 0.05 }}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors duration-150 group border border-transparent hover:border-blue-100"
+            transition={{ duration: 0.15, delay: index * 0.05 }}
+            className="flex items-center justify-between p-3 rounded-lg hover:bg-blue-50 transition-colors duration-150 border border-transparent hover:border-blue-100"
           >
-            {/* Status Icon */}
-            <div className={`p-2 rounded-full ${activity.statusBadge.bg} flex-shrink-0 mt-0.5`}>
-              <span className={`text-xs font-bold ${activity.statusBadge.text.split(' ')[0]}`}>
-                {activity.statusBadge.label.charAt(0)}
-              </span>
-            </div>
-            
-            {/* Content - Single line layout */}
-            <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-blue-900 group-hover:text-blue-700 transition-colors truncate">
-                    Booking #{activity.displayNumber}
-                  </p>
-                  <span className={`text-xs px-2 py-1 rounded-full border ${activity.statusBadge.text} ${activity.statusBadge.bg} flex-shrink-0`}>
-                    {activity.statusBadge.label}
-                  </span>
-                </div>
-                <p className="text-sm text-blue-700 mt-1 truncate">
-                  {activity.description || "Shipping activity updated"}
+            {/* Left: Booking Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-semibold text-blue-900 truncate">
+                  Booking #{activity.displayNumber}
                 </p>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full border ${activity.statusBadge.text} ${activity.statusBadge.bg}`}
+                >
+                  {activity.statusBadge.label}
+                </span>
               </div>
-              
-              {/* Date on the right */}
-              <p className="text-xs text-blue-500 whitespace-nowrap flex-shrink-0 mt-0.5">
-                {activity.formattedDate}
+              <p className="text-sm text-blue-700 mt-0.5 truncate">
+                {activity.description || "Shipping activity updated"}
               </p>
             </div>
+
+            {/* Right: Date */}
+            <p className="text-sm font-semibold text-blue-500 whitespace-nowrap ml-3">
+              {activity.formattedDate}
+            </p>
           </motion.div>
         ))}
       </div>
     ) : (
-      <div className="text-center py-8">
-        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <Bell className="w-6 h-6 text-blue-400" />
-        </div>
+      <div className="text-center py-6">
         <p className="text-blue-600 text-sm font-medium">No recent activity found</p>
         <p className="text-blue-400 text-xs mt-1">New bookings will appear here</p>
       </div>
