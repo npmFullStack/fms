@@ -13,8 +13,11 @@ const useFinanceStore = create((set, get) => ({
   fetchAR: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get("/finance/accounts-receivable");
-      set({ arRecords: response.data.data || [], loading: false });
+      const response = await api.get("/ar");
+      set({ 
+        arRecords: response.data.data || [], 
+        loading: false 
+      });
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch AR records",
@@ -28,15 +31,68 @@ const useFinanceStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.get("/ap");
-      set({ 
-        apRecords: response.data.apSummaries || [], 
-        loading: false 
+      set({
+        apRecords: response.data.apSummaries || [],
+        loading: false
       });
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch AP records",
         loading: false
       });
+    }
+  },
+
+  // Get AR by ID
+  getARById: async (arId) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get(`/ar/${arId}`);
+      return response.data.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch AR record",
+        loading: false
+      });
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Update AR record
+  updateARRecord: async (arId, data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.put(`/ar/${arId}`, data);
+      
+      // Update local state
+      const updatedRecords = get().arRecords.map(record =>
+        record.ar_id === arId ? { ...record, ...response.data.data } : record
+      );
+      
+      set({ arRecords: updatedRecords, loading: false });
+      return { success: true, data: response.data };
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Failed to update AR record";
+      set({ error: errorMsg, loading: false });
+      return { success: false, error: errorMsg };
+    }
+  },
+
+  // Create missing AR records
+  createMissingARRecords: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get("/ar/missing");
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to create missing AR records",
+        loading: false
+      });
+      throw error;
     }
   },
 
@@ -62,12 +118,9 @@ const useFinanceStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.put(`/ap/${apId}`, data);
-
-      // Update local state
       const updatedRecords = get().apRecords.map(record =>
         record.ap_id === apId ? { ...record, ...response.data.apRecord } : record
       );
-
       set({ apRecords: updatedRecords, loading: false });
       return { success: true, data: response.data };
     } catch (error) {

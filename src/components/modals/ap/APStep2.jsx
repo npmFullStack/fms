@@ -3,8 +3,8 @@ import { useState, useRef } from "react";
 import { Controller } from "react-hook-form";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
-import { Calendar, Info } from "lucide-react";
 import { NumericFormat } from "react-number-format";
+import { Calendar, Info } from "lucide-react";
 
 const APStep2 = ({ register, control, errors, apRecord }) => {
   const [activeTab, setActiveTab] = useState("origin");

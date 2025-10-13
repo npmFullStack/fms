@@ -73,16 +73,12 @@ const useUserStore = create((set, get) => ({
             const config = {};
             if (updatedData instanceof FormData) {
                 config.headers = {
-                    // Don't set Content-Type for FormData
                 };
             }
 
             await api.put(`/users/${id}`, updatedData, config);
-
-            // Refresh user list after updating
             await get().fetchUsers();
 
-            // Update currentUser if it's the same user being edited
             if (get().currentUser?.id === id) {
                 const updatedUser = { ...get().currentUser, ...updatedData };
                 set({ currentUser: updatedUser });

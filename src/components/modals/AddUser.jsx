@@ -80,7 +80,6 @@ const AddUser = ({ isOpen, onClose }) => {
             if (result.success) {
                 toast.success("User added successfully!");
 
-                // Keep loading for 1.5s, then close modal and reset form
                 setTimeout(() => {
                     handleClose();
                     setIsLoading(false);
