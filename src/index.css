@@ -338,9 +338,9 @@
     .gradient {
         @apply bg-gradient-to-r from-[#178fff] to-[#006dd2] bg-clip-text text-transparent;
     }
-    .gradient-bg {
-        @apply bg-gradient-to-r from-[#178fff] to-[#006dd2];
-    }
+  .gradient-bg {
+    @apply bg-gradient-to-r from-[#1c4bb6] to-[#34b7eb];
+}
 }
 
 /* CUSTOM LOADING */

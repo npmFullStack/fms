@@ -11,7 +11,7 @@ const Header = () => {
         const handleScroll = () => {
             if (location.pathname !== "/") return;
 
-            const sections = ["home", "how-it-works", "why-choose-us"];
+            const sections = ["home", "services", "why-choose-us"];
             const scrollPosition = window.scrollY + 100;
 
             for (const section of sections) {
@@ -42,7 +42,7 @@ const Header = () => {
         } else {
             // If we're back on home page, set the active section based on scroll position
             const handleScroll = () => {
-                const sections = ["home", "how-it-works", "why-choose-us"];
+                const sections = ["home", "services", "why-choose-us"];
                 const scrollPosition = window.scrollY + 100;
 
                 for (const section of sections) {
@@ -115,15 +115,15 @@ const Header = () => {
                         </button>
 
                         <button
-                            onClick={() => handleClick("how-it-works")}
+                            onClick={() => handleClick("services")}
                             className={`pb-1 ${
-                                activeSection === "how-it-works" &&
+                                activeSection === "services" &&
                                 location.pathname === "/"
                                     ? "text-blue-600 font-semibold border-b-2 border-blue-600"
                                     : "text-gray-700 hover:text-blue-600"
                             }`}
                         >
-                            How It Works
+                            Services
                         </button>
 
                         <button

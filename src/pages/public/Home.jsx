@@ -13,8 +13,30 @@ import {
     CheckCircle
 } from "lucide-react";
 
+// Import images directly
+import poster1 from "../../assets/images/cards/poster1.png";
+import poster2 from "../../assets/images/cards/poster2.png";
+import poster3 from "../../assets/images/cards/poster3.png";
 
 const Home = () => {
+    const posters = [
+        {
+            image: poster1,
+            title: "Ship Your Cargo With Us",
+            description: "Reliable freight solutions for all your shipping needs"
+        },
+        {
+            image: poster2,
+            title: "Track Your Orders",
+            description: "Search HWB# or Booking# to monitor your shipments"
+        },
+        {
+            image: poster3,
+            title: "Pay with PayMongo",
+            description: "Secure and convenient online payments"
+        }
+    ];
+
     return (
         <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center text-center px-4 font-[Poppins]">
             {/* ✅ Fixed Background Grid */}
@@ -44,83 +66,45 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* How It Works Section */}
+                {/* Posters Section - Replacing How It Works */}
                 <section
-                    id="how-it-works"
+                    id="services"
                     className="min-h-screen w-screen flex flex-col items-center justify-center gradient-bg px-12 py-20"
                 >
                     <div className="container text-white mx-auto px-8 md:px-8">
                         <div className="text-center mb-16">
                             <h1 className="heading text-white mb-6">
-                                How It Works
+                                Our Services
                             </h1>
                             <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-                                Our streamlined process makes freight forwarding
-                                simple and efficient. Follow these easy steps to
-                                get your cargo moving worldwide.
+                                Discover our comprehensive freight solutions designed to simplify your shipping experience
                             </p>
                         </div>
 
+                        {/* Posters Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
-                                <div className="flex justify-center mb-6">
-                                    <div className="bg-blue-100 p-4 rounded-full">
-                                        <UserPlus className="h-12 w-12 text-blue-600" />
+                            {posters.map((poster, index) => (
+                                <div 
+                                    key={index}
+                                    className="bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300"
+                                >
+                                    <div className="aspect-square bg-gray-50">
+                                        <img
+                                            src={poster.image}
+                                            alt={poster.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-6">
+                                        <h3 className="text-black text-xl font-bold mb-3">
+                                            {poster.title}
+                                        </h3>
+                                        <p className="text-gray-600 leading-relaxed">
+                                            {poster.description}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
-                                    STEP 1
-                                </div>
-                                <h3 className="text-black text-xl font-bold mb-4">
-                                    Create Your Account
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Sign up for free and gain access to our
-                                    comprehensive freight forwarding platform.
-                                    Complete your profile and verify your
-                                    business details to get started.
-                                </p>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
-                                <div className="flex justify-center mb-6">
-                                    <div className="bg-green-100 p-4 rounded-full">
-                                        <ClipboardList className="h-12 w-12 text-green-600" />
-                                    </div>
-                                </div>
-                                <div className="bg-green-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
-                                    STEP 2
-                                </div>
-                                <h3 className="text-black text-xl font-bold mb-4">
-                                    Book Your Shipment
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Enter your shipment details, select
-                                    services, and get instant quotes. Upload
-                                    documents, choose pickup dates, and confirm
-                                    your booking with just a few clicks.
-                                </p>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-xl shadow-xl text-center transform hover:scale-105 transition-all duration-300">
-                                <div className="flex justify-center mb-6">
-                                    <div className="bg-purple-100 p-4 rounded-full">
-                                        <Eye className="h-12 w-12 text-purple-600" />
-                                    </div>
-                                </div>
-                                <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded-full inline-block mb-4">
-                                    STEP 3
-                                </div>
-                                <h3 className="text-black text-xl font-bold mb-4">
-                                    Track & Monitor
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Monitor your shipment in real-time with our
-                                    advanced tracking system. Receive updates,
-                                    manage documentation, and stay informed
-                                    throughout the journey.
-                                </p>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -128,7 +112,7 @@ const Home = () => {
                 {/* Why Choose Us Section */}
                 <section
                     id="why-choose-us"
-                    className="min-h-screen w-screen flex flex-col items-center justify-center bg-white px-12 py-20"
+                    className="min-h-screen w-screen flex flex-col items-center justify-center px-12 py-20"
                 >
                     <div className="container mx-auto px-8 md:px-8">
                         <div className="text-center mb-16">
@@ -141,7 +125,7 @@ const Home = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <ShieldCheck className="h-12 w-12 text-blue-600" />
                                 </div>
@@ -156,7 +140,7 @@ const Home = () => {
                                 </p>
                             </div>
 
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <DollarSign className="h-12 w-12 text-green-600" />
                                 </div>
@@ -171,7 +155,7 @@ const Home = () => {
                                 </p>
                             </div>
 
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <MessageSquare className="h-12 w-12 text-purple-600" />
                                 </div>
@@ -186,7 +170,7 @@ const Home = () => {
                                 </p>
                             </div>
 
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <Clock className="h-12 w-12 text-orange-600" />
                                 </div>
@@ -200,7 +184,7 @@ const Home = () => {
                                 </p>
                             </div>
 
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <Truck className="h-12 w-12 text-red-600" />
                                 </div>
@@ -208,14 +192,14 @@ const Home = () => {
                                     Global Network
                                 </h3>
                                 <p className="text-gray-600">
-                                    Extensive worldwide network oftrusted
+                                    Extensive worldwide network of trusted
                                     partners and agents providing comprehensive
                                     coverage for all your international shipping
                                     needs.
                                 </p>
                             </div>
 
-                            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
+                            <div className="bg-white text-center p-6 rounded-lg hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-center mb-4">
                                     <CheckCircle className="h-12 w-12 text-teal-600" />
                                 </div>
@@ -248,14 +232,14 @@ const Home = () => {
                             <p>+63 123 456 7890</p>
                             <p>info@xtramilefreight.com</p>
                         </div>
-<div className="mt-4 flex justify-center space-x-6 text-sm">
-  <Link
-    to="/terms-conditions"
-    className="text-gray-300 hover:text-white transition-colors"
-  >
-    Terms & Conditions
-  </Link>
-</div>
+                        <div className="mt-4 flex justify-center space-x-6 text-sm">
+                            <Link
+                                to="/terms-conditions"
+                                className="text-gray-300 hover:text-white transition-colors"
+                            >
+                                Terms & Conditions
+                            </Link>
+                        </div>
                         {/* Copyright */}
                         <div className="mt-4 pt-4 border-t border-gray-700">
                             <p className="text-xs text-gray-400">
