@@ -248,7 +248,14 @@ const Home = () => {
                             <p>+63 123 456 7890</p>
                             <p>info@xtramilefreight.com</p>
                         </div>
-
+<div className="mt-4 flex justify-center space-x-6 text-sm">
+  <Link
+    to="/terms-conditions"
+    className="text-gray-300 hover:text-white transition-colors"
+  >
+    Terms & Conditions
+  </Link>
+</div>
                         {/* Copyright */}
                         <div className="mt-4 pt-4 border-t border-gray-700">
                             <p className="text-xs text-gray-400">

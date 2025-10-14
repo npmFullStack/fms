@@ -1,5 +1,5 @@
 // components/modals/UpdateAR.jsx
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateARFormSchema } from "../../schemas/arSchema";
@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import { NumericFormat } from "react-number-format";
-import { Calendar, Info, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   const { updateARRecord } = useFinanceStore();
@@ -18,30 +18,33 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     reset();
   });
 
+  // Helper for placeholder values
+  const formatAmount = (val) =>
+    val === null || val === undefined ? "" : val.toString();
+
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(updateARFormSchema),
     mode: "onChange",
     defaultValues: {
       amount_paid: "",
       payment_date: "",
-      terms: ""
-    }
+      terms: "",
+    },
   });
 
-  // Populate form with existing data
+  // Populate with existing data
   useEffect(() => {
     if (arRecord && isOpen) {
-      const formData = {
-        amount_paid: arRecord.amount_paid?.toString() || "",
+      reset({
+        amount_paid: formatAmount(arRecord.amount_paid),
         payment_date: arRecord.payment_date || "",
-        terms: arRecord.terms?.toString() || "0"
-      };
-      reset(formData);
+        terms: arRecord.terms?.toString() || "0",
+      });
     }
   }, [arRecord, isOpen, reset]);
 
@@ -54,10 +57,11 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
+
       const formattedData = {
         amount_paid: parseFloat(data.amount_paid) || 0,
         payment_date: data.payment_date || null,
-        terms: parseInt(data.terms) || 0
+        terms: parseInt(data.terms) || 0,
       };
 
       const result = await updateARRecord(arId, formattedData);
@@ -75,8 +79,9 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     }
   };
 
+  // ✅ Fixed for zod string validation
   const renderAmountField = () => (
-    <div className="input-container" key="amount_paid">
+    <div className="input-container">
       <label className="input-label-modern">Amount Paid *</label>
       <Controller
         control={control}
@@ -84,7 +89,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
         render={({ field }) => (
           <NumericFormat
             value={
-              field.value === "" || field.value === null || field.value === 0
+              field.value === "" || field.value === null || field.value === "0"
                 ? ""
                 : field.value
             }
@@ -97,8 +102,8 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               errors.amount_paid ? "input-error" : ""
             }`}
             onValueChange={(values) => {
-              const val = values.value;
-              field.onChange(val === "" ? "" : val);
+              // ✅ Keep as string for Zod
+              field.onChange(values.value || "");
             }}
             onBlur={field.onBlur}
           />
@@ -111,7 +116,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   );
 
   const renderDateField = () => (
-    <div className="input-container" key="payment_date">
+    <div className="input-container">
       <label className="input-label-modern">Payment Date</label>
       <div className="relative">
         <Controller
@@ -143,7 +148,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   );
 
   const renderTermsField = () => (
-    <div className="input-container" key="terms">
+    <div className="input-container">
       <label className="input-label-modern">Payment Terms (Days)</label>
       <div className="relative">
         <Controller
@@ -164,47 +169,18 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
         />
         <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
       </div>
-      {errors.terms && (
-        <p className="error-message">{errors.terms.message}</p>
-      )}
-      <p className="text-xs text-slate-500 mt-1">
-        Number of days for payment terms (e.g., 30 for Net 30)
-      </p>
+      {errors.terms && <p className="error-message">{errors.terms.message}</p>}
     </div>
   );
 
-  const fields = [
-    {
-      name: "amount_paid",
-      label: "Amount Paid",
-      type: "custom",
-      required: true,
-      customRender: renderAmountField
-    },
-    {
-      name: "payment_date",
-      label: "Payment Date",
-      type: "custom",
-      customRender: renderDateField
-    },
-    {
-      name: "terms",
-      label: "Payment Terms",
-      type: "custom",
-      customRender: renderTermsField
-    }
-  ];
-
-  // Calculate terms status for info box
-  const getTermsStatus = () => {
-    if (!arRecord?.terms) return "No terms set";
-    
-    const currentAging = arRecord.current_aging || arRecord.aging || 0;
-    if (currentAging > arRecord.terms) {
-      return `Overdue by ${currentAging - arRecord.terms} days`;
-    } else {
-      return `Within terms (${arRecord.terms} days)`;
-    }
+  // ✅ Tips only toolbox
+  const tipsBox = {
+    title: "Tips",
+    items: [
+      { text: "Ensure all values are correct before saving." },
+      { text: "Leave fields blank if not applicable." },
+      { text: "Amount field uses a placeholder — no need to clear it." },
+    ],
   };
 
   return (
@@ -215,31 +191,12 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onSubmit)}
-      fields={fields}
-      infoBox={{
-        title: "Payment Information",
-        items: [
-          { text: `Client: ${arRecord?.shipper || "-"}` },
-          { text: `HWB: ${arRecord?.hwb_number || "-"}` },
-          { text: `Total Amount: ₱${arRecord?.pesos?.toLocaleString("en-PH") || "0"}` },
-          { 
-            text: `Current Balance: ₱${
-              arRecord?.balance?.toLocaleString("en-PH") ||
-              arRecord?.pesos?.toLocaleString("en-PH") ||
-              "0"
-            }` 
-          },
-          { 
-            text: `Payment Terms: ${arRecord?.terms ? `Net ${arRecord.terms}` : "Not set"}` 
-          },
-          { 
-            text: `Status: ${getTermsStatus()}`,
-            className: arRecord?.terms && (arRecord.current_aging || arRecord.aging) > arRecord.terms 
-              ? "text-red-600 font-medium" 
-              : "text-green-600 font-medium"
-          }
-        ]
-      }}
+      fields={[
+        { name: "amount_paid", type: "custom", customRender: renderAmountField },
+        { name: "payment_date", type: "custom", customRender: renderDateField },
+        { name: "terms", type: "custom", customRender: renderTermsField },
+      ]}
+      infoBox={tipsBox}
       buttonText="Update Payment"
     />
   );

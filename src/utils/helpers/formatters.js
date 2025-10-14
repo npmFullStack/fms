@@ -1,3 +1,5 @@
+// utils/helpers/formatters
+
 export const formatRole = role => {
     if (!role) return "Unknown";
 

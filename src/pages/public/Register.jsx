@@ -237,7 +237,30 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-
+{/* Terms and Conditions */}
+<div className="flex items-start space-x-2">
+  <input
+    type="checkbox"
+    id="terms"
+    {...register("terms", {
+      required: "You must accept the terms and conditions",
+    })}
+    className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  />
+  <label htmlFor="terms" className="text-sm text-gray-600">
+    I agree to the{" "}
+    <Link
+      to="/terms-conditions"
+      className="text-blue-600 hover:text-blue-500 font-medium"
+      target="_blank"
+    >
+      Terms and Conditions
+    </Link>
+  </label>
+</div>
+{errors.terms && (
+  <p className="error-message">{errors.terms.message}</p>
+)}
                         {/* Submit Button */}
                         <button
                             type="submit"

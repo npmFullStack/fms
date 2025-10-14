@@ -11,6 +11,7 @@ const Login = lazy(() => import("./pages/public/Login"));
 const Register = lazy(() => import("./pages/public/Register"));
 const ForgotPassword = lazy(() => import("./pages/public/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/public/ResetPassword"));
+const TermsConditions = lazy(() => import("./pages/public/TermsConditions"));
 
 // Shared Protected
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
@@ -71,7 +72,9 @@ function App() {
                             path="/forgot-password"
                             element={<ForgotPassword />}
                         />
-                        <Route path="/reset-password" element={<ResetPassword />} /> {/* Move here */}
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/terms-conditions"
+                        element={<TermsConditions />} />
 
                     </Route>
 

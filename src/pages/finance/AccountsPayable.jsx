@@ -66,8 +66,7 @@ const AccountsPayable = () => {
   };
 
   const calculateNetRevenue = (ap) => {
-    // For now, using a placeholder calculation
-    // You might want to fetch actual revenue data from your backend
+
     const grossRevenue = 50000; // placeholder
     return grossRevenue - calculateTotalWithBIR(ap);
   };

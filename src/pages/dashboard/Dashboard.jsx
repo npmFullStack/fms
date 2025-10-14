@@ -42,7 +42,7 @@ const Dashboard = () => {
           <div>
             <h1 className="page-title">Dashboard</h1>
             <p className="page-subtitle">
-              Welcome back, {user?.first_name || user?.email || "User"} 👋
+              Welcome back, {user?.first_name || user?.email || "User"} 👋🏻
             </p>
           </div>
 

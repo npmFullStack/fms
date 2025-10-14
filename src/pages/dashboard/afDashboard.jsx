@@ -1,3 +1,4 @@
+// pages/dashboard/afDashboard.jsx
 import React, { useMemo, useEffect, useState } from "react";
 import {
   BarChart,
@@ -23,6 +24,7 @@ import Select from "react-select";
 import useFinanceStore from "../../utils/store/useFinanceStore";
 import Loading from "../../components/Loading";
 import StatCard from "../../components/cards/StatCard";
+import { calculateTotalWithBIR, calculateNetRevenue } from "../../utils/helpers/financeCalculations";
 
 const DATE_OPTIONS = [
   { value: "all", label: "All Time" },
@@ -56,93 +58,164 @@ const AfDashboard = () => {
   }, [fetchAP, fetchAR]);
 
   const formatCurrency = (amount) =>
-    new Intl.NumberFormat("en-US", {
+    new Intl.NumberFormat("en-PH", {
       style: "currency",
-      currency: "USD",
+      currency: "PHP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount || 0);
 
+  // Helper to match AR and AP records
+  const getAPRecord = (bookingId) => {
+    return apRecords.find(ap => ap.booking_id === bookingId);
+  };
+
+  // Filter data based on date selection
+  const filteredData = useMemo(() => {
+    const now = new Date();
+    let startDate = new Date(0); // Beginning of time
+
+    switch (dateFilter.value) {
+      case "month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case "3months":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        break;
+      case "year":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(0);
+    }
+
+    return arRecords.filter(ar => {
+      const recordDate = new Date(ar.payment_date || ar.created_at);
+      return recordDate >= startDate;
+    });
+  }, [arRecords, dateFilter]);
+
   const financialMetrics = useMemo(() => {
-    const totalExpenses = apRecords.reduce(
-      (sum, r) => sum + (parseFloat(r.total_expenses) || 0),
-      0
-    );
-    const totalRevenue = apRecords.reduce(
-      (sum, r) => sum + (parseFloat(r.net_revenue) || 0),
-      0
-    );
-    const netIncome = totalRevenue - totalExpenses;
-    const profitMargin = totalRevenue > 0 ? (netIncome / totalRevenue) * 100 : 0;
-    const totalBookings = apRecords.length;
-    const avgRevenuePerBooking =
-      totalBookings > 0 ? totalRevenue / totalBookings : 0;
-    const expenseRatio =
-      totalRevenue > 0 ? (totalExpenses / totalRevenue) * 100 : 0;
+    let totalRevenue = 0;
+    let totalExpenses = 0;
+    let totalCollected = 0;
+    let totalNetRevenue = 0;
+
+    filteredData.forEach(ar => {
+      const apRecord = getAPRecord(ar.booking_id);
+      const amountPaid = parseFloat(ar.amount_paid || 0);
+      const expenses = calculateTotalWithBIR(apRecord);
+      const netRevenue = calculateNetRevenue(ar, apRecord);
+
+      totalCollected += amountPaid;
+      totalExpenses += expenses;
+      totalNetRevenue += netRevenue;
+      totalRevenue += parseFloat(ar.pesos || ar.total_amount || 0);
+    });
+
+    const profitMargin = totalCollected > 0 ? (totalNetRevenue / totalCollected) * 100 : 0;
+    const totalBookings = filteredData.length;
+    const avgRevenuePerBooking = totalBookings > 0 ? totalCollected / totalBookings : 0;
+    const expenseRatio = totalCollected > 0 ? (totalExpenses / totalCollected) * 100 : 0;
 
     return {
       totalExpenses,
+      totalCollected,
       totalRevenue,
-      netIncome,
+      totalNetRevenue,
       profitMargin,
       totalBookings,
       avgRevenuePerBooking,
       expenseRatio,
     };
-  }, [apRecords]);
+  }, [filteredData, apRecords]);
 
   const chartData = useMemo(() => {
     const monthlyData = {};
-    apRecords.forEach((r) => {
-      if (r.created_at) {
-        const date = new Date(r.created_at);
-        const key = `${date.getFullYear()}-${date.getMonth()}`;
-        if (!monthlyData[key])
-          monthlyData[key] = { month: MONTHS[date.getMonth()], revenue: 0, expense: 0 };
-        monthlyData[key].revenue += parseFloat(r.net_revenue) || 0;
-        monthlyData[key].expense += parseFloat(r.total_expenses) || 0;
+    
+    filteredData.forEach((ar) => {
+      const date = new Date(ar.payment_date || ar.created_at);
+      const key = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
+      const monthLabel = MONTHS[date.getMonth()];
+
+      if (!monthlyData[key]) {
+        monthlyData[key] = { 
+          month: monthLabel, 
+          revenue: 0, 
+          expense: 0,
+          collected: 0,
+          netRevenue: 0
+        };
       }
+
+      const apRecord = getAPRecord(ar.booking_id);
+      const amountPaid = parseFloat(ar.amount_paid || 0);
+      const expenses = calculateTotalWithBIR(apRecord);
+      const netRevenue = calculateNetRevenue(ar, apRecord);
+
+      monthlyData[key].collected += amountPaid;
+      monthlyData[key].expense += expenses;
+      monthlyData[key].netRevenue += netRevenue;
+      monthlyData[key].revenue += parseFloat(ar.pesos || ar.total_amount || 0);
     });
-    return Object.values(monthlyData).slice(-6);
-  }, [apRecords]);
+
+    // Sort by date and return last 6 months
+    return Object.keys(monthlyData)
+      .sort()
+      .slice(-6)
+      .map(key => monthlyData[key]);
+  }, [filteredData, apRecords]);
 
   const recentActivity = useMemo(() => {
-    return apRecords
+    return filteredData
+      .filter(ar => ar.payment_date) // Only show records with payments
       .slice(-5)
       .reverse()
-      .map((r) => ({
-        id: r.id,
-        action: r.freight_payee || "Transaction",
-        date: new Date(r.created_at).toLocaleDateString(),
-        amount: r.net_revenue ? formatCurrency(r.net_revenue) : "—",
-      }));
-  }, [apRecords]);
+      .map((ar) => {
+        const apRecord = getAPRecord(ar.booking_id);
+        const netRevenue = calculateNetRevenue(ar, apRecord);
+        
+        return {
+          id: ar.ar_id || ar.id,
+          action: `${ar.shipper || ar.client || "Client"} - ${ar.hwb_number || "N/A"}`,
+          date: new Date(ar.payment_date).toLocaleDateString("en-PH"),
+          amount: formatCurrency(netRevenue),
+          isPositive: netRevenue >= 0
+        };
+      });
+  }, [filteredData, apRecords]);
 
   const statConfig = useMemo(
     () => [
       {
-        title: "Total Revenue",
-        value: formatCurrency(financialMetrics.totalRevenue),
-        color: "bg-blue-500",
+        title: "Total Collected",
+        value: formatCurrency(financialMetrics.totalCollected),
+        color: "bg-gradient-to-br from-green-500 to-green-600 text-white",
         icon: DollarSign,
+        subtitle: `${financialMetrics.totalBookings} bookings`
       },
       {
         title: "Total Expenses",
         value: formatCurrency(financialMetrics.totalExpenses),
-        color: "bg-blue-400",
+        color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
         icon: CreditCard,
+        subtitle: "Including 12% BIR"
       },
       {
-        title: "Net Income",
-        value: formatCurrency(financialMetrics.netIncome),
-        color: "bg-indigo-500",
+        title: "Net Revenue",
+        value: formatCurrency(financialMetrics.totalNetRevenue),
+        color: financialMetrics.totalNetRevenue >= 0
+          ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+          : "bg-gradient-to-br from-red-500 to-red-600 text-white",
         icon: TrendingUp,
+        subtitle: `${financialMetrics.profitMargin.toFixed(1)}% margin`
       },
       {
-        title: "Profit Margin",
-        value: `${financialMetrics.profitMargin.toFixed(1)}%`,
-        color: "bg-sky-500",
+        title: "Avg Revenue/Booking",
+        value: formatCurrency(financialMetrics.avgRevenuePerBooking),
+        color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
         icon: PieChart,
+        subtitle: `${financialMetrics.expenseRatio.toFixed(1)}% expense ratio`
       },
     ],
     [financialMetrics]
@@ -157,7 +230,7 @@ const AfDashboard = () => {
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Financial Overview</h2>
           <p className="text-sm text-slate-600 mt-1">
-            Track accounts payable, expenses, and performance
+            Track collections, expenses, and net revenue performance
           </p>
         </div>
         <div className="flex flex-col text-sm mt-3 sm:mt-0">
@@ -198,16 +271,17 @@ const AfDashboard = () => {
             value={stat.value}
             color={stat.color}
             icon={stat.icon}
+            subtitle={stat.subtitle}
           />
         ))}
       </div>
 
       {/* Charts & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue vs Expenses */}
+        {/* Collections vs Expenses */}
         <div className="bg-white border border-slate-50 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Revenue vs Expenses</h3>
+            <h3 className="font-semibold text-slate-900">Collections vs Expenses</h3>
             <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
               Last 6 months
             </span>
@@ -219,7 +293,7 @@ const AfDashboard = () => {
               <YAxis
                 stroke="#2563eb"
                 fontSize={12}
-                tickFormatter={(v) => `$${v / 1000}k`}
+                tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
               />
               <ReTooltip
                 formatter={(v) => [formatCurrency(v), "Amount"]}
@@ -230,8 +304,8 @@ const AfDashboard = () => {
                   fontSize: "12px",
                 }}
               />
-              <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-              <Bar dataKey="expense" fill="#93c5fd" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="collected" name="Collected" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="expense" name="Expenses" fill="#a855f7" radius={[4, 4, 0, 0]} barSize={20} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -239,7 +313,7 @@ const AfDashboard = () => {
         {/* Recent Activity */}
         <div className="bg-white border border-slate-50 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Recent Activity</h3>
+            <h3 className="font-semibold text-slate-900">Recent Payments</h3>
             <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
               Latest 5
             </span>
@@ -254,30 +328,32 @@ const AfDashboard = () => {
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                   className="flex justify-between items-center p-3 rounded-lg hover:bg-blue-50 transition-colors"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">{item.action}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-blue-900 truncate">{item.action}</p>
                     <p className="text-xs text-blue-600">{item.date}</p>
                   </div>
-                  <p className="text-sm font-semibold text-blue-900">
+                  <p className={`text-sm font-semibold ml-2 ${
+                    item.isPositive ? 'text-green-600' : 'text-red-600'
+                  }`}>
                     {item.amount}
                   </p>
                 </motion.div>
               ))
             ) : (
               <p className="text-blue-500 text-sm text-center py-6">
-                No recent activity
+                No recent payments
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Account Summary (Line Chart) */}
+      {/* Net Revenue Trend (Line Chart) */}
       <div className="bg-white border border-slate-50 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-slate-900">Accounts Summary</h3>
+          <h3 className="font-semibold text-slate-900">Net Revenue Trend</h3>
           <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-            Overview
+            6-month overview
           </span>
         </div>
         <ResponsiveContainer width="100%" height={260}>
@@ -287,7 +363,7 @@ const AfDashboard = () => {
             <YAxis
               stroke="#2563eb"
               fontSize={12}
-              tickFormatter={(v) => `$${v / 1000}k`}
+              tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
             />
             <ReTooltip
               formatter={(v) => [formatCurrency(v), "Amount"]}
@@ -300,17 +376,27 @@ const AfDashboard = () => {
             />
             <Line
               type="monotone"
-              dataKey="revenue"
-              stroke="#2563eb"
+              dataKey="collected"
+              name="Collected"
+              stroke="#10b981"
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#2563eb" }}
+              dot={{ r: 4, fill: "#10b981" }}
             />
             <Line
               type="monotone"
               dataKey="expense"
-              stroke="#60a5fa"
+              name="Expenses"
+              stroke="#a855f7"
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#60a5fa" }}
+              dot={{ r: 4, fill: "#a855f7" }}
+            />
+            <Line
+              type="monotone"
+              dataKey="netRevenue"
+              name="Net Revenue"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={{ r: 5, fill: "#3b82f6" }}
             />
           </LineChart>
         </ResponsiveContainer>
