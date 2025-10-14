@@ -7,6 +7,7 @@ import Loading from "../../components/Loading";
 import McDashboard from "./mcDashboard";
 import AfDashboard from "./afDashboard";
 import GmDashboard from "./gmDashboard";
+import CmDashboard from "./cmDashboard"; 
 
 const Dashboard = () => {
   const { user } = useAuthStore();
@@ -22,15 +23,10 @@ const Dashboard = () => {
         return <AfDashboard />;
       case "general_manager":
         return <GmDashboard />;
+      case "customer":
+        return <CmDashboard />;
       default:
-        return (
-          <div className="flex flex-col items-center justify-center h-[60vh] text-gray-700">
-            <h1 className="text-3xl font-semibold text-blue-600">Welcome!</h1>
-            <p className="text-gray-500 mt-2">
-              Your dashboard overview will appear here soon.
-            </p>
-          </div>
-        );
+        return <CmDashboard />; // Use customer dashboard as default
     }
   };
 
