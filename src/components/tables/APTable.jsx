@@ -15,10 +15,11 @@ import DataTable from "./DataTable";
 const APTable = ({ data, activeTab, onSelectionChange }) => {
   const { arRecords } = useFinanceStore();
 
+
   // Helper to find matching AR record
-  const getARRecord = (bookingId) => {
-    return arRecords.find(ar => ar.booking_id === bookingId);
-  };
+const getARRecord = (bookingId) => {
+    return arRecords.find(arr => arr.booking_id === bookingId);
+};
 
   const baseColumns = [
     {

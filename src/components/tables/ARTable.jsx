@@ -4,7 +4,6 @@ import useTable from "../../utils/hooks/useTable";
 import usePagination from "../../utils/hooks/usePagination";
 import useFinanceStore from "../../utils/store/useFinanceStore";
 import { toCaps, getRouteAbbreviation, formatVolume } from "../../utils/helpers/tableDataFormatters";
-// ❌ REMOVED: financeCalculations imports
 import DataTable from "./DataTable";
 
 const ARTable = ({ data, onSelectionChange }) => {
@@ -116,7 +115,7 @@ const ARTable = ({ data, onSelectionChange }) => {
         );
       }
     },
-    // ✅ NEW: Collectible Amount column (before Amount Paid)
+    // ✅ Collectible Amount column (before Amount Paid)
     {
       accessorKey: "gross_income",
       header: "Collectible Amount",
@@ -139,33 +138,33 @@ const ARTable = ({ data, onSelectionChange }) => {
         </span>
       )
     },
-    // ❌ UPDATED: Remove complex calculations, show simple values
+    // ✅ UPDATED: Use total_payables instead of total_expenses
     {
-      accessorKey: "total_expenses",
-      header: "Total Expenses",
+      accessorKey: "total_payables",
+      header: "Total Payables",
       cell: ({ row }) => {
         const apRecord = getAPRecord(row.original.booking_id);
-        // Simple display - use total_expenses from AP if available
-        const totalExpenses = apRecord?.total_expenses || 0;
+        // Use total_payables from AP if available
+        const totalPayables = apRecord?.total_payables || 0;
         return (
           <span className="table-text">
-            ₱{totalExpenses.toLocaleString('en-PH', {
+            ₱{totalPayables.toLocaleString('en-PH', {
               minimumFractionDigits: 2
             })}
           </span>
         );
       }
     },
-    // ❌ UPDATED: Simplified net revenue calculation
+    // ✅ UPDATED: Net Revenue calculation using total_payables
     {
       accessorKey: "net_revenue",
       header: "Net Revenue",
       cell: ({ row }) => {
         const amountPaid = row.original.amount_paid || 0;
         const apRecord = getAPRecord(row.original.booking_id);
-        const totalExpenses = apRecord?.total_expenses || 0;
-        // Simple calculation: amount_paid - total_expenses
-        const netRevenue = amountPaid - totalExpenses;
+        const totalPayables = apRecord?.total_payables || 0;
+        // Calculation: amount_paid - total_payables
+        const netRevenue = amountPaid - totalPayables;
         
         return (
           <span className={`table-text-bold ${netRevenue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -176,15 +175,15 @@ const ARTable = ({ data, onSelectionChange }) => {
         );
       }
     },
-    // ❌ UPDATED: Simplified net revenue percentage
+    // ✅ UPDATED: Net Revenue percentage using total_payables
     {
       accessorKey: "net_revenue_percent",
       header: "Net Revenue (%)",
       cell: ({ row }) => {
         const amountPaid = row.original.amount_paid || 0;
         const apRecord = getAPRecord(row.original.booking_id);
-        const totalExpenses = apRecord?.total_expenses || 0;
-        const netRevenue = amountPaid - totalExpenses;
+        const totalPayables = apRecord?.total_payables || 0;
+        const netRevenue = amountPaid - totalPayables;
         
         // Calculate percentage based on amount_paid
         const percentage = amountPaid > 0 ? (netRevenue / amountPaid) * 100 : 0;
