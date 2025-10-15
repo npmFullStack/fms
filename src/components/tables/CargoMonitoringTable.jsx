@@ -8,7 +8,9 @@ import usePagination from "../../utils/hooks/usePagination";
 import {
   toCaps,
   getStatusBadge,
-  getModeBadge
+  getModeBadge,
+  getRouteAbbreviation,
+  formatVolume
 } from "../../utils/helpers/tableDataFormatters";
 // Components
 import DataTable from "./DataTable";
@@ -80,15 +82,17 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onEditDate
         cell: ({ row }) => {
           const containers = row.original.containers || [];
           if (!containers.length) return <span>---</span>;
+          
           const containerGroups = containers.reduce((acc, c) => {
             if (!acc[c.size]) acc[c.size] = 0;
             acc[c.size]++;
             return acc;
           }, {});
+          
           return (
             <span className="font-medium">
               {Object.entries(containerGroups)
-                .map(([size, count]) => `${count}X${toCaps(size)}`)
+                .map(([size, count]) => formatVolume(count, size))
                 .join(", ")}
             </span>
           );
@@ -235,18 +239,14 @@ const CargoMonitoringTable = ({ data, rightAction, onSelectionChange, onEditDate
       {
         accessorKey: "route",
         header: "ROUTE",
-        cell: ({ row }) => (
-          <div>
-            <div>
-              <span className="text-yellow-600 font-medium mr-1">ORIGIN:</span>
-              {toCaps(row.original.origin_port)}
-            </div>
-            <div>
-              <span className="text-blue-600 font-medium mr-1">DEST:</span>
-              {toCaps(row.original.destination_port)}
-            </div>
-          </div>
-        )
+        cell: ({ row }) => {
+          const route = getRouteAbbreviation(row.original.origin_port, row.original.destination_port);
+          return (
+            <span className="font-medium">
+              {route}
+            </span>
+          );
+        }
       },
       {
         accessorKey: "booking_mode",
