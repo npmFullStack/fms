@@ -24,36 +24,8 @@ const APStep6 = ({ watch, apRecord }) => {
     });
   };
 
-  // ✅ Calculate total expenses from all charges (same as APStep5)
-  const calculateTotalExpenses = () => {
-    const amounts = [
-      formData.freight_amount,
-      formData.trucking_origin_amount,
-      formData.trucking_dest_amount,
-      formData.crainage_amount,
-      formData.arrastre_origin_amount,
-      formData.arrastre_dest_amount,
-      formData.wharfage_origin_amount,
-      formData.wharfage_dest_amount,
-      formData.labor_origin_amount,
-      formData.labor_dest_amount,
-      formData.rebates_amount,
-      formData.storage_amount,
-      formData.facilitation_amount,
-    ];
-    return amounts.reduce((sum, val) => sum + (Number(val) || 0), 0);
-  };
-
-  // ✅ Calculate everything dynamically like APStep5
-  const totalExpenses = calculateTotalExpenses();
-  const birPercentage = formData.bir_percentage || 0; // Use 0 if not set, not 12
-  const birAmount = totalExpenses * (birPercentage / 100);
-  const totalPayables = totalExpenses + birAmount;
-  const netRevenuePercentage = formData.net_revenue_percentage || 0;
-  const netRevenueAmount = totalPayables * (netRevenuePercentage / 100);
-  
-  // ✅ Use the form value if set, otherwise calculate it
-  const grossIncome = formData.gross_income || (totalPayables + netRevenueAmount);
+  // ✅ Use the form values directly (no calculations needed)
+  const grossIncome = formData.gross_income || 0;
 
   const groups = [
     {
@@ -158,7 +130,7 @@ const APStep6 = ({ watch, apRecord }) => {
           {groups.map((g) => (
             <button
               key={g.title}
-              type="button" // ✅ Prevent submit
+              type="button"
               onClick={() => setActiveTab(g.title)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === g.title
@@ -206,83 +178,67 @@ const APStep6 = ({ watch, apRecord }) => {
         )}
       </div>
 
-      {/* ✅ UPDATED: Financial Summary with dynamic calculations */}
+      {/* ✅ SIMPLIFIED: Financial Summary - Just show what will be sent to backend */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Calculator className="w-4 h-4 text-blue-600" />
           <h4 className="font-semibold text-slate-800">Financial Summary</h4>
         </div>
-        <div className="space-y-2 text-sm">
-          {/* Expenses Section */}
+        <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-600">Total Expenses:</span>
-            <span className="font-semibold text-slate-800">{formatCurrency(totalExpenses)}</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(formData.total_expenses)}</span>
           </div>
           
-          {/* BIR Tax Section */}
           <div className="flex justify-between">
-            <span className="text-slate-600">BIR Tax ({birPercentage}%):</span>
-            <span className="font-semibold text-slate-800">{formatCurrency(birAmount)}</span>
+            <span className="text-slate-600">BIR Percentage:</span>
+            <span className="font-semibold text-slate-800">{formData.bir_percentage || 0}%</span>
           </div>
           
-          {/* Total Payables */}
-          <div className="flex justify-between border-t border-blue-200 pt-2">
-            <span className="font-semibold text-slate-800">Total Payables:</span>
-            <span className="font-semibold text-slate-800">{formatCurrency(totalPayables)}</span>
+          <div className="flex justify-between">
+            <span className="text-slate-600">Total Payables:</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(formData.total_payables)}</span>
           </div>
 
-          {/* Net Revenue Section (only show if percentage is set) */}
-          {netRevenuePercentage > 0 && (
-            <div className="flex justify-between">
-              <span className="text-slate-600">Net Revenue ({netRevenuePercentage}%):</span>
-              <span className="font-medium text-slate-800">{formatCurrency(netRevenueAmount)}</span>
-            </div>
-          )}
-
-          {/* Gross Income */}
           <div className="flex justify-between border-t border-blue-200 pt-2">
             <span className="font-semibold text-slate-800 text-base">Gross Income:</span>
             <span className="font-semibold text-slate-800 text-lg">{formatCurrency(grossIncome)}</span>
           </div>
 
-          {/* ✅ NEW: Calculation Breakdown Info */}
-          <div className="mt-3 pt-3 border-t border-blue-200">
-            <p className="text-xs text-slate-500">
-              <strong>Calculation:</strong><br />
-              • Total Payables = Total Expenses + BIR Tax<br />
-              {netRevenuePercentage > 0 
-                ? `• Gross Income = Total Payables + Net Revenue (${netRevenuePercentage}%)`
-                : formData.gross_income 
-                  ? "• Gross Income = Manually entered"
-                  : "• Gross Income = Total Payables"
-              }
-            </p>
-          </div>
+          {formData.net_revenue_percentage > 0 && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Net Revenue Percentage:</span>
+              <span className="font-medium text-slate-800">{formData.net_revenue_percentage}%</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ✅ NEW: Accounts Receivable Section for Gross Income */}
+      {/* ✅ SIMPLIFIED: Accounts Receivable Section */}
       <div className="bg-green-50 border border-green-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Calculator className="w-4 h-4 text-green-600" />
-          <h4 className="font-semibold text-slate-800">Accounts Receivable Summary</h4>
+          <h4 className="font-semibold text-slate-800">Accounts Receivable Impact</h4>
         </div>
-        <div className="space-y-2 text-sm">
+        <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-600">Gross Income:</span>
             <span className="font-semibold text-green-700">{formatCurrency(grossIncome)}</span>
           </div>
-          {apRecord?.amount_paid > 0 && (
-            <div className="flex justify-between">
-              <span className="text-slate-600">Amount Paid:</span>
-              <span className="font-medium text-slate-800">{formatCurrency(apRecord.amount_paid)}</span>
-            </div>
-          )}
+          
           <div className="flex justify-between border-t border-green-200 pt-2">
-            <span className="font-semibold text-slate-800">Outstanding Balance:</span>
-            <span className="font-semibold text-slate-800">
-              {formatCurrency(grossIncome - (apRecord?.amount_paid || 0))}
-            </span>
+            <span className="font-semibold text-slate-800">Collectible Amount:</span>
+            <span className="font-semibold text-blue-700">{formatCurrency(grossIncome)}</span>
+          </div>
+
+          {/* ✅ Clear explanation */}
+          <div className="mt-3 pt-3 border-t border-green-200">
+            <p className="text-xs text-slate-500">
+              <strong>What will happen:</strong><br />
+              • <strong>Gross Income</strong> = {formatCurrency(grossIncome)} (sent to backend)<br />
+              • <strong>Collectible Amount</strong> = {formatCurrency(grossIncome)} (same as Gross Income)<br />
+              • Payments will reduce the Collectible Amount in AR updates
+            </p>
           </div>
         </div>
       </div>

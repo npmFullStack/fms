@@ -52,6 +52,8 @@ const AddBooking = ({ isOpen, onClose }) => {
             consignee: "",
             consignee_name: "",
             consignee_phone: "",
+            booking_date: "",
+
             shipping_line_id: "",
             ship_id: "",
             container_ids: [],

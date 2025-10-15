@@ -115,13 +115,13 @@ const ARTable = ({ data, onSelectionChange }) => {
         );
       }
     },
-    // ✅ Collectible Amount column (before Amount Paid)
+    // ✅ UPDATED: Show actual collectible_amount instead of gross_income
     {
-      accessorKey: "gross_income",
+      accessorKey: "collectible_amount",
       header: "Collectible Amount",
       cell: ({ row }) => (
         <span className="table-text-bold text-blue-600">
-          ₱{(row.original.gross_income || 0).toLocaleString('en-PH', {
+          ₱{(row.original.collectible_amount || row.original.gross_income || 0).toLocaleString('en-PH', {
             minimumFractionDigits: 2
           })}
         </span>
@@ -138,7 +138,6 @@ const ARTable = ({ data, onSelectionChange }) => {
         </span>
       )
     },
-    // ✅ UPDATED: Use total_payables instead of total_expenses
     {
       accessorKey: "total_payables",
       header: "Total Payables",
@@ -155,16 +154,16 @@ const ARTable = ({ data, onSelectionChange }) => {
         );
       }
     },
-    // ✅ UPDATED: Net Revenue calculation using total_payables
+    // ✅ UPDATED: Net Revenue calculation using gross_income - total_payables
     {
       accessorKey: "net_revenue",
       header: "Net Revenue",
       cell: ({ row }) => {
-        const amountPaid = row.original.amount_paid || 0;
+        const grossIncome = row.original.gross_income || 0;
         const apRecord = getAPRecord(row.original.booking_id);
         const totalPayables = apRecord?.total_payables || 0;
-        // Calculation: amount_paid - total_payables
-        const netRevenue = amountPaid - totalPayables;
+        // ✅ CORRECTED: Calculation: gross_income - total_payables
+        const netRevenue = grossIncome - totalPayables;
         
         return (
           <span className={`table-text-bold ${netRevenue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -175,18 +174,18 @@ const ARTable = ({ data, onSelectionChange }) => {
         );
       }
     },
-    // ✅ UPDATED: Net Revenue percentage using total_payables
+    // ✅ UPDATED: Net Revenue percentage using gross_income
     {
       accessorKey: "net_revenue_percent",
       header: "Net Revenue (%)",
       cell: ({ row }) => {
-        const amountPaid = row.original.amount_paid || 0;
+        const grossIncome = row.original.gross_income || 0;
         const apRecord = getAPRecord(row.original.booking_id);
         const totalPayables = apRecord?.total_payables || 0;
-        const netRevenue = amountPaid - totalPayables;
+        const netRevenue = grossIncome - totalPayables;
         
-        // Calculate percentage based on amount_paid
-        const percentage = amountPaid > 0 ? (netRevenue / amountPaid) * 100 : 0;
+        // ✅ CORRECTED: Calculate percentage based on gross_income
+        const percentage = grossIncome > 0 ? (netRevenue / grossIncome) * 100 : 0;
         const color = percentage >= 20 ? "text-green-600" : percentage >= 10 ? "text-yellow-600" : "text-red-600";
         
         return (

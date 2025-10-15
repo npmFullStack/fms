@@ -24,7 +24,8 @@ export const step1Schema = z.object({
     phone: z.string().optional().or(z.literal("")),
     consignee: z.string().min(1, "Consignee is required"),
     consignee_name: z.string().optional().or(z.literal("")),
-    consignee_phone: z.string().optional().or(z.literal(""))
+    consignee_phone: z.string().optional().or(z.literal("")),
+    booking_date: z.string().optional().or(z.literal("")),
 });
 
 export const step2Schema = z

@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import { NumericFormat } from "react-number-format";
-import { Calendar, Clock, DollarSign } from "lucide-react";
+import { Calendar, Clock, DollarSign, AlertTriangle } from "lucide-react";
 
 const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   const { updateARRecord } = useFinanceStore();
@@ -22,11 +22,21 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   const formatAmount = (val) =>
     val === null || val === undefined ? "" : val.toString();
 
+  // ✅ Calculate current collectible amount
+  const currentCollectibleAmount = useMemo(() => {
+    return parseFloat(arRecord?.collectible_amount || arRecord?.gross_income || 0);
+  }, [arRecord]);
+
+  // ✅ Check if collectible amount is 0
+  const isFullyPaid = currentCollectibleAmount <= 0;
+
   const {
     control,
     handleSubmit,
     reset,
     watch,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(updateARFormSchema),
@@ -38,15 +48,24 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     },
   });
 
-  // Watch amount_paid for real-time balance calculation
+  // Watch amount_paid for real-time validation
   const amountPaid = watch("amount_paid");
-  
-  // ✅ Calculate remaining balance
-  const remainingBalance = useMemo(() => {
-    const collectibleAmount = parseFloat(arRecord?.gross_income || 0);
-    const paidAmount = parseFloat(amountPaid || 0) || 0;
-    return collectibleAmount - paidAmount;
-  }, [amountPaid, arRecord?.gross_income]);
+
+  // ✅ Validate amount paid doesn't exceed collectible amount
+  useEffect(() => {
+    if (amountPaid && !isNaN(amountPaid)) {
+      const paidAmount = parseFloat(amountPaid);
+      
+      if (paidAmount > currentCollectibleAmount) {
+        setError("amount_paid", {
+          type: "manual",
+          message: `Payment cannot exceed collectible amount of ₱${currentCollectibleAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+        });
+      } else {
+        clearErrors("amount_paid");
+      }
+    }
+  }, [amountPaid, currentCollectibleAmount, setError, clearErrors]);
 
   // Populate with existing data
   useEffect(() => {
@@ -67,10 +86,23 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
 
   const onSubmit = async (data) => {
     try {
+      // ✅ Final validation before submission
+      const paidAmount = parseFloat(data.amount_paid) || 0;
+      
+      if (isFullyPaid && paidAmount > 0) {
+        toast.error("Cannot accept payment - collectible amount is already 0");
+        return;
+      }
+      
+      if (paidAmount > currentCollectibleAmount) {
+        toast.error(`Payment cannot exceed collectible amount of ₱${currentCollectibleAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`);
+        return;
+      }
+
       setIsLoading(true);
 
       const formattedData = {
-        amount_paid: parseFloat(data.amount_paid) || 0,
+        amount_paid: paidAmount,
         payment_date: data.payment_date || null,
         terms: parseInt(data.terms) || 0,
       };
@@ -90,39 +122,54 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     }
   };
 
-  // ✅ NEW: Collectible Amount (read-only) field
+  // ✅ UPDATED: Collectible Amount field with fully paid status
   const renderCollectibleAmountField = () => (
     <div className="input-container">
-      <label className="input-label-modern">Collectible Amount</label>
+      <label className="input-label-modern">Current Collectible Amount</label>
       <div className="relative">
         <NumericFormat
-          value={arRecord?.gross_income || 0}
+          value={currentCollectibleAmount}
           thousandSeparator
           prefix="₱ "
           decimalScale={2}
           allowNegative={false}
           placeholder="₱ 0.00"
-          className="input-field-modern bg-gray-50 text-gray-600 cursor-not-allowed"
+          className={`input-field-modern bg-gray-50 text-gray-600 cursor-not-allowed ${
+            isFullyPaid ? 'border-green-200 bg-green-50' : ''
+          }`}
           readOnly
           disabled
         />
-        <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
+        <DollarSign className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 ${
+          isFullyPaid ? 'text-green-500' : 'text-slate-400'
+        }`} />
       </div>
-      <p className="text-sm text-gray-500 mt-1">
-        This is the total amount to be collected (Gross Income)
-      </p>
+      {isFullyPaid ? (
+        <div className="flex items-center gap-2 mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-green-600" />
+          <p className="text-sm text-green-700 font-medium">
+            ✅ Fully Paid - No further payments can be accepted
+          </p>
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500 mt-1">
+          This amount will be reduced by the payment you enter below
+        </p>
+      )}
     </div>
   );
 
-  // ✅ UPDATED: Amount Paid field with balance info
+  // ✅ UPDATED: Amount Paid field with validation
   const renderAmountField = () => (
     <div className="input-container">
-      <label className="input-label-modern">Amount Paid *</label>
+      <label className="input-label-modern">
+        Amount Paid {!isFullyPaid && "*"}
+      </label>
       <Controller
         control={control}
         name="amount_paid"
         render={({ field }) => (
-          <div>
+          <div className="relative">
             <NumericFormat
               value={
                 field.value === "" || field.value === null || field.value === "0"
@@ -133,42 +180,56 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               prefix="₱ "
               decimalScale={2}
               allowNegative={false}
-              placeholder="₱ 0.00"
-              className={`input-field-modern ${
+              placeholder={isFullyPaid ? "Fully Paid" : "₱ 0.00"}
+              className={`input-field-modern pr-10 ${
                 errors.amount_paid ? "input-error" : ""
+              } ${
+                isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""
               }`}
               onValueChange={(values) => {
-                // ✅ Keep as string for Zod
-                field.onChange(values.value || "");
+                if (!isFullyPaid) {
+                  field.onChange(values.value || "");
+                }
               }}
               onBlur={field.onBlur}
+              readOnly={isFullyPaid}
+              disabled={isFullyPaid}
             />
-            {/* ✅ Balance information */}
-            <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-700 font-medium">Remaining Balance:</span>
-                <span className={`font-bold ${
-                  remainingBalance > 0 ? 'text-orange-600' : 'text-green-600'
-                }`}>
-                  ₱{remainingBalance.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              {remainingBalance < 0 && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✅ Overpayment detected
-                </p>
-              )}
-              {remainingBalance === 0 && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✅ Fully paid
-                </p>
-              )}
-            </div>
+            <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
           </div>
         )}
       />
+      
+      {/* ✅ Show validation errors */}
       {errors.amount_paid && (
-        <p className="error-message">{errors.amount_paid.message}</p>
+        <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <p className="text-sm text-red-700">{errors.amount_paid.message}</p>
+        </div>
+      )}
+      
+      {/* ✅ Show remaining balance info */}
+      {amountPaid && !errors.amount_paid && !isFullyPaid && (
+        <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+          <div className="flex justify-between text-sm">
+            <span className="text-blue-700 font-medium">Remaining after payment:</span>
+            <span className="font-bold text-blue-800">
+              ₱{(currentCollectibleAmount - parseFloat(amountPaid)).toLocaleString('en-PH', { 
+                minimumFractionDigits: 2 
+              })}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {isFullyPaid ? (
+        <p className="text-sm text-gray-500 mt-1">
+          This record is fully paid and cannot accept additional payments
+        </p>
+      ) : (
+        <p className="text-sm text-gray-500 mt-1">
+          Maximum payment: ₱{currentCollectibleAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+        </p>
       )}
     </div>
   );
@@ -187,12 +248,17 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               dateFormat="YYYY-MM-DD"
               closeOnSelect={true}
               inputProps={{
-                className: "input-field-modern pr-10 cursor-pointer",
+                className: `input-field-modern pr-10 cursor-pointer ${
+                  isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""
+                }`,
                 placeholder: "Select date",
+                disabled: isFullyPaid
               }}
-              onChange={(val) =>
-                field.onChange(val && val.format ? val.format("YYYY-MM-DD") : "")
-              }
+              onChange={(val) => {
+                if (!isFullyPaid) {
+                  field.onChange(val && val.format ? val.format("YYYY-MM-DD") : "");
+                }
+              }}
               value={field.value || ""}
             />
           )}
@@ -221,7 +287,10 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               placeholder="0"
               className={`input-field-modern pr-10 ${
                 errors.terms ? "input-error" : ""
+              } ${
+                isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""
               }`}
+              disabled={isFullyPaid}
             />
           )}
         />
@@ -231,14 +300,15 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     </div>
   );
 
-  // ✅ UPDATED: Tips with collectible amount info
+  // ✅ UPDATED: Tips with payment validation info
   const tipsBox = {
-    title: "Tips",
+    title: "Payment Rules",
     items: [
-      { text: "Collectible Amount is the total Gross Income for this booking" },
-      { text: "Remaining balance updates automatically as you enter payments" },
-      { text: "Terms are the number of days client has to pay after booking" },
-      { text: "Negative balance indicates overpayment" },
+      { text: "Current Collectible Amount shows the remaining balance" },
+      { text: "Payments cannot exceed the Collectible Amount" },
+      { text: "When Collectible Amount reaches 0, no more payments can be accepted" },
+      { text: "Example: ₱900 collectible, ₱950 payment = ❌ Error" },
+      { text: "Example: ₱900 collectible, ₱500 payment = ✅ Accepted" },
     ],
   };
 
@@ -249,7 +319,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
       title="Update Payment"
       isLoading={isLoading}
       isSubmitting={isSubmitting}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={isFullyPaid ? () => toast.error("Cannot update - fully paid") : handleSubmit(onSubmit)}
       fields={[
         { name: "collectible_amount", type: "custom", customRender: renderCollectibleAmountField },
         { name: "amount_paid", type: "custom", customRender: renderAmountField },
@@ -257,7 +327,8 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
         { name: "terms", type: "custom", customRender: renderTermsField },
       ]}
       infoBox={tipsBox}
-      buttonText="Update Payment"
+      buttonText={isFullyPaid ? "Fully Paid" : "Update Payment"}
+      submitDisabled={isFullyPaid}
     />
   );
 };
