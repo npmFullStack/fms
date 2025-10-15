@@ -54,16 +54,18 @@ const DataTable = ({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto relative">
         <table className="w-full">
           <thead className="table-thead">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header, index) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="table-header"
+                    className={`table-header ${
+                      index === 0 ? 'sticky left-0 z-10 bg-white' : ''
+                    }`}
                   >
                     <div className="flex items-center gap-2">
                       {flexRender(
@@ -86,8 +88,13 @@ const DataTable = ({
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map(row => (
                 <tr key={row.id} className="table-row">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="table-cell">
+                  {row.getVisibleCells().map((cell, index) => (
+                    <td 
+                      key={cell.id} 
+                      className={`table-cell ${
+                        index === 0 ? 'sticky left-0 z-10 bg-white' : ''
+                      }`}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
