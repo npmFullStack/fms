@@ -9,7 +9,7 @@ const BookingStep1 = ({ register, control, errors }) => {
   return (
     <div className="space-y-6">
       {/* Shipper Section */}
-      <div className="p-5 border border-slate-200 rounded-2xl shadow-sm">
+      <div>
         <h4 className="font-semibold text-slate-800 mb-4 text-lg">
           Shipper Information
         </h4>
@@ -77,7 +77,7 @@ const BookingStep1 = ({ register, control, errors }) => {
       </div>
 
       {/* Consignee Section */}
-      <div className="p-5 border border-slate-200 rounded-2xl shadow-sm">
+      <div>
         <h4 className="font-semibold text-slate-800 mb-4 text-lg">
           Consignee Information
         </h4>
@@ -132,7 +132,7 @@ const BookingStep1 = ({ register, control, errors }) => {
       </div>
 
       {/* Booking Date Section */}
-      <div className="p-5 border border-slate-200 rounded-2xl shadow-sm">
+      <div>
         <h4 className="font-semibold text-slate-800 mb-4 text-lg">
           Booking Details
         </h4>

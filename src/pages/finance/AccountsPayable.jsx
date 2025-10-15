@@ -33,10 +33,31 @@ const AccountsPayable = () => {
   const [selectedAP, setSelectedAP] = useState([]);
   const [isUpdateAPModalOpen, setIsUpdateAPModalOpen] = useState(false);
   const [activeAPId, setActiveAPId] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // 🔄 Enhanced data fetching with timeout and retry
+  const refreshData = async () => {
+    try {
+      setDataLoaded(false);
+      // Add a small delay to ensure data is properly fetched from backend
+      await Promise.all([
+        fetchBookings(),
+        fetchAP()
+      ]);
+      
+      // Set timeout to ensure data is fully processed
+      setTimeout(() => {
+        setDataLoaded(true);
+      }, 1500);
+      
+    } catch (err) {
+      console.error("Error refreshing data:", err);
+      setDataLoaded(true); // Still set to true to show UI even if there's an error
+    }
+  };
 
   useEffect(() => {
-    fetchBookings();
-    fetchAP();
+    refreshData();
   }, [fetchBookings, fetchAP]);
 
   // Safe arrays
@@ -45,6 +66,8 @@ const AccountsPayable = () => {
 
   // 🔸 Data preparation for AP table
   const apRecordsForTable = useMemo(() => {
+    if (!dataLoaded) return []; // Return empty array until data is loaded
+    
     if (safeAPRecords.length > 0) {
       return safeAPRecords.map(ap => ({
         ...ap,
@@ -116,10 +139,14 @@ const AccountsPayable = () => {
         remarks: "",
       }));
     }
-  }, [safeBookings, safeAPRecords]);
+  }, [safeBookings, safeAPRecords, dataLoaded]);
 
   // 🔸 Stats - Updated to use actual database fields
   const stats = useMemo(() => {
+    if (!dataLoaded) {
+      return { total: 0, expenses: 0, bir: 0, records: 0 };
+    }
+    
     const totalPayable = apRecordsForTable.reduce((sum, r) => sum + (r.total_payables || 0), 0);
     const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses || 0), 0);
     const totalBIR = apRecordsForTable.reduce((sum, r) => sum + (r.bir_amount || 0), 0);
@@ -131,7 +158,7 @@ const AccountsPayable = () => {
       bir: totalBIR,
       records: totalRecords
     };
-  }, [apRecordsForTable]);
+  }, [apRecordsForTable, dataLoaded]);
 
   // 🔸 Updated stats config with dynamic BIR percentage
   const statsConfig = [
@@ -193,7 +220,18 @@ const AccountsPayable = () => {
     }
   };
 
-  const loading = bookingsLoading || financeLoading;
+  // ✅ NEW: Handle modal close with auto-refresh
+  const handleModalClose = () => {
+    setIsUpdateAPModalOpen(false);
+    setActiveAPId(null);
+    // Refresh data after modal closes to show updated data
+    setTimeout(() => {
+      refreshData();
+    }, 500);
+  };
+
+  const loading = bookingsLoading || financeLoading || !dataLoaded;
+
   if (loading) return <Loading />;
 
   if (error || financeError) {
@@ -266,13 +304,10 @@ const AccountsPayable = () => {
             onDelete={handleBulkDelete}
           />
 
-          {/* Update AP Modal */}
+          {/* Update AP Modal with auto-refresh */}
           <UpdateAP
             isOpen={isUpdateAPModalOpen}
-            onClose={() => {
-              setIsUpdateAPModalOpen(false);
-              setActiveAPId(null);
-            }}
+            onClose={handleModalClose}
             apId={activeAPId}
             apRecord={apRecordsForTable.find(r => r.ap_id === activeAPId)}
           />

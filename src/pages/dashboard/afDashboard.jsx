@@ -17,14 +17,16 @@ import {
   CalendarDays,
   CreditCard,
   PieChart,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Select from "react-select";
 
 import useFinanceStore from "../../utils/store/useFinanceStore";
+import useBookingStore from "../../utils/store/useBookingStore";
 import Loading from "../../components/Loading";
 import StatCard from "../../components/cards/StatCard";
-import { calculateTotalWithBIR, calculateNetRevenue } from "../../utils/helpers/financeCalculations";
 
 const DATE_OPTIONS = [
   { value: "all", label: "All Time" },
@@ -34,28 +36,20 @@ const DATE_OPTIONS = [
 ];
 
 const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
 const AfDashboard = () => {
   const [dateFilter, setDateFilter] = useState(DATE_OPTIONS[0]);
   const { apRecords, arRecords, loading, fetchAP, fetchAR } = useFinanceStore();
+  const { bookings, fetchBookings } = useBookingStore();
 
   useEffect(() => {
     fetchAP();
     fetchAR();
-  }, [fetchAP, fetchAR]);
+    fetchBookings();
+  }, [fetchAP, fetchAR, fetchBookings]);
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("en-PH", {
@@ -70,10 +64,37 @@ const AfDashboard = () => {
     return apRecords.find(ap => ap.booking_id === bookingId);
   };
 
+  // ✅ NEW: Calculate overdue records
+  const overdueRecords = useMemo(() => {
+    return arRecords.filter(ar => {
+      const terms = ar.terms || 0;
+      if (terms <= 0) return false;
+
+      const bookingDate = new Date(ar.booking_date || ar.created_at);
+      const today = new Date();
+      const dueDate = new Date(bookingDate);
+      dueDate.setDate(dueDate.getDate() + terms);
+      
+      const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
+      const amountPaid = parseFloat(ar.amount_paid || 0);
+      
+      return today > dueDate && collectibleAmount > amountPaid;
+    });
+  }, [arRecords]);
+
+  // ✅ NEW: Calculate total overdue amount
+  const totalOverdueAmount = useMemo(() => {
+    return overdueRecords.reduce((total, ar) => {
+      const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
+      const amountPaid = parseFloat(ar.amount_paid || 0);
+      return total + (collectibleAmount - amountPaid);
+    }, 0);
+  }, [overdueRecords]);
+
   // Filter data based on date selection
   const filteredData = useMemo(() => {
     const now = new Date();
-    let startDate = new Date(0); // Beginning of time
+    let startDate = new Date(0);
 
     switch (dateFilter.value) {
       case "month":
@@ -104,19 +125,20 @@ const AfDashboard = () => {
     filteredData.forEach(ar => {
       const apRecord = getAPRecord(ar.booking_id);
       const amountPaid = parseFloat(ar.amount_paid || 0);
-      const expenses = calculateTotalWithBIR(apRecord);
-      const netRevenue = calculateNetRevenue(ar, apRecord);
+      const grossIncome = parseFloat(ar.gross_income || 0);
+      const expenses = parseFloat(apRecord?.total_payables || 0);
+      const netRevenue = grossIncome - expenses;
 
       totalCollected += amountPaid;
       totalExpenses += expenses;
       totalNetRevenue += netRevenue;
-      totalRevenue += parseFloat(ar.pesos || ar.total_amount || 0);
+      totalRevenue += grossIncome;
     });
 
-    const profitMargin = totalCollected > 0 ? (totalNetRevenue / totalCollected) * 100 : 0;
+    const profitMargin = totalRevenue > 0 ? (totalNetRevenue / totalRevenue) * 100 : 0;
     const totalBookings = filteredData.length;
     const avgRevenuePerBooking = totalBookings > 0 ? totalCollected / totalBookings : 0;
-    const expenseRatio = totalCollected > 0 ? (totalExpenses / totalCollected) * 100 : 0;
+    const expenseRatio = totalRevenue > 0 ? (totalExpenses / totalRevenue) * 100 : 0;
 
     return {
       totalExpenses,
@@ -127,8 +149,10 @@ const AfDashboard = () => {
       totalBookings,
       avgRevenuePerBooking,
       expenseRatio,
+      overdueCount: overdueRecords.length,
+      totalOverdueAmount,
     };
-  }, [filteredData, apRecords]);
+  }, [filteredData, apRecords, overdueRecords, totalOverdueAmount]);
 
   const chartData = useMemo(() => {
     const monthlyData = {};
@@ -150,16 +174,16 @@ const AfDashboard = () => {
 
       const apRecord = getAPRecord(ar.booking_id);
       const amountPaid = parseFloat(ar.amount_paid || 0);
-      const expenses = calculateTotalWithBIR(apRecord);
-      const netRevenue = calculateNetRevenue(ar, apRecord);
+      const grossIncome = parseFloat(ar.gross_income || 0);
+      const expenses = parseFloat(apRecord?.total_payables || 0);
+      const netRevenue = grossIncome - expenses;
 
       monthlyData[key].collected += amountPaid;
       monthlyData[key].expense += expenses;
       monthlyData[key].netRevenue += netRevenue;
-      monthlyData[key].revenue += parseFloat(ar.pesos || ar.total_amount || 0);
+      monthlyData[key].revenue += grossIncome;
     });
 
-    // Sort by date and return last 6 months
     return Object.keys(monthlyData)
       .sort()
       .slice(-6)
@@ -168,12 +192,14 @@ const AfDashboard = () => {
 
   const recentActivity = useMemo(() => {
     return filteredData
-      .filter(ar => ar.payment_date) // Only show records with payments
+      .filter(ar => ar.payment_date)
       .slice(-5)
       .reverse()
       .map((ar) => {
         const apRecord = getAPRecord(ar.booking_id);
-        const netRevenue = calculateNetRevenue(ar, apRecord);
+        const grossIncome = parseFloat(ar.gross_income || 0);
+        const expenses = parseFloat(apRecord?.total_payables || 0);
+        const netRevenue = grossIncome - expenses;
         
         return {
           id: ar.ar_id || ar.id,
@@ -184,6 +210,29 @@ const AfDashboard = () => {
         };
       });
   }, [filteredData, apRecords]);
+
+  // ✅ NEW: Overdue notifications
+  const overdueNotifications = useMemo(() => {
+    return overdueRecords.slice(0, 5).map(ar => {
+      const terms = ar.terms || 0;
+      const bookingDate = new Date(ar.booking_date || ar.created_at);
+      const dueDate = new Date(bookingDate);
+      dueDate.setDate(dueDate.getDate() + terms);
+      
+      const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
+      const amountPaid = parseFloat(ar.amount_paid || 0);
+      const overdueAmount = collectibleAmount - amountPaid;
+      
+      return {
+        id: ar.ar_id || ar.id,
+        client: ar.shipper || ar.client || "Client",
+        hwb: ar.hwb_number || "N/A",
+        dueDate: dueDate.toLocaleDateString("en-PH"),
+        overdueAmount,
+        daysOverdue: Math.floor((new Date() - dueDate) / (1000 * 60 * 60 * 24))
+      };
+    });
+  }, [overdueRecords]);
 
   const statConfig = useMemo(
     () => [
@@ -199,7 +248,7 @@ const AfDashboard = () => {
         value: formatCurrency(financialMetrics.totalExpenses),
         color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
         icon: CreditCard,
-        subtitle: "Including 12% BIR"
+        subtitle: "Payables including BIR"
       },
       {
         title: "Net Revenue",
@@ -210,12 +259,15 @@ const AfDashboard = () => {
         icon: TrendingUp,
         subtitle: `${financialMetrics.profitMargin.toFixed(1)}% margin`
       },
+      // ✅ NEW: Overdue Records Card
       {
-        title: "Avg Revenue/Booking",
-        value: formatCurrency(financialMetrics.avgRevenuePerBooking),
-        color: "bg-gradient-to-br from-sky-500 to-sky-600 text-white",
-        icon: PieChart,
-        subtitle: `${financialMetrics.expenseRatio.toFixed(1)}% expense ratio`
+        title: "Overdue Records",
+        value: financialMetrics.overdueCount.toString(),
+        color: financialMetrics.overdueCount > 0
+          ? "bg-gradient-to-br from-red-500 to-red-600 text-white"
+          : "bg-gradient-to-br from-gray-500 to-gray-600 text-white",
+        icon: AlertTriangle,
+        subtitle: formatCurrency(financialMetrics.totalOverdueAmount)
       },
     ],
     [financialMetrics]
@@ -261,6 +313,36 @@ const AfDashboard = () => {
           />
         </div>
       </div>
+
+      {/* Overdue Alerts */}
+      {overdueNotifications.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <h3 className="font-semibold text-red-900">Overdue Payments Alert</h3>
+            <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full">
+              {overdueNotifications.length} records
+            </span>
+          </div>
+          <div className="space-y-2">
+            {overdueNotifications.map((item) => (
+              <div key={item.id} className="flex justify-between items-center p-2 bg-white rounded-lg border border-red-100">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-red-900 truncate">
+                    {item.client} - {item.hwb}
+                  </p>
+                  <p className="text-xs text-red-600">
+                    Due: {item.dueDate} • {item.daysOverdue} days overdue
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-red-700 ml-2">
+                  {formatCurrency(item.overdueAmount)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -348,7 +430,7 @@ const AfDashboard = () => {
         </div>
       </div>
 
-      {/* Net Revenue Trend (Line Chart) */}
+      {/* Net Revenue Trend */}
       <div className="bg-white border border-slate-50 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-slate-900">Net Revenue Trend</h3>
@@ -373,22 +455,6 @@ const AfDashboard = () => {
                 borderRadius: "8px",
                 fontSize: "12px",
               }}
-            />
-            <Line
-              type="monotone"
-              dataKey="collected"
-              name="Collected"
-              stroke="#10b981"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: "#10b981" }}
-            />
-            <Line
-              type="monotone"
-              dataKey="expense"
-              name="Expenses"
-              stroke="#a855f7"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: "#a855f7" }}
             />
             <Line
               type="monotone"

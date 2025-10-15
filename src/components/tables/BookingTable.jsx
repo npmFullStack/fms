@@ -52,15 +52,18 @@ const BookingTable = ({ data, rightAction, onSelectionChange }) => {
                     </span>
                 )
             },
-            {
-                accessorKey: "created_at",
-                header: "Booking Date",
-                cell: ({ row }) => (
-                    <span className="table-text">
-                        {new Date(row.original.created_at).toLocaleDateString()}
-                    </span>
-                )
-            },
+{
+    accessorKey: "booking_date",
+    header: "Booking Date",
+    cell: ({ row }) => (
+        <span className="table-text">
+            {row.original.booking_date
+                ? new Date(row.original.booking_date).toLocaleDateString()
+                : "—"}
+        </span>
+    )
+},
+
             {
                 accessorKey: "shipper",
                 header: "Shipper",

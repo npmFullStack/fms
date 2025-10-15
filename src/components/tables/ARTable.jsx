@@ -34,18 +34,17 @@ const ARTable = ({ data, onSelectionChange }) => {
         />
       )
     },
-    {
-      accessorKey: "payment_date",
-      header: "Payment Date",
-      cell: ({ row }) => (
-        <span className="table-text">
-          {row.original.payment_date
-            ? new Date(row.original.payment_date).toLocaleDateString()
-            : '---'
-          }
-        </span>
-      )
-    },
+{
+  accessorKey: "booking_date",
+  header: "Booking Date",
+  cell: ({ row }) => (
+    <span className="table-text">
+      {row.original.booking_date
+        ? new Date(row.original.booking_date).toLocaleDateString()
+        : "---"}
+    </span>
+  ),
+},
     {
       accessorKey: "client",
       header: "Client",
@@ -103,19 +102,18 @@ const ARTable = ({ data, onSelectionChange }) => {
         </span>
       )
     },
-    {
-      accessorKey: "terms",
-      header: "Terms",
-      cell: ({ row }) => {
-        const terms = row.original.terms || 30;
-        return (
-          <span className="table-text">
-            {terms} days
-          </span>
-        );
-      }
-    },
-    // ✅ UPDATED: Show actual collectible_amount instead of gross_income
+ {
+  accessorKey: "terms",
+  header: "Terms",
+  cell: ({ row }) => {
+    const terms = row.original.terms || 0;
+    return (
+      <span className="table-text">
+        {terms} days
+      </span>
+    );
+  }
+},
     {
       accessorKey: "collectible_amount",
       header: "Collectible Amount",

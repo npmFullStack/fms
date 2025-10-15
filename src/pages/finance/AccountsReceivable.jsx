@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import useBookingStore from "../../utils/store/useBookingStore";
 import useFinanceStore from "../../utils/store/useFinanceStore";
-import { DollarSign, TrendingUp, AlertCircle, Wallet, FileText } from "lucide-react";
+import { DollarSign, TrendingUp, AlertCircle, Wallet } from "lucide-react";
 import Loading from "../../components/Loading";
 import ARTable from "../../components/tables/ARTable";
 import UpdateAR from "../../components/modals/UpdateAR";
@@ -23,17 +23,13 @@ const AccountsReceivable = () => {
   const [selectedAR, setSelectedAR] = useState([]);
   const [isUpdateARModalOpen, setIsUpdateARModalOpen] = useState(false);
   const [activeARId, setActiveARId] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Function to refresh data
   const refreshData = async () => {
-    setIsRefreshing(true);
     try {
       await Promise.all([fetchBookings(), fetchAR(), fetchAP()]);
     } catch (err) {
       console.error("Error refreshing data:", err);
-    } finally {
-      setIsRefreshing(false);
     }
   };
 
@@ -46,18 +42,27 @@ const AccountsReceivable = () => {
   const safeARRecords = useMemo(() => (Array.isArray(arRecords) ? arRecords : []), [arRecords]);
   const safeAPRecords = useMemo(() => (Array.isArray(apRecords) ? apRecords : []), [apRecords]);
 
+  // Helper to get booking data for AR record
+  const getBookingData = (bookingId) => {
+    return safeBookings.find(booking => booking.id === bookingId);
+  };
+
   // Helper to get AP record
   const getAPRecord = (bookingId) => {
     return safeAPRecords.find(ap => ap.booking_id === bookingId);
   };
 
-  // Format data for AR table
-  const arRecordsForTable = useMemo(() => {
-    if (safeARRecords.length > 0) {
-      return safeARRecords.map(ar => ({
+// Format data for AR table - FIXED booking date logic
+const arRecordsForTable = useMemo(() => {
+  if (safeARRecords.length > 0) {
+    return safeARRecords.map(ar => {
+      // Get corresponding booking data to access the correct booking_date
+      const bookingData = getBookingData(ar.booking_id);
+
+      return {
         ...ar,
         id: ar.ar_id || ar.id,
-        date: ar.booking_date || ar.created_at,
+        booking_date: bookingData?.booking_date || ar.booking_date || ar.created_at,
         client: ar.shipper || "-",
         description: "FREIGHT",
         hwb_number: ar.hwb_number || "-",
@@ -67,49 +72,51 @@ const AccountsReceivable = () => {
         container_size: ar.container_size || "LCL",
         date_delivered: ar.date_delivered,
         aging: ar.current_aging || ar.aging || 0,
-        terms: ar.terms || 30,
+        terms: ar.terms !== undefined && ar.terms !== null ? ar.terms : 0,
         amount_paid: ar.amount_paid || 0,
-        // ✅ ADDED: Include both gross_income and collectible_amount
         gross_income: ar.gross_income || 0,
         collectible_amount: ar.collectible_amount || ar.gross_income || 0,
         payment_status: ar.ar_payment_status || ar.payment_status || "PENDING",
         shipping_line: ar.shipping_line || "-",
         booking_id: ar.booking_id
-      }));
-    } else {
-      // Fallback to bookings data
-      return safeBookings.map(booking => {
-        const containerSize = booking.container_size || "LCL";
-        const createdDate = new Date(booking.created_at);
-        const today = new Date();
-        const aging = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+      };
+    });
+  } else {
+    // Fallback to bookings data
+    return safeBookings.map(booking => {
+      const containerSize = booking.container_size || "LCL";
+      const createdDate = new Date(booking.created_at);
+      const today = new Date();
+      const aging = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
 
-        return {
-          id: booking.id,
-          ar_id: booking.id,
-          date: booking.created_at,
-          client: booking.shipper || "-",
-          description: "FREIGHT",
-          hwb_number: booking.hwb_number || "-",
-          origin_port: booking.origin_port,
-          destination_port: booking.destination_port,
-          quantity: booking.quantity || 1,
-          container_size: containerSize,
-          date_delivered: booking.date_delivered,
-          aging,
-          terms: 30,
-          amount_paid: 0,
-          gross_income: 0,
-          collectible_amount: 0,
-          payment_status: booking.payment_status || "PENDING",
-          shipping_line: booking.shipping_line_name || "-",
-          booking_id: booking.id
-        };
-      });
-    }
-  }, [safeBookings, safeARRecords]);
+      return {
+        id: booking.id,
+        ar_id: booking.id,
+        // ✅ FIXED: Use actual booking_date from booking
+        booking_date: booking.booking_date || booking.created_at,
+        client: booking.shipper || "-",
+        description: "FREIGHT",
+        hwb_number: booking.hwb_number || "-",
+        origin_port: booking.origin_port,
+        destination_port: booking.destination_port,
+        quantity: booking.quantity || 1,
+        container_size: containerSize,
+        date_delivered: booking.date_delivered,
+        aging,
+        // ✅ FIXED: Default to 0 instead of 30
+        terms: 0,
+        amount_paid: 0,
+        gross_income: 0,
+        collectible_amount: 0,
+        payment_status: booking.payment_status || "PENDING",
+        shipping_line: booking.shipping_line_name || "-",
+        booking_id: booking.id
+      };
+    });
+  }
+}, [safeBookings, safeARRecords]);
 
-  // ✅ UPDATED: Calculate statistics with CORRECT net revenue calculation
+  // Calculate statistics with CORRECT net revenue calculation
   const stats = useMemo(() => {
     let totalCollectible = 0;
     let totalCollected = 0;
@@ -124,10 +131,8 @@ const AccountsReceivable = () => {
       const grossIncome = parseFloat(ar.gross_income || 0);
       const collectibleAmount = parseFloat(ar.collectible_amount || grossIncome);
       
-      // ✅ UPDATED: Use total_payables from AP for expenses
       const expenses = parseFloat(apRecord?.total_payables || apRecord?.total_expenses || 0);
       
-      // ✅ CORRECTED: Net Revenue = Gross Income - Total Payables (Expenses)
       const netRevenue = grossIncome - expenses;
 
       totalCollectible += collectibleAmount;
@@ -135,8 +140,8 @@ const AccountsReceivable = () => {
       totalExpenses += expenses;
       totalNetRevenue += netRevenue;
 
-      // Count overdue records (aging > terms)
-      const terms = ar.terms || 30;
+
+const terms = ar.terms !== undefined && ar.terms !== null ? ar.terms : 0;
       if (ar.aging > terms) {
         overdueCount++;
       }
@@ -159,7 +164,7 @@ const AccountsReceivable = () => {
     };
   }, [arRecordsForTable, safeAPRecords]);
 
-  // ✅ UPDATED: Stats configuration - removed high aging card
+  // Stats configuration
   const statsConfig = [
     {
       key: "COLLECTIBLE",
@@ -219,19 +224,19 @@ const AccountsReceivable = () => {
     }
   };
 
-  // ✅ NEW: Handle modal close with auto-refresh
+  // Handle modal close with auto-refresh
   const handleModalClose = () => {
     setIsUpdateARModalOpen(false);
     setActiveARId(null);
     // Refresh data after a short delay to allow backend to process
     setTimeout(() => {
       refreshData();
-    }, 500);
+    }, 1500);
   };
 
-  const loading = bookingsLoading || financeLoading || isRefreshing;
+  const loading = bookingsLoading || financeLoading;
 
-  if (loading && !isRefreshing) return <Loading />;
+  if (loading) return <Loading />;
 
   if (error || financeError) {
     return (
@@ -250,22 +255,12 @@ const AccountsReceivable = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header with Refresh Button */}
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="page-title">Accounts Receivable</h1>
-              <p className="page-subtitle">
-                Track payments, expenses, and net revenue
-              </p>
-            </div>
-            <button
-              onClick={refreshData}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              {isRefreshing ? "Refreshing..." : "Refresh Data"}
-            </button>
+          {/* Header - REMOVED Refresh Button */}
+          <div className="mb-8">
+            <h1 className="page-title">Accounts Receivable</h1>
+            <p className="page-subtitle">
+              Track payments, expenses, and net revenue
+            </p>
           </div>
 
           {/* Stats Cards */}

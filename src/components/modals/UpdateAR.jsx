@@ -307,8 +307,6 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
       { text: "Current Collectible Amount shows the remaining balance" },
       { text: "Payments cannot exceed the Collectible Amount" },
       { text: "When Collectible Amount reaches 0, no more payments can be accepted" },
-      { text: "Example: ₱900 collectible, ₱950 payment = ❌ Error" },
-      { text: "Example: ₱900 collectible, ₱500 payment = ✅ Accepted" },
     ],
   };
 
