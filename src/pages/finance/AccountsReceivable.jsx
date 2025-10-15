@@ -8,7 +8,7 @@ import ARTable from "../../components/tables/ARTable";
 import UpdateAR from "../../components/modals/UpdateAR";
 import BulkActionBar from "../../components/BulkActionBar";
 import StatCard from "../../components/cards/StatCard";
-import { calculateTotalWithBIR, calculateNetRevenue } from "../../utils/helpers/financeCalculations";
+// ❌ REMOVED: financeCalculations imports
 
 const AccountsReceivable = () => {
   const { bookings, fetchBookings, loading: bookingsLoading, error, clearError } = useBookingStore();
@@ -59,6 +59,8 @@ const AccountsReceivable = () => {
         aging: ar.current_aging || ar.aging || 0,
         terms: ar.terms || 30,
         amount_paid: ar.amount_paid || 0,
+        // ✅ ADDED: Include gross_income for collectible amount
+        gross_income: ar.gross_income || 0,
         payment_status: ar.ar_payment_status || ar.payment_status || "PENDING",
         shipping_line: ar.shipping_line || "-",
         booking_id: ar.booking_id
@@ -86,6 +88,7 @@ const AccountsReceivable = () => {
           aging,
           terms: 30,
           amount_paid: 0,
+          gross_income: 0, // ✅ ADDED: Default gross_income
           payment_status: booking.payment_status || "PENDING",
           shipping_line: booking.shipping_line_name || "-",
           booking_id: booking.id
@@ -94,9 +97,9 @@ const AccountsReceivable = () => {
     }
   }, [safeBookings, safeARRecords]);
 
-  // Calculate statistics
+  // ✅ UPDATED: Calculate statistics - SIMPLIFIED without financeCalculations
   const stats = useMemo(() => {
-    let totalReceivable = 0;
+    let totalCollectible = 0; // ✅ CHANGED: Total gross_income (collectible amount)
     let totalCollected = 0;
     let totalExpenses = 0;
     let totalNetRevenue = 0;
@@ -105,10 +108,15 @@ const AccountsReceivable = () => {
     arRecordsForTable.forEach(ar => {
       const apRecord = getAPRecord(ar.booking_id);
       const amountPaid = parseFloat(ar.amount_paid || 0);
-      const expenses = calculateTotalWithBIR(apRecord);
-      const netRevenue = calculateNetRevenue(ar, apRecord);
+      const grossIncome = parseFloat(ar.gross_income || 0);
+      
+      // ✅ UPDATED: Simple expense calculation
+      const expenses = parseFloat(apRecord?.total_expenses || 0);
+      
+      // ✅ UPDATED: Simple net revenue calculation
+      const netRevenue = amountPaid - expenses;
 
-      totalReceivable += parseFloat(ar.pesos || ar.total_amount || 0);
+      totalCollectible += grossIncome;
       totalCollected += amountPaid;
       totalExpenses += expenses;
       totalNetRevenue += netRevenue;
@@ -119,13 +127,13 @@ const AccountsReceivable = () => {
       }
     });
 
-    const totalBalance = totalReceivable - totalCollected;
+    const totalBalance = totalCollectible - totalCollected; // ✅ CHANGED: Based on collectible amount
     const averageNetRevenuePercent = totalCollected > 0 
       ? (totalNetRevenue / totalCollected) * 100 
       : 0;
 
     return {
-      totalReceivable,
+      totalCollectible, // ✅ NEW: Total collectible amount
       totalCollected,
       totalBalance,
       totalExpenses,
@@ -137,30 +145,30 @@ const AccountsReceivable = () => {
 
   const statsConfig = [
     {
+      key: "COLLECTIBLE",
+      title: "Total Collectible",
+      value: `₱${stats.totalCollectible.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+      color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+      icon: Wallet,
+      subtitle: `Balance: ₱${stats.totalBalance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
+    },
+    {
       key: "COLLECTED",
       title: "Total Collected",
       value: `₱${stats.totalCollected.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
       color: "bg-gradient-to-br from-green-500 to-green-600 text-white",
-      icon: Wallet,
-      subtitle: `Balance: ₱${stats.totalBalance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
+      icon: DollarSign,
+      subtitle: `Collected from clients`
     },
     {
       key: "NET_REVENUE",
       title: "Net Revenue",
       value: `₱${stats.totalNetRevenue.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
       color: stats.totalNetRevenue >= 0 
-        ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+        ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
         : "bg-gradient-to-br from-red-500 to-red-600 text-white",
       icon: TrendingUp,
       subtitle: `Average: ${stats.averageNetRevenuePercent.toFixed(1)}%`
-    },
-    {
-      key: "EXPENSES",
-      title: "Total Expenses",
-      value: `₱${stats.totalExpenses.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-      color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white",
-      icon: DollarSign,
-      subtitle: "Including 12% BIR"
     },
     {
       key: "HIGH_AGING",

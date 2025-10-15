@@ -10,12 +10,6 @@ import {
   getRouteAbbreviation, 
   formatVolume 
 } from "../../utils/helpers/tableDataFormatters";
-import { 
-  calculateTotalExpenses, 
-  calculateBIR, 
-  calculateTotalWithBIR,
-  calculateNetRevenue 
-} from "../../utils/helpers/financeCalculations";
 import DataTable from "./DataTable";
 
 const APTable = ({ data, activeTab, onSelectionChange }) => {
@@ -100,26 +94,10 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
           </span>
         );
       }
-    },
-    {
-      accessorKey: "gross_income",
-      header: "Gross Income",
-      cell: ({ row }) => {
-        const arRecord = getARRecord(row.original.booking_id);
-        const grossIncome = parseFloat(arRecord?.amount_paid || 0);
-        return (
-          <span className="table-text-bold">
-            ₱{grossIncome.toLocaleString("en-PH", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}
-          </span>
-        );
-      }
     }
   ];
 
-  // Create expense columns dynamically
+  // ✅ UPDATED: Create expense columns WITHOUT dates
   const createExpenseColumns = (prefix, label) => [
     {
       accessorKey: `${prefix}_payee`,
@@ -143,22 +121,6 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
       )
     },
     {
-      accessorKey: `${prefix}_check_date`,
-      header: `${label} - Check Date`,
-      cell: ({ row }) => (
-        <span className="table-text">
-          {row.original[`${prefix}_check_date`]
-            ? new Date(row.original[`${prefix}_check_date`]).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric"
-              })
-            : "-"
-          }
-        </span>
-      )
-    },
-    {
       accessorKey: `${prefix}_voucher`,
       header: `${label} - Voucher`,
       cell: ({ row }) => (
@@ -167,20 +129,19 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
     }
   ];
 
-  // Create dual expense columns for origin/destination
+  // ✅ UPDATED: Create dual expense columns WITHOUT dates
   const createDualExpenseColumns = (prefix, label) => [
     ...createExpenseColumns(`${prefix}_origin`, `${label} (Origin)`),
     ...createExpenseColumns(`${prefix}_dest`, `${label} (Dest)`)
   ];
 
-  // Summary columns
+  // ✅ UPDATED: Summary columns with corrected calculations
   const summaryColumns = [
     {
       accessorKey: "total_expenses",
       header: "Total Expenses",
       cell: ({ row }) => {
-        const apRecord = row.original;
-        const totalExpenses = calculateTotalExpenses(apRecord);
+        const totalExpenses = parseFloat(row.original.total_expenses) || 0;
         return (
           <span className="table-text-bold">
             ₱{totalExpenses.toLocaleString("en-PH", {
@@ -193,13 +154,37 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
     },
     {
       accessorKey: "total_payables",
-      header: "Total Payables (BIR 12%)",
+      header: "Total Payables",
       cell: ({ row }) => {
-        const apRecord = row.original;
-        const totalWithBIR = calculateTotalWithBIR(apRecord);
+        const totalPayables = parseFloat(row.original.total_payables) || 0;
+        const birPercentage = parseFloat(row.original.bir_percentage) || 0;
+        
         return (
-          <span className="table-text-bold text-red-600">
-            ₱{totalWithBIR.toLocaleString("en-PH", {
+          <div className="text-right">
+            <div className="table-text-bold text-red-600">
+              ₱{totalPayables.toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
+            </div>
+            {birPercentage > 0 && (
+              <div className="text-xs text-slate-500 mt-1">
+                BIR {birPercentage}%
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "gross_income",
+      header: "Gross Income",
+      cell: ({ row }) => {
+        const arRecord = getARRecord(row.original.booking_id);
+        const grossIncome = parseFloat(arRecord?.gross_income) || 0;
+        return (
+          <span className="table-text-bold text-green-600">
+            ₱{grossIncome.toLocaleString("en-PH", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             })}
@@ -212,8 +197,12 @@ const APTable = ({ data, activeTab, onSelectionChange }) => {
       header: "Net Revenue",
       cell: ({ row }) => {
         const arRecord = getARRecord(row.original.booking_id);
-        const apRecord = row.original;
-        const netRevenue = calculateNetRevenue(arRecord, apRecord);
+        const grossIncome = parseFloat(arRecord?.gross_income) || 0;
+        const totalPayables = parseFloat(row.original.total_payables) || 0;
+        
+        // ✅ CORRECTED: Net Revenue = Gross Income - Total Payables
+        const netRevenue = grossIncome - totalPayables;
+        
         const colorClass = netRevenue >= 0 ? "text-green-600" : "text-red-600";
         return (
           <span className={`table-text-bold ${colorClass}`}>

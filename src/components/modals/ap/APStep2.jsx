@@ -4,7 +4,7 @@ import { Controller } from "react-hook-form";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import { NumericFormat } from "react-number-format";
-import { Calendar, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 const APStep2 = ({ register, control, errors, apRecord }) => {
   const [activeTab, setActiveTab] = useState("origin");
@@ -69,8 +69,9 @@ const APStep2 = ({ register, control, errors, apRecord }) => {
           />
         </div>
 
-        {/* Amount + Check Date */}
+        {/* Amount + Voucher Number */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Amount */}
           <div className="input-container">
             <label className="input-label-modern">Amount *</label>
             <Controller
@@ -106,51 +107,23 @@ const APStep2 = ({ register, control, errors, apRecord }) => {
             )}
           </div>
 
-          {/* Check Date */}
+          {/* Voucher Number */}
           <div className="input-container">
-            <label className="input-label-modern">Check Date</label>
-            <div className="relative">
-              <Controller
-                control={control}
-                name={`trucking_${prefix}_check_date`}
-                render={({ field }) => (
-                  <Datetime
-                    {...field}
-                    timeFormat={false}
-                    dateFormat="YYYY-MM-DD"
-                    closeOnSelect={true}
-                    inputProps={{
-                      className: "input-field-modern pr-10 cursor-pointer",
-                      placeholder: "Select date",
-                    }}
-                    onChange={(val) =>
-                      field.onChange(val && val.format ? val.format("YYYY-MM-DD") : "")
-                    }
-                    value={field.value || ""}
-                  />
-                )}
-              />
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
-            </div>
+            <label className="input-label-modern">Voucher Number</label>
+            <input
+              type="text"
+              {...register(`trucking_${prefix}_voucher`)}
+              placeholder="Voucher number"
+              className={`input-field-modern ${
+                errors[`trucking_${prefix}_voucher`] ? "input-error" : ""
+              }`}
+            />
+            {errors[`trucking_${prefix}_voucher`] && (
+              <p className="error-message">
+                {errors[`trucking_${prefix}_voucher`].message}
+              </p>
+            )}
           </div>
-        </div>
-
-        {/* Voucher */}
-        <div className="input-container">
-          <label className="input-label-modern">Voucher Number</label>
-          <input
-            type="text"
-            {...register(`trucking_${prefix}_voucher`)}
-            placeholder="Voucher number"
-            className={`input-field-modern ${
-              errors[`trucking_${prefix}_voucher`] ? "input-error" : ""
-            }`}
-          />
-          {errors[`trucking_${prefix}_voucher`] && (
-            <p className="error-message">
-              {errors[`trucking_${prefix}_voucher`].message}
-            </p>
-          )}
         </div>
       </div>
     );

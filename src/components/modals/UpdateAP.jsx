@@ -13,7 +13,8 @@ import APStep1 from "./ap/APStep1";
 import APStep2 from "./ap/APStep2";
 import APStep3 from "./ap/APStep3";
 import APStep4 from "./ap/APStep4";
-import APStep5 from "./ap/APStep5";
+import APStep5 from "./ap/APStep5"; // ✅ NEW STEP
+import APStep6 from "./ap/APStep6";
 
 const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -93,7 +94,14 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
 
       facilitation_amount: "",
       facilitation_check_date: "",
-      facilitation_voucher: ""
+      facilitation_voucher: "",
+
+      // ✅ NEW: Financial Fields
+      bir_percentage: "",
+      total_expenses: "",
+      total_payables: "",
+      gross_income: "",
+      net_revenue_percentage: ""
     }
   });
 
@@ -151,7 +159,14 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
 
         facilitation_amount: formatAmount(apRecord.facilitation_amount),
         facilitation_check_date: apRecord.facilitation_check_date || "",
-        facilitation_voucher: apRecord.facilitation_voucher || ""
+        facilitation_voucher: apRecord.facilitation_voucher || "",
+
+        // ✅ NEW: Populate financial fields if they exist
+        bir_percentage: formatAmount(apRecord.bir_percentage),
+        total_expenses: formatAmount(apRecord.total_expenses),
+        total_payables: formatAmount(apRecord.total_payables),
+        gross_income: formatAmount(apRecord.gross_income),
+        net_revenue_percentage: formatAmount(apRecord.net_revenue_percentage)
       };
 
       Object.entries(formData).forEach(([key, value]) => setValue(key, value));
@@ -178,7 +193,7 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
       "labor_dest_amount"
     ],
     4: ["rebates_amount", "storage_amount", "facilitation_amount"],
-    5: []
+    5: [] // ✅ APStep5 has no required fields (all calculations or optional)
   };
 
   const onSubmit = async (data) => {
@@ -229,7 +244,14 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
         labor_dest_amount: data.labor_dest_amount || 0,
         rebates_amount: data.rebates_amount || 0,
         storage_amount: data.storage_amount || 0,
-        facilitation_amount: data.facilitation_amount || 0
+        facilitation_amount: data.facilitation_amount || 0,
+
+        // ✅ NEW: Financial fields
+        bir_percentage: data.bir_percentage || 0,
+        total_expenses: data.total_expenses || 0,
+        total_payables: data.total_payables || 0,
+        gross_income: data.gross_income || 0,
+        net_revenue_percentage: data.net_revenue_percentage || 0
       };
 
       const result = await updateAPRecord(apId, formattedData);
@@ -257,7 +279,7 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
         return;
       }
     }
-    if (currentStep < 5) setCurrentStep(currentStep + 1);
+    if (currentStep < 6) setCurrentStep(currentStep + 1); // ✅ Now 6 steps total
   };
 
   const handlePrev = () => {
@@ -269,7 +291,9 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
     2: <APStep2 register={register} control={control} errors={errors} apRecord={apRecord} />,
     3: <APStep3 register={register} control={control} errors={errors} apRecord={apRecord} />,
     4: <APStep4 register={register} control={control} errors={errors} apRecord={apRecord} />,
-    5: <APStep5 control={control} watch={watch} apRecord={apRecord} />
+    5:  <APStep5 register={register} control={control} errors={errors}
+    watch={watch} setValue={setValue} apRecord={apRecord} />,
+    6: <APStep6 control={control} watch={watch} apRecord={apRecord} />
   };
 
   return (
@@ -284,8 +308,8 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
       infoBox={{
         title: "Accounts Payable Update Info",
         items: [
-          { text: `Step ${currentStep} of 5` },
-          { text: ["Freight Charges", "Trucking Charges", "Port Charges", "Misc Charges", "Review Details"][currentStep - 1] }
+          { text: `Step ${currentStep} of 6` }, // ✅ Updated to 6 steps
+          { text: ["Freight Charges", "Trucking Charges", "Port Charges", "Misc Charges", "Financial Calculations", "Review Details"][currentStep - 1] } // ✅ Added "Financial Calculations"
         ]
       }}
       footer={
@@ -298,7 +322,7 @@ const UpdateAP = ({ isOpen, onClose, apId, apRecord }) => {
           >
             Previous
           </button>
-          {currentStep === 5 ? (
+          {currentStep === 6 ? ( // ✅ Now step 6 is the final step
             <button type="submit" disabled={isLoading} className="btn-primary-modern">
               {isLoading ? "Updating..." : "Update AP"}
             </button>

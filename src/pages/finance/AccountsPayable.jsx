@@ -39,37 +39,6 @@ const AccountsPayable = () => {
     fetchAP();
   }, [fetchBookings, fetchAP]);
 
-  // 🔸 Helper functions for calculations
-  const calculateTotalExpenses = (ap) => {
-    return (parseFloat(ap.freight_amount) || 0) +
-           (parseFloat(ap.trucking_origin_amount) || 0) +
-           (parseFloat(ap.trucking_dest_amount) || 0) +
-           (parseFloat(ap.crainage_amount) || 0) +
-           (parseFloat(ap.arrastre_origin_amount) || 0) +
-           (parseFloat(ap.arrastre_dest_amount) || 0) +
-           (parseFloat(ap.wharfage_origin_amount) || 0) +
-           (parseFloat(ap.wharfage_dest_amount) || 0) +
-           (parseFloat(ap.labor_origin_amount) || 0) +
-           (parseFloat(ap.labor_dest_amount) || 0) +
-           (parseFloat(ap.rebates_amount) || 0) +
-           (parseFloat(ap.storage_amount) || 0) +
-           (parseFloat(ap.facilitation_amount) || 0);
-  };
-
-  const calculateBIR = (ap) => {
-    const totalExpenses = calculateTotalExpenses(ap);
-    return totalExpenses * 0.12;
-  };
-
-  const calculateTotalWithBIR = (ap) => {
-    return calculateTotalExpenses(ap) + calculateBIR(ap);
-  };
-
-  const calculateNetRevenue = (ap) => {
-    const grossRevenue = 50000; // placeholder
-    return grossRevenue - calculateTotalWithBIR(ap);
-  };
-
   // Safe arrays
   const safeBookings = useMemo(() => (Array.isArray(bookings) ? bookings : []), [bookings]);
   const safeAPRecords = useMemo(() => (Array.isArray(apRecords) ? apRecords : []), [apRecords]);
@@ -96,10 +65,14 @@ const AccountsPayable = () => {
         rebates_amount: parseFloat(ap.rebates_amount) || 0,
         storage_amount: parseFloat(ap.storage_amount) || 0,
         facilitation_amount: parseFloat(ap.facilitation_amount) || 0,
-        total_expenses: calculateTotalExpenses(ap),
-        bir: calculateBIR(ap),
-        total_expenses_with_bir: calculateTotalWithBIR(ap),
-        net_revenue: calculateNetRevenue(ap),
+        
+        // ✅ Use actual database fields
+        total_expenses: parseFloat(ap.total_expenses) || 0,
+        bir_percentage: parseFloat(ap.bir_percentage) || 0,
+        total_payables: parseFloat(ap.total_payables) || 0,
+        
+        // ✅ Calculate BIR amount for display
+        bir_amount: (parseFloat(ap.total_expenses) || 0) * (parseFloat(ap.bir_percentage) || 0) / 100,
       }));
     } else {
       // fallback from bookings if AP empty
@@ -134,20 +107,22 @@ const AccountsPayable = () => {
         rebates_amount: 0,
         storage_amount: 0,
         facilitation_amount: 0,
+        
+        // ✅ Default values for new fields
         total_expenses: 0,
-        bir: 0,
-        total_expenses_with_bir: 0,
-        net_revenue: 0,
+        bir_percentage: 0,
+        total_payables: 0,
+        bir_amount: 0,
         remarks: "",
       }));
     }
   }, [safeBookings, safeAPRecords]);
 
-  // 🔸 Stats
+  // 🔸 Stats - Updated to use actual database fields
   const stats = useMemo(() => {
-    const totalPayable = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses_with_bir || 0), 0);
+    const totalPayable = apRecordsForTable.reduce((sum, r) => sum + (r.total_payables || 0), 0);
     const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses || 0), 0);
-    const totalBIR = apRecordsForTable.reduce((sum, r) => sum + (r.bir || 0), 0);
+    const totalBIR = apRecordsForTable.reduce((sum, r) => sum + (r.bir_amount || 0), 0);
     const totalRecords = apRecordsForTable.length;
 
     return { 
@@ -158,6 +133,7 @@ const AccountsPayable = () => {
     };
   }, [apRecordsForTable]);
 
+  // 🔸 Updated stats config with dynamic BIR percentage
   const statsConfig = [
     { 
       key: "TOTAL", 
@@ -175,7 +151,7 @@ const AccountsPayable = () => {
     },
     { 
       key: "BIR", 
-      title: "BIR Tax (12%)", 
+      title: "BIR Tax", 
       value: `₱${stats.bir.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, 
       color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white", 
       icon: Percent 

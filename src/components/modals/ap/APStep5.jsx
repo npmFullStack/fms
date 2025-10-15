@@ -1,31 +1,14 @@
-// components/modals/ap/APStep5.jsx
-import { useState } from "react";
-import { Info, FileText, Calculator } from "lucide-react";
+import { Controller } from "react-hook-form";
+import { Info, Calculator } from "lucide-react";
+import { NumericFormat } from "react-number-format";
+import { useEffect } from "react";
 
-const APStep5 = ({ watch, apRecord }) => {
-  // ✅ Safely call watch only if it's a function
-  const formData = typeof watch === "function" ? watch() : {};
-
-  const [activeTab, setActiveTab] = useState("Freight Charges");
-
-  // ✅ Currency formatter
-  const formatCurrency = (num) =>
-    `₱${(num || 0).toLocaleString("en-PH", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-
-  const formatDate = (date) => {
-    if (!date) return "Not set";
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // ✅ Total calculation with fallbacks
-  const calculateTotal = () => {
+const APStep5 = ({ register, control, errors, watch, setValue, apRecord }) => {
+  // Watch form values for real-time calculations
+  const formData = watch();
+  
+  // Calculate total expenses from all charges (same as APStep6)
+  const calculateTotalExpenses = () => {
     const amounts = [
       formData.freight_amount,
       formData.trucking_origin_amount,
@@ -44,179 +27,238 @@ const APStep5 = ({ watch, apRecord }) => {
     return amounts.reduce((sum, val) => sum + (Number(val) || 0), 0);
   };
 
-  const total = calculateTotal();
-  const bir = total * 0.12;
-  const grandTotal = total + bir;
+  const totalExpenses = calculateTotalExpenses();
+  const birPercentage = formData.bir_percentage || 0;
+  const netRevenuePercentage = formData.net_revenue_percentage || 0;
+  
+  // Calculate derived values
+  const birAmount = totalExpenses * (birPercentage / 100);
+  const totalPayables = totalExpenses + birAmount;
+  const netRevenueAmount = totalPayables * (netRevenuePercentage / 100);
+  const calculatedGrossIncome = totalPayables + netRevenueAmount;
 
-  const groups = [
-    {
-      title: "Freight Charges",
-      charges: [
-        {
-          label: "Freight",
-          payee: formData.freight_payee || apRecord?.freight_payee,
-          amount: formData.freight_amount,
-          date: formData.freight_check_date,
-          voucher: formData.freight_voucher,
-        },
-      ],
-    },
-    {
-      title: "Trucking Charges",
-      charges: [
-        {
-          label: "Origin Trucking",
-          payee: formData.trucking_origin_payee || apRecord?.trucking_origin_payee,
-          amount: formData.trucking_origin_amount,
-          date: formData.trucking_origin_check_date,
-          voucher: formData.trucking_origin_voucher,
-        },
-        {
-          label: "Destination Trucking",
-          payee: formData.trucking_dest_payee || apRecord?.trucking_dest_payee,
-          amount: formData.trucking_dest_amount,
-          date: formData.trucking_dest_check_date,
-          voucher: formData.trucking_dest_voucher,
-        },
-      ],
-    },
-    {
-      title: "Port Charges",
-      charges: [
-        { label: "Crainage", payee: formData.crainage_payee, amount: formData.crainage_amount, date: formData.crainage_check_date, voucher: formData.crainage_voucher },
-        { label: "Arrastre (Origin)", payee: formData.arrastre_origin_payee, amount: formData.arrastre_origin_amount, date: formData.arrastre_origin_check_date, voucher: formData.arrastre_origin_voucher },
-        { label: "Arrastre (Dest)", payee: formData.arrastre_dest_payee, amount: formData.arrastre_dest_amount, date: formData.arrastre_dest_check_date, voucher: formData.arrastre_dest_voucher },
-        { label: "Wharfage (Origin)", payee: formData.wharfage_origin_payee, amount: formData.wharfage_origin_amount, date: formData.wharfage_origin_check_date, voucher: formData.wharfage_origin_voucher },
-        { label: "Wharfage (Dest)", payee: formData.wharfage_dest_payee, amount: formData.wharfage_dest_amount, date: formData.wharfage_dest_check_date, voucher: formData.wharfage_dest_voucher },
-        { label: "Labor (Origin)", payee: formData.labor_origin_payee, amount: formData.labor_origin_amount, date: formData.labor_origin_check_date, voucher: formData.labor_origin_voucher },
-        { label: "Labor (Dest)", payee: formData.labor_dest_payee, amount: formData.labor_dest_amount, date: formData.labor_dest_check_date, voucher: formData.labor_dest_voucher },
-      ],
-    },
-    {
-      title: "Miscellaneous Charges",
-      charges: [
-        { label: "Rebates/DENR", payee: formData.rebates_payee, amount: formData.rebates_amount, date: formData.rebates_check_date, voucher: formData.rebates_voucher },
-        { label: "Storage", payee: formData.storage_payee, amount: formData.storage_amount, date: formData.storage_check_date, voucher: formData.storage_voucher },
-        { label: "Facilitation", payee: formData.facilitation_payee, amount: formData.facilitation_amount, date: formData.facilitation_check_date, voucher: formData.facilitation_voucher },
-      ],
-    },
-  ];
+  // ✅ AUTO-SET FORM VALUES WHEN CALCULATIONS CHANGE
+  useEffect(() => {
+    // Always set total_expenses (it's calculated from charges)
+    setValue("total_expenses", totalExpenses, { shouldValidate: true });
+    
+    // Always set total_payables (it's calculated from expenses + BIR)
+    setValue("total_payables", totalPayables, { shouldValidate: true });
+    
+    // Auto-set gross_income when net revenue % is set
+    if (netRevenuePercentage > 0) {
+      setValue("gross_income", calculatedGrossIncome, { shouldValidate: true });
+    }
+  }, [totalExpenses, totalPayables, calculatedGrossIncome, netRevenuePercentage, setValue]);
+
+  // Determine if gross income should be auto-calculated or manual
+  const isAutoCalculated = netRevenuePercentage > 0;
+  const displayGrossIncome = isAutoCalculated ? calculatedGrossIncome : (formData.gross_income || 0);
+
+  // Handle net revenue percentage change
+  const handleNetRevenueChange = (value) => {
+    if (value > 0) {
+      // Auto-calculate gross income when net revenue % is set
+      setValue("gross_income", calculatedGrossIncome, { shouldValidate: true });
+    }
+    // If net revenue % is cleared, keep the current gross income value (manual mode)
+  };
+
+  // Handle gross income manual input (only when not auto-calculated)
+  const handleGrossIncomeChange = (value) => {
+    if (!isAutoCalculated) {
+      setValue("gross_income", value === "" ? "" : Number(value), { shouldValidate: true });
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Info Box */}
-      <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 p-4 rounded-lg">
-        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-        <div className="text-sm text-slate-700">
-          <p className="font-medium text-slate-800 mb-1">
-            Please review all charge details carefully.
-          </p>
-          <p>
-            Make sure that payee, amounts, dates, and vouchers are correct before finalizing.
+    <div className="space-y-5">
+      {/* 🧰 Header */}
+      <div className="info-box-modern">
+        <div className="flex items-start gap-3">
+          <div className="p-1.5 bg-blue-100 rounded-lg">
+            <Calculator className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-slate-800 mb-1">
+              Financial Calculations
+            </h4>
+            <p className="text-xs text-slate-600">
+              Configure BIR tax percentage and net revenue to calculate gross income.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 📊 Total Expenses Display (Read-only) */}
+      <div className="input-container">
+        <label className="input-label-modern">Total Expenses</label>
+        <NumericFormat
+          value={totalExpenses}
+          thousandSeparator
+          prefix="₱"
+          decimalScale={2}
+          displayType="text"
+          className="input-field-modern bg-gray-100 cursor-not-allowed"
+          readOnly
+        />
+        <p className="text-xs text-slate-500 mt-1">
+          Sum of all charges from previous steps
+        </p>
+      </div>
+
+      {/* 💰 BIR Percentage + Total Payables */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 💰 BIR Percentage */}
+        <div className="input-container">
+          <label className="input-label-modern">BIR (%)</label>
+          <Controller
+            control={control}
+            name="bir_percentage"
+            render={({ field }) => (
+              <NumericFormat
+                value={field.value === "" || field.value === null || field.value === 0 || field.value === "0" ? "" : field.value}
+                thousandSeparator={false}
+                suffix="%"
+                decimalScale={2}
+                allowNegative={false}
+                placeholder="0.00%"
+                className={`input-field-modern ${
+                  errors.bir_percentage ? "input-error" : ""
+                }`}
+                onValueChange={(values) => {
+                  const val = values.value;
+                  field.onChange(val === "" ? "" : Number(val));
+                }}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+          {errors.bir_percentage && (
+            <p className="error-message">{errors.bir_percentage.message}</p>
+          )}
+        </div>
+
+        {/* 💰 Total Payables (Read-only) */}
+        <div className="input-container">
+          <label className="input-label-modern">Total Payables</label>
+          <NumericFormat
+            value={totalPayables}
+            thousandSeparator
+            prefix="₱"
+            decimalScale={2}
+            displayType="text"
+            className="input-field-modern bg-gray-100 cursor-not-allowed"
+            readOnly
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Total Expenses + BIR Tax
           </p>
         </div>
       </div>
 
-      {/* Booking Info */}
-      {apRecord && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <FileText className="w-4 h-4 text-blue-600" />
-            <h4 className="font-semibold text-slate-800">Booking Information</h4>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-slate-600">Booking #:</span>
-              <p className="font-medium text-slate-800">{apRecord.booking_number}</p>
-            </div>
-            <div>
-              <span className="text-slate-600">HWB #:</span>
-              <p className="font-medium text-slate-800">{apRecord.hwb_number}</p>
-            </div>
-            <div>
-              <span className="text-slate-600">Route:</span>
-              <p className="font-medium text-slate-800">{apRecord.route}</p>
-            </div>
-            <div>
-              <span className="text-slate-600">Commodity:</span>
-              <p className="font-medium text-slate-800">{apRecord.commodity}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div>
-        <div className="flex border-b border-blue-100 mb-4">
-          {groups.map((g) => (
-            <button
-              key={g.title}
-              type="button" // ✅ Prevent submit
-              onClick={() => setActiveTab(g.title)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === g.title
-                  ? "text-blue-700 border-b-2 border-blue-600"
-                  : "text-slate-600 hover:text-blue-600"
-              }`}
-            >
-              {g.title}
-            </button>
-          ))}
+      {/* 💰 Net Revenue Percentage + Gross Income */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 💰 Net Revenue Percentage (Optional) */}
+        <div className="input-container">
+          <label className="input-label-modern">
+            Net Revenue (%) <span className="text-xs text-slate-400">Optional</span>
+          </label>
+          <Controller
+            control={control}
+            name="net_revenue_percentage"
+            render={({ field }) => (
+              <NumericFormat
+                value={field.value === "" || field.value === null || field.value === 0 || field.value === "0" ? "" : field.value}
+                thousandSeparator={false}
+                suffix="%"
+                decimalScale={2}
+                allowNegative={false}
+                placeholder="0.00%"
+                className={`input-field-modern ${
+                  errors.net_revenue_percentage ? "input-error" : ""
+                }`}
+                onValueChange={(values) => {
+                  const val = values.value;
+                  field.onChange(val === "" ? "" : Number(val));
+                  handleNetRevenueChange(Number(val) || 0);
+                }}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+          {errors.net_revenue_percentage && (
+            <p className="error-message">{errors.net_revenue_percentage.message}</p>
+          )}
         </div>
 
-        {groups.map(
-          (group) =>
-            activeTab === group.title && (
-              <div key={group.title} className="space-y-4">
-                {group.charges.map((charge, i) => (
-                  <div
-                    key={i}
-                    className="border border-blue-100 rounded-lg p-4 bg-blue-50/30"
-                  >
-                    <p className="font-semibold text-slate-800 mb-2">{charge.label}</p>
-                    <div className="grid grid-cols-2 gap-y-2 text-sm">
-                      <div>
-                        <p className="text-slate-600">Payee</p>
-                        <p className="text-slate-800 font-medium">{charge.payee || "—"}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-600">Check Date</p>
-                        <p className="text-slate-800 font-medium">{formatDate(charge.date)}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-600">Voucher</p>
-                        <p className="text-slate-800 font-medium">{charge.voucher || "—"}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-600">Amount</p>
-                        <p className="text-slate-800 font-semibold">{formatCurrency(charge.amount)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-        )}
+        {/* 💰 Gross Income (Auto-calculated or Manual) */}
+        <div className="input-container">
+          <label className="input-label-modern">Gross Income</label>
+          <Controller
+            control={control}
+            name="gross_income"
+            render={({ field }) => (
+              <NumericFormat
+                value={isAutoCalculated ? calculatedGrossIncome : (field.value === "" || field.value === null || field.value === 0 || field.value === "0" ? "" : field.value)}
+                thousandSeparator
+                prefix="₱"
+                decimalScale={2}
+                allowNegative={false}
+                placeholder="₱0.00"
+                className={`input-field-modern ${
+                  errors.gross_income ? "input-error" : ""
+                } ${
+                  isAutoCalculated ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
+                onValueChange={(values) => {
+                  if (!isAutoCalculated) {
+                    const val = values.value;
+                    handleGrossIncomeChange(val);
+                  }
+                }}
+                onBlur={field.onBlur}
+                readOnly={isAutoCalculated}
+              />
+            )}
+          />
+          {errors.gross_income && (
+            <p className="error-message">{errors.gross_income.message}</p>
+          )}
+          <p className="text-xs text-slate-500 mt-1">
+            {isAutoCalculated 
+              ? `Auto-calculated: Total Payables + Net Revenue (${netRevenuePercentage}%)` 
+              : "Enter manually or set Net Revenue % above"
+            }
+          </p>
+        </div>
       </div>
 
-      {/* Financial Summary */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Calculator className="w-4 h-4 text-blue-600" />
-          <h4 className="font-semibold text-slate-800">Financial Summary</h4>
-        </div>
+      {/* 📈 Calculation Summary */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+        <h5 className="text-sm font-semibold text-slate-800 mb-3">Calculation Summary</h5>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-600">Total Expenses:</span>
-            <span className="font-semibold text-slate-800">{formatCurrency(total)}</span>
+            <span className="font-medium text-slate-800">₱{totalExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-600">BIR Tax (12%):</span>
-            <span className="font-semibold text-slate-800">{formatCurrency(bir)}</span>
+            <span className="text-slate-600">BIR Tax ({birPercentage}%):</span>
+            <span className="font-medium text-slate-800">₱{birAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between border-t border-blue-200 pt-2">
-            <span className="font-semibold text-slate-800">Grand Total:</span>
-            <span className="font-semibold text-slate-800 text-lg">{formatCurrency(grandTotal)}</span>
+            <span className="font-semibold text-slate-800">Total Payables:</span>
+            <span className="font-semibold text-slate-800">₱{totalPayables.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
+          {netRevenuePercentage > 0 && (
+            <div className="flex justify-between">
+              <span className="text-slate-600">Net Revenue ({netRevenuePercentage}%):</span>
+              <span className="font-medium text-slate-800">₱{netRevenueAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-blue-200 pt-2">
+            <span className="font-semibold text-slate-800 text-base">Gross Income:</span>
+            <span className="font-semibold text-slate-800 text-base">₱{displayGrossIncome.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
         </div>
       </div>
