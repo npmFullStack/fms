@@ -5,8 +5,8 @@ import useFinanceStore from "../../utils/store/useFinanceStore";
 import {
   DollarSign,
   TrendingDown,
-  Clock,
-  CheckCircle,
+  Receipt,
+  Percent,
   Truck,
   Ship,
   Anchor,
@@ -39,7 +39,7 @@ const AccountsPayable = () => {
     fetchAP();
   }, [fetchBookings, fetchAP]);
 
-  // 🔸 Helper functions for calculations - MOVE THESE BEFORE useMemo
+  // 🔸 Helper functions for calculations
   const calculateTotalExpenses = (ap) => {
     return (parseFloat(ap.freight_amount) || 0) +
            (parseFloat(ap.trucking_origin_amount) || 0) +
@@ -66,7 +66,6 @@ const AccountsPayable = () => {
   };
 
   const calculateNetRevenue = (ap) => {
-
     const grossRevenue = 50000; // placeholder
     return grossRevenue - calculateTotalWithBIR(ap);
   };
@@ -83,7 +82,7 @@ const AccountsPayable = () => {
         client: ap.consignee || "-",
         mode: ap.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
         route: `${ap.origin_port || "-"} → ${ap.destination_port || "-"}`,
-        volume: `${ap.quantity || 1}${ap.container_size || "LCL"}`,
+        container_size: ap.container_size || "LCL",
         freight_amount: parseFloat(ap.freight_amount) || 0,
         trucking_origin_amount: parseFloat(ap.trucking_origin_amount) || 0,
         trucking_dest_amount: parseFloat(ap.trucking_dest_amount) || 0,
@@ -105,7 +104,7 @@ const AccountsPayable = () => {
     } else {
       // fallback from bookings if AP empty
       return safeBookings.map(booking => ({
-        ap_id: booking.id, // Use booking ID as temporary AP ID
+        ap_id: booking.id,
         booking_id: booking.id,
         booking_number: booking.booking_number,
         hwb_number: booking.hwb_number,
@@ -113,12 +112,12 @@ const AccountsPayable = () => {
         destination_port: booking.destination_port,
         commodity: booking.commodity,
         quantity: booking.quantity,
+        container_size: booking.container_size || "LCL",
         booking_mode: booking.booking_mode,
         created_at: booking.created_at,
         client: booking.shipper || "-",
         mode: booking.booking_mode === "DOOR_TO_DOOR" ? "D-D" : "P-P",
         route: `${booking.origin_port || "-"} → ${booking.destination_port || "-"}`,
-        volume: `${booking.quantity || 1}${booking.container_size || "LCL"}`,
         freight_payee: booking.shipping_line_name || "-",
         freight_amount: 0,
         trucking_origin_payee: booking.pickup_trucker || "-",
@@ -148,20 +147,14 @@ const AccountsPayable = () => {
   const stats = useMemo(() => {
     const totalPayable = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses_with_bir || 0), 0);
     const totalExpenses = apRecordsForTable.reduce((sum, r) => sum + (r.total_expenses || 0), 0);
-    
-    // Simple logic to determine pending/paid - you might want to improve this
-    const pendingCount = apRecordsForTable.filter(r => 
-      !r.freight_check_date && 
-      !r.trucking_origin_check_date && 
-      !r.trucking_dest_check_date
-    ).length;
-    const paidCount = apRecordsForTable.length - pendingCount;
+    const totalBIR = apRecordsForTable.reduce((sum, r) => sum + (r.bir || 0), 0);
+    const totalRecords = apRecordsForTable.length;
 
     return { 
       total: totalPayable, 
       expenses: totalExpenses, 
-      pending: pendingCount, 
-      paid: paidCount 
+      bir: totalBIR,
+      records: totalRecords
     };
   }, [apRecordsForTable]);
 
@@ -181,18 +174,18 @@ const AccountsPayable = () => {
       icon: DollarSign 
     },
     { 
-      key: "PENDING", 
-      title: "Pending", 
-      value: stats.pending, 
-      color: "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white", 
-      icon: Clock 
+      key: "BIR", 
+      title: "BIR Tax (12%)", 
+      value: `₱${stats.bir.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, 
+      color: "bg-gradient-to-br from-purple-500 to-purple-600 text-white", 
+      icon: Percent 
     },
     { 
-      key: "PAID", 
-      title: "Paid", 
-      value: stats.paid, 
-      color: "bg-gradient-to-br from-green-500 to-green-600 text-white", 
-      icon: CheckCircle 
+      key: "RECORDS", 
+      title: "Total Records", 
+      value: stats.records, 
+      color: "bg-gradient-to-br from-blue-500 to-blue-600 text-white", 
+      icon: Receipt 
     },
   ];
 
@@ -253,10 +246,10 @@ const AccountsPayable = () => {
             {statsConfig.map(stat => <StatCard key={stat.key} {...stat} />)}
           </div>
 
-          {/* Tabs */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-            <div className="overflow-x-auto">
-              <div className="flex border-b border-gray-200">
+          {/* Tabs - Centered and Responsive */}
+          <div className="mb-6">
+            <div className="flex justify-center">
+              <div className="inline-flex p-1 rounded-lg bg-slate-100 overflow-x-auto max-w-full">
                 {tabs.map(tab => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.key;
@@ -264,14 +257,15 @@ const AccountsPayable = () => {
                     <button
                       key={tab.key}
                       onClick={() => setActiveTab(tab.key)}
-                      className={`flex items-center gap-2 px-6 py-4 font-medium text-sm whitespace-nowrap transition-all duration-200 border-b-2
-                        ${isActive
-                          ? "border-blue-600 text-blue-600 bg-blue-50"
-                          : "border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                        }`}
+                      className={`flex items-center gap-2 px-4 sm:px-6 py-2 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                      }`}
                     >
-                      <Icon className="h-5 w-5" />
-                      {tab.label}
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                     </button>
                   );
                 })}

@@ -28,7 +28,7 @@ const AccountsReceivable = () => {
   useEffect(() => {
     fetchBookings();
     fetchAR();
-    fetchAP(); // Make sure to fetch AP records too
+    fetchAP();
   }, [fetchBookings, fetchAR, fetchAP]);
 
   // Safe arrays

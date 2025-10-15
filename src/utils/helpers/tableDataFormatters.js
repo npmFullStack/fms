@@ -69,22 +69,8 @@ export const getModeBadge = mode => {
             label: "PORT-PORT",
             bg: "bg-blue-100",
             text: "text-blue-700 border-blue-700"
-        },
-        CY_TO_DOOR: {
-            label: "CY-DOOR",
-            bg: "bg-amber-100",
-            text: "text-amber-700 border-amber-700"
-        },
-        DOOR_TO_CY: {
-            label: "DOOR-CY",
-            bg: "bg-emerald-100",
-            text: "text-emerald-700 border-emerald-700"
-        },
-        CY_TO_CY: {
-            label: "CY-CY",
-            bg: "bg-rose-100",
-            text: "text-rose-700 border-rose-700"
         }
+  
     };
 
     return (
