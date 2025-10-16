@@ -1,4 +1,4 @@
-// pages/dashboard/afDashboard.jsx
+// pages/dashboard/afDashboard.jsx - Key sections fixed
 import React, { useMemo, useEffect, useState } from "react";
 import {
   BarChart,
@@ -16,13 +16,10 @@ import {
   TrendingUp,
   CalendarDays,
   CreditCard,
-  PieChart,
   AlertTriangle,
-  Clock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Select from "react-select";
-
 import useFinanceStore from "../../utils/store/useFinanceStore";
 import useBookingStore from "../../utils/store/useBookingStore";
 import Loading from "../../components/Loading";
@@ -59,30 +56,60 @@ const AfDashboard = () => {
       maximumFractionDigits: 0,
     }).format(amount || 0);
 
-  // Helper to match AR and AP records
   const getAPRecord = (bookingId) => {
     return apRecords.find(ap => ap.booking_id === bookingId);
   };
 
-  // ✅ NEW: Calculate overdue records
+  // ✅ FIXED: Calculate overdue records using booking_date
   const overdueRecords = useMemo(() => {
+    console.log("Calculating overdue records...");
+    
     return arRecords.filter(ar => {
-      const terms = ar.terms || 0;
+      const terms = parseInt(ar.terms) || 0;
+      
+      // Skip if no terms set
       if (terms <= 0) return false;
 
-      const bookingDate = new Date(ar.booking_date || ar.created_at);
+      // ✅ Use booking_date or created_at
+      const bookingDateStr = ar.booking_date || ar.created_at;
+      if (!bookingDateStr) return false;
+
+      const bookingDate = new Date(bookingDateStr);
       const today = new Date();
+      
+      // Calculate due date
       const dueDate = new Date(bookingDate);
       dueDate.setDate(dueDate.getDate() + terms);
-      
+
+      // Check if overdue
+      const isOverdue = today > dueDate;
+
+      // Check if still has collectible amount
       const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
       const amountPaid = parseFloat(ar.amount_paid || 0);
-      
-      return today > dueDate && collectibleAmount > amountPaid;
+      const hasBalance = collectibleAmount > amountPaid;
+
+      const isRecordOverdue = isOverdue && hasBalance;
+
+      // Debug logging
+      if (isRecordOverdue) {
+        console.log("Overdue record found:", {
+          hwb: ar.hwb_number,
+          bookingDate: bookingDateStr,
+          terms,
+          dueDate: dueDate.toLocaleDateString(),
+          today: today.toLocaleDateString(),
+          collectibleAmount,
+          amountPaid,
+          balance: collectibleAmount - amountPaid
+        });
+      }
+
+      return isRecordOverdue;
     });
   }, [arRecords]);
 
-  // ✅ NEW: Calculate total overdue amount
+  // ✅ Calculate total overdue amount
   const totalOverdueAmount = useMemo(() => {
     return overdueRecords.reduce((total, ar) => {
       const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
@@ -156,16 +183,16 @@ const AfDashboard = () => {
 
   const chartData = useMemo(() => {
     const monthlyData = {};
-    
+
     filteredData.forEach((ar) => {
       const date = new Date(ar.payment_date || ar.created_at);
       const key = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
       const monthLabel = MONTHS[date.getMonth()];
 
       if (!monthlyData[key]) {
-        monthlyData[key] = { 
-          month: monthLabel, 
-          revenue: 0, 
+        monthlyData[key] = {
+          month: monthLabel,
+          revenue: 0,
           expense: 0,
           collected: 0,
           netRevenue: 0
@@ -200,7 +227,7 @@ const AfDashboard = () => {
         const grossIncome = parseFloat(ar.gross_income || 0);
         const expenses = parseFloat(apRecord?.total_payables || 0);
         const netRevenue = grossIncome - expenses;
-        
+
         return {
           id: ar.ar_id || ar.id,
           action: `${ar.shipper || ar.client || "Client"} - ${ar.hwb_number || "N/A"}`,
@@ -211,25 +238,28 @@ const AfDashboard = () => {
       });
   }, [filteredData, apRecords]);
 
-  // ✅ NEW: Overdue notifications
+  // ✅ FIXED: Overdue notifications with proper date handling
   const overdueNotifications = useMemo(() => {
     return overdueRecords.slice(0, 5).map(ar => {
-      const terms = ar.terms || 0;
-      const bookingDate = new Date(ar.booking_date || ar.created_at);
+      const terms = parseInt(ar.terms) || 0;
+      const bookingDateStr = ar.booking_date || ar.created_at;
+      const bookingDate = new Date(bookingDateStr);
       const dueDate = new Date(bookingDate);
       dueDate.setDate(dueDate.getDate() + terms);
-      
+
       const collectibleAmount = parseFloat(ar.collectible_amount || ar.gross_income || 0);
       const amountPaid = parseFloat(ar.amount_paid || 0);
       const overdueAmount = collectibleAmount - amountPaid;
-      
+      const today = new Date();
+      const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+
       return {
         id: ar.ar_id || ar.id,
         client: ar.shipper || ar.client || "Client",
         hwb: ar.hwb_number || "N/A",
         dueDate: dueDate.toLocaleDateString("en-PH"),
         overdueAmount,
-        daysOverdue: Math.floor((new Date() - dueDate) / (1000 * 60 * 60 * 24))
+        daysOverdue
       };
     });
   }, [overdueRecords]);
@@ -259,7 +289,6 @@ const AfDashboard = () => {
         icon: TrendingUp,
         subtitle: `${financialMetrics.profitMargin.toFixed(1)}% margin`
       },
-      // ✅ NEW: Overdue Records Card
       {
         title: "Overdue Records",
         value: financialMetrics.overdueCount.toString(),
@@ -314,7 +343,7 @@ const AfDashboard = () => {
         </div>
       </div>
 
-      {/* Overdue Alerts */}
+      {/* ✅ FIXED: Overdue Alerts */}
       {overdueNotifications.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">

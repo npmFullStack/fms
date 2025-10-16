@@ -31,7 +31,6 @@ const ShippingLines = lazy(() => import("./pages/operations/ShippingLines"));
 const TruckingCompanies = lazy(() =>
     import("./pages/operations/TruckingCompanies")
 );
-const HouseWaybill = lazy(() => import("./pages/operations/HouseWaybill"));
 const IncidentReports = lazy(() =>
     import("./pages/operations/IncidentReports")
 );
@@ -105,10 +104,6 @@ function App() {
                             element={<TruckingCompanies />}
                         />
 
-                        <Route
-                            path="/house-waybill"
-                            element={<HouseWaybill />}
-                        />
                         <Route
                             path="/incident-reports"
                             element={<IncidentReports />}

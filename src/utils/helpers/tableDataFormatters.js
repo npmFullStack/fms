@@ -109,3 +109,12 @@ export const formatVolume = (quantity, size) => {
     if (!quantity || !size) return "---";
     return `${quantity}X${size}`;
 };
+
+
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2
+  }).format(amount || 0);
+};

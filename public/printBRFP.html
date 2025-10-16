@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking/Request for Payment</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 15px; line-height: 1.4; font-size: 12px;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 15px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 18px; font-weight: bold;">X-TRA MILE FREIGHT FORWARDING INC.</div>
+            <div style="font-size: 14px;">POBLACION INDAHAG</div>
+            <div style="font-size: 14px;">Cagayan de Oro City</div>
+            <div style="font-size: 16px; font-weight: bold; margin-top: 15px;">BOOKING/REQUEST FOR PAYMENT</div>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 20px;">
+            <span style="font-weight: bold;">Date:</span> 
+            <div style="display: inline-block; width: 150px; border-bottom: 1px solid black; margin-left: 8px; text-align: center;">
+                <span style="color: blue;">{{ DATE }}</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">HWB</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px; text-align: left;">
+                    <span style="color: blue;">{{ HWB # }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">SHIPPER</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ SHIPPER }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">CONTACT PERSON</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ CONTACT PERSON }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">PICKUP ADD</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ PICKUP ADD }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">DATE OF PICKUP/STUFFING</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ DATE OF PICKUP/STUFFING }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">CONSIGNEE</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ CONSIGNEE }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">ADDRESS</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ ADDRESS }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">VOLUME</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ VOLUME }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">ROUTE</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ ROUTE }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">MODE OF SERVICE</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ MODE OF SERVICE }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">SHIPPING LINE</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ SHIPPING LINE }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">COMMODITY</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ COMMODITY }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">TERMS</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ TERMS }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">VAN NUMBER(S)</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ VAN NUMBER(S) }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">BOOKING NUMBER</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ BOOKING NUMBER }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">ATD</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ ATD }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 180px; font-weight: bold;">ATA</div>
+                <div style="width: 350px; border-bottom: 1px solid black; margin-left: 8px;">
+                    <span style="color: blue;">{{ ATA }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Payable Section -->
+        <div style="border: 2px solid black; padding: 15px; margin-top: 30px;">
+            <div style="font-weight: bold; margin-bottom: 8px;">Note: Please pay the following:</div>
+            
+            <!-- Headers -->
+            <div style="display: flex; border-bottom: 1px solid #ccc; padding-bottom: 3px;">
+                <div style="width: 40%; font-weight: bold;">Charge Description</div>
+                <div style="width: 20%; font-weight: bold; text-align: left;">Amount</div>
+                <div style="width: 40%; font-weight: bold; text-align: left;">Payee</div>
+            </div>
+            
+            <!-- Left Column -->
+            <div style="display: flex;">
+                <div style="width: 40%;">
+                    <!-- Freight Charges -->
+                    <div>Freight Charges</div>
+                    <!-- Trucking Charges -->
+                    <div>Trucking - Origin</div>
+                    <div>Trucking - Destination</div>
+                    <!-- Port Charges -->
+                    <div>Crainage</div>
+                    <div>Arrastre - Origin</div>
+                    <div>Arrastre - Destination</div>
+                    <div>Wharfage - Origin</div>
+                </div>
+                
+                <!-- Middle Column - Amounts -->
+                <div style="width: 20%;">
+                    <div>{{ FREIGHT_AMOUNT }}</div>
+                    <div>{{ TRUCKING_ORIGIN_AMOUNT }}</div>
+                    <div>{{ TRUCKING_DEST_AMOUNT }}</div>
+                    <div>{{ CRAINAGE_AMOUNT }}</div>
+                    <div>{{ ARRASTRE_ORIGIN_AMOUNT }}</div>
+                    <div>{{ ARRASTRE_DEST_AMOUNT }}</div>
+                    <div>{{ WHARFAGE_ORIGIN_AMOUNT }}</div>
+                </div>
+                
+                <!-- Right Column - Payees -->
+                <div style="width: 40%;">
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ FREIGHT_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ TRUCKING_ORIGIN_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ TRUCKING_DEST_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ CRAINAGE_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ ARRASTRE_ORIGIN_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ ARRASTRE_DEST_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ WHARFAGE_ORIGIN_PAYEE }}</div>
+                </div>
+            </div>
+
+            <!-- Second Row -->
+            <div style="display: flex; margin-top: 0;">
+                <div style="width: 40%;">
+                    <div>Wharfage - Destination</div>
+                    <div>Labor - Origin</div>
+                    <div>Labor - Destination</div>
+                    <!-- Miscellaneous Charges -->
+                    <div>Rebates</div>
+                    <div>Storage</div>
+                    <div>Facilitation</div>
+                    <div>DENR</div>
+                </div>
+                
+                <!-- Middle Column - Amounts -->
+                <div style="width: 20%;">
+                    <div>{{ WHARFAGE_DEST_AMOUNT }}</div>
+                    <div>{{ LABOR_ORIGIN_AMOUNT }}</div>
+                    <div>{{ LABOR_DEST_AMOUNT }}</div>
+                    <div>{{ REBATES_AMOUNT }}</div>
+                    <div>{{ STORAGE_AMOUNT }}</div>
+                    <div>{{ FACILITATION_AMOUNT }}</div>
+                    <div>{{ DENR_AMOUNT }}</div>
+                </div>
+                
+                <!-- Right Column - Payees -->
+                <div style="width: 40%;">
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ WHARFAGE_DEST_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ LABOR_ORIGIN_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ LABOR_DEST_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ REBATES_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ STORAGE_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ FACILITATION_PAYEE }}</div>
+                    <div style="border-bottom: 1px solid black; padding-left: 5px;">{{ DENR_PAYEE }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Space at bottom for additional content -->
+        <div style="margin-top: 50px; height: 100px;">
+            <!-- Additional content can be added here -->
+        </div>
+    </div>
+</body>
+</html>

@@ -18,10 +18,6 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     reset();
   });
 
-  // Helper for placeholder values
-  const formatAmount = (val) =>
-    val === null || val === undefined ? "" : val.toString();
-
   // ✅ Calculate current collectible amount
   const currentCollectibleAmount = useMemo(() => {
     return parseFloat(arRecord?.collectible_amount || arRecord?.gross_income || 0);
@@ -55,7 +51,6 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
   useEffect(() => {
     if (amountPaid && !isNaN(amountPaid)) {
       const paidAmount = parseFloat(amountPaid);
-      
       if (paidAmount > currentCollectibleAmount) {
         setError("amount_paid", {
           type: "manual",
@@ -67,12 +62,12 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     }
   }, [amountPaid, currentCollectibleAmount, setError, clearErrors]);
 
-  // Populate with existing data
+  // ✅ FIXED: Populate with existing data - DON'T populate amount_paid
   useEffect(() => {
     if (arRecord && isOpen) {
       reset({
-        amount_paid: formatAmount(arRecord.amount_paid),
-        payment_date: arRecord.payment_date || "",
+        amount_paid: "", // ✅ Always empty - this is for NEW payment
+        payment_date: "", // ✅ Empty for new payment date
         terms: arRecord.terms?.toString() || "0",
       });
     }
@@ -86,9 +81,9 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
 
   const onSubmit = async (data) => {
     try {
-      // ✅ Final validation before submission
       const paidAmount = parseFloat(data.amount_paid) || 0;
       
+      // ✅ Validation
       if (isFullyPaid && paidAmount > 0) {
         toast.error("Cannot accept payment - collectible amount is already 0");
         return;
@@ -101,13 +96,15 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
 
       setIsLoading(true);
 
+      // ✅ FIXED: Send data in correct format for backend
       const formattedData = {
-        amount_paid: paidAmount,
-        payment_date: data.payment_date || null,
+        amount_paid: paidAmount > 0 ? paidAmount : undefined, // Only send if > 0
+        payment_date: paidAmount > 0 ? data.payment_date : undefined, // Only send if payment exists
         terms: parseInt(data.terms) || 0,
       };
 
       const result = await updateARRecord(arId, formattedData);
+
       if (result.success) {
         toast.success("Payment updated successfully");
         handleClose();
@@ -122,7 +119,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     }
   };
 
-  // ✅ UPDATED: Collectible Amount field with fully paid status
+  // ✅ Collectible Amount field
   const renderCollectibleAmountField = () => (
     <div className="input-container">
       <label className="input-label-modern">Current Collectible Amount</label>
@@ -159,11 +156,11 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
     </div>
   );
 
-  // ✅ UPDATED: Amount Paid field with validation
+  // ✅ FIXED: Amount Paid field - for NEW payment
   const renderAmountField = () => (
     <div className="input-container">
       <label className="input-label-modern">
-        Amount Paid {!isFullyPaid && "*"}
+        New Payment Amount {!isFullyPaid && "*"}
       </label>
       <Controller
         control={control}
@@ -171,11 +168,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
         render={({ field }) => (
           <div className="relative">
             <NumericFormat
-              value={
-                field.value === "" || field.value === null || field.value === "0"
-                  ? ""
-                  : field.value
-              }
+              value={field.value === "" || field.value === null || field.value === "0" ? "" : field.value}
               thousandSeparator
               prefix="₱ "
               decimalScale={2}
@@ -183,9 +176,7 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               placeholder={isFullyPaid ? "Fully Paid" : "₱ 0.00"}
               className={`input-field-modern pr-10 ${
                 errors.amount_paid ? "input-error" : ""
-              } ${
-                isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""
-              }`}
+              } ${isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""}`}
               onValueChange={(values) => {
                 if (!isFullyPaid) {
                   field.onChange(values.value || "");
@@ -199,29 +190,22 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
           </div>
         )}
       />
-      
-      {/* ✅ Show validation errors */}
       {errors.amount_paid && (
         <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
           <AlertTriangle className="w-4 h-4 text-red-600" />
           <p className="text-sm text-red-700">{errors.amount_paid.message}</p>
         </div>
       )}
-      
-      {/* ✅ Show remaining balance info */}
       {amountPaid && !errors.amount_paid && !isFullyPaid && (
         <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
           <div className="flex justify-between text-sm">
             <span className="text-blue-700 font-medium">Remaining after payment:</span>
             <span className="font-bold text-blue-800">
-              ₱{(currentCollectibleAmount - parseFloat(amountPaid)).toLocaleString('en-PH', { 
-                minimumFractionDigits: 2 
-              })}
+              ₱{(currentCollectibleAmount - parseFloat(amountPaid)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
             </span>
           </div>
         </div>
       )}
-
       {isFullyPaid ? (
         <p className="text-sm text-gray-500 mt-1">
           This record is fully paid and cannot accept additional payments
@@ -285,28 +269,26 @@ const UpdateAR = ({ isOpen, onClose, arId, arRecord }) => {
               min="0"
               step="1"
               placeholder="0"
-              className={`input-field-modern pr-10 ${
-                errors.terms ? "input-error" : ""
-              } ${
-                isFullyPaid ? "bg-gray-100 cursor-not-allowed" : ""
-              }`}
-              disabled={isFullyPaid}
+              className={`input-field-modern pr-10 ${errors.terms ? "input-error" : ""}`}
             />
           )}
         />
         <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-5 h-5" />
       </div>
       {errors.terms && <p className="error-message">{errors.terms.message}</p>}
+      <p className="text-sm text-gray-500 mt-1">
+        Payment due {watch("terms") || 0} days after booking date
+      </p>
     </div>
   );
 
-  // ✅ UPDATED: Tips with payment validation info
   const tipsBox = {
     title: "Payment Rules",
     items: [
-      { text: "Current Collectible Amount shows the remaining balance" },
+      { text: "Enter a NEW payment amount to record" },
+      { text: "Current Collectible Amount shows remaining balance" },
       { text: "Payments cannot exceed the Collectible Amount" },
-      { text: "When Collectible Amount reaches 0, no more payments can be accepted" },
+      { text: "When Collectible Amount reaches 0, no more payments accepted" },
     ],
   };
 

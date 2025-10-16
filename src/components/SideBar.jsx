@@ -42,7 +42,6 @@ const menuByRole = {
             path: "/cargo-monitoring",
             icon: Ship
         },
-        { name: "House Waybill", path: "/house-waybill", icon: File },
         {
             name: "Incident Reports",
             path: "/incident-reports",
@@ -81,15 +80,15 @@ const menuByRole = {
         },
         { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
         {
+            name: "Partners",
+            path: "/partners",
+            icon: Users
+        },
+        {
             name: "Account Management",
             path: "/account-management",
             icon: Users
         },
-        {
-            name: "Partners",
-            path: "/partners",
-            icon: Users
-        }
     ]
 };
 

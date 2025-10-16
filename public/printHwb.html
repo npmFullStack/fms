@@ -117,7 +117,7 @@
                     >
                         <span>WAYBILL</span>
                         <span style="color: red; margin-left: 5px">N⁰</span>
-                        <span style="color: red">2020</span>
+                        <span style="color: red">{{HWB#}}</span>
                     </div>
                 </div>
 
@@ -193,9 +193,9 @@
                             "
                         >
                             <div style="font-weight: bold; margin-bottom: 5px">
-                                DEREC CO
+                                {{SHIPPER}}
                             </div>
-                            <div style="margin-bottom: 5px">CUGMAN, CDO</div>
+                            <div style="margin-bottom: 5px">{{PICKUP_LOCATION}}</div>
                             <div
                                 style="
                                     position: absolute;
@@ -204,7 +204,7 @@
                                     font-size: 8px;
                                 "
                             >
-                                Phone/Fax:
+                                Phone/Fax: {{SHIPPER_PHONE_NUMBER}}
                             </div>
                         </div>
 
@@ -222,8 +222,8 @@
                             >
                                 DESCRIPTION OF PACKAGING CONTENTS
                             </div>
-                            <div>1X20' PET FOODS</div>
-                            <div>TATU1781390</div>
+                            <div>{{VOLUME}} {{COMMODITY}}</div>
+                            <div>{{VAN_NUMBER}}</div>
                             <div>***NOTHING FOLLOWS***</div>
                         </div>
                     </div>
@@ -267,9 +267,9 @@
                             "
                         >
                             <div style="font-weight: bold; margin-bottom: 5px">
-                                DEREC CO
+                                {{CONSIGNEE}}
                             </div>
-                            <div style="margin-bottom: 5px">CUGMAN, CDO</div>
+                            <div style="margin-bottom: 5px">{{DELIVERY_LOCATION}}</div>
                             <div
                                 style="
                                     position: absolute;
@@ -278,7 +278,7 @@
                                     font-size: 8px;
                                 "
                             >
-                                Phone/Fax:
+                                Phone/Fax: {{CONSIGNEE_PHONE_NUMBER}}
                             </div>
                         </div>
 
@@ -395,7 +395,10 @@
                                     text-align: center;
                                 "
                             >
-                                ORIGIN
+                                ORIGIN <br />
+                                {{ORIGIN}}
+                                
+                               
                             </div>
 
                             <!-- Destination -->
@@ -413,6 +416,8 @@
                                 "
                             >
                                 DESTIN
+                                <br />
+                                {{DESTINATION}}
                             </div>
 
                             <!-- Pieces -->
@@ -430,6 +435,8 @@
                                 "
                             >
                                 PIECES
+                                <br />
+                                {{VOLUME}}
                             </div>
 
                             <!-- Chargeable Weight -->
@@ -717,7 +724,7 @@
                                         align-items: flex-start;
                                     "
                                 >
-                                    <div>__________________</div>
+                                    <div>{{FREIGHT_CHARGES}}</div>
                                     <div>__________________</div>
                                     <div>__________________</div>
                                     <div>
@@ -728,7 +735,7 @@
                                         __________________
                                     </div>
                                     <div style="margin-top: auto">
-                                        __________________
+                                        {{TOTAL_EXPENSES}}
                                     </div>
                                 </div>
                             </div>
